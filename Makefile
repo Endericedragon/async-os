@@ -28,7 +28,7 @@
 #     - `GW`: Gateway IPv4 address (default is 10.0.2.2 for QEMU user netdev)
 
 # General options
-ARCH ?= x86_64
+ARCH ?= riscv64
 PLATFORM ?=
 SMP ?= 1
 MODE ?= release
@@ -44,7 +44,7 @@ RUSTFLAGS ?=
 STRUCT ?= Unikernel
 
 # QEMU options
-BLK ?= n
+BLK ?= y
 NET ?= n
 GRAPHIC ?= n
 BUS ?= pci
@@ -211,7 +211,7 @@ fmt_c:
 test:
 	$(call app_test)
 
-test_monolithic: 
+test_monolithic:
 	$(call app_test_for_monolithic)
 
 disk_img:

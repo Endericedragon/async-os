@@ -13,12 +13,14 @@ async fn main() -> i32 {
     async_std::println!("Mutex locked: {:?}", *b);
     *b = 34;
     // drop(b);
+    async_std::println!("Creating thread join handle...");
     let j = async_std::thread::spawn(async {
         let a = A.lock().await;
         async_std::println!("spawn Mutex locked: {:?}", *a);
         32
     }).join();
     async_std::thread::sleep(Duration::from_secs(1)).await;
+    async_std::println!("Variable b dropped.");
     drop(b);
     let res = j.await.unwrap();
     async_std::println!("res {}", res);

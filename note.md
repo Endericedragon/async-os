@@ -11,3 +11,8 @@
 > ```
 
 回答：先`cargo install cargo-binutils`，再`rustup component add llvm-tools-preview`。如果出现其他报错，按照rCore_dev_guide处理。
+
+> 问题：找不到块设备。
+
+回答：先运行`./build_img.sh -a riscv64`，再在`Makefile`中设置`BLK ?= y`，最后检查`DISK_IMG`的默认值是否为`disk.img`。或者直接在`make`指令中指定`BLK=y`也成。
+
