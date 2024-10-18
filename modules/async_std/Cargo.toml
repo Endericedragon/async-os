@@ -63,6 +63,7 @@ axlog = { git = "https://github.com/Starry-OS/axlog.git" }
 futures-core = { version = "0.3.30", default-features = false, features = ["alloc"] }
 pin-project-lite = "0.2.14"
 lazy_init = { git = "https://github.com/Starry-OS/lazy_init.git" }
+hashbrown = "0.14"
 
 axerrno = { git = "https://github.com/Starry-OS/axerrno.git" }
 spinlock = { git = "https://github.com/Starry-OS/spinlock.git" }

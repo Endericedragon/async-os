@@ -12,6 +12,7 @@ members = [
     "apps/helloworld",
     "apps/user_boot",
     "apps/fs/shell",
+    "apps/collections",
     "modules/async_axtask",
     "modules/async_axruntime",
     "modules/async_taskctx",
@@ -27,5 +28,6 @@ members = [
     "modules/async_fs",
     "modules/async_vfs",
     "modules/async_api",
+    "modules/async_futures-bounded",
 ]
 resolver = "2"

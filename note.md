@@ -1,3 +1,7 @@
+# async-os学习研究笔记
+
+## 问题汇总
+
 > 问题：无法运行`make A=apps/helloworld ARCH=x86_64 run`
 
 回答：只能在riscv64架构上运行，请使用`ARCH=riscv64`
@@ -16,3 +20,16 @@
 
 回答：先运行`./build_img.sh -a riscv64`，再在`Makefile`中设置`BLK ?= y`，最后检查`DISK_IMG`的默认值是否为`disk.img`。或者直接在`make`指令中指定`BLK=y`也成。
 
+## 代码阅读
+
+## 增添功能
+
+### 新建模块async_std::collections
+
+注意到当前操作系统没有提供容器数据结构，仅有`alloc::vec::Vec`，因此有必要增添`async_std::collections`来提供常用的容器数据结构。
+
+本次功能增添一共新增两个容器：`HashMap`和`BinaryHeap`。前者直接通过引入`hashbrown`库实现，后者
+
+### 尝试移植futures-bounded#0.2.3
+
+这个库在rust-libp2p的依赖图拓扑排序中排在非常靠前的位置，因此先从它开始移植。

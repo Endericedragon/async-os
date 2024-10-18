@@ -1,14 +1,23 @@
 #![no_std]
 #![no_main]
 
-extern crate async_std;
+extern crate async_std as std;
 use async_std::sync::Mutex;
+
 static A: Mutex<i32> = Mutex::new(23);
 
 use core::time::Duration;
 
 #[async_std::async_main]
 async fn main() -> i32 {
+    async_test().await;
+
+    
+
+    0
+}
+
+async fn async_test() {
     let mut b = A.lock().await;
     async_std::println!("Mutex locked: {:?}", *b);
     *b = 34;
@@ -18,15 +27,12 @@ async fn main() -> i32 {
         let a = A.lock().await;
         async_std::println!("spawn Mutex locked: {:?}", *a);
         32
-    }).join();
+    })
+    .join();
     async_std::thread::sleep(Duration::from_secs(1)).await;
     async_std::println!("Variable b dropped.");
     drop(b);
     let res = j.await.unwrap();
     async_std::println!("res {}", res);
     async_std::thread::sleep(Duration::from_secs(1)).await;
-    for i in 0..2 {
-        async_std::println!("for test preempt {}", i);
-    }
-    0
 }

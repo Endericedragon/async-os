@@ -12,6 +12,8 @@ pub mod env;
 pub mod os;
 pub mod time;
 pub mod prelude;
+/// Newly added module, providing useful containers.
+pub mod collections;
 
 #[cfg(feature = "fs")]
 pub mod fs;
