@@ -6,17 +6,17 @@
 
 extern crate alloc;
 
-mod futures_map;
-mod futures_set;
-mod futures_tuple_set;
-mod stream_map;
-mod stream_set;
+// mod futures_map;
+// mod futures_set;
+// mod futures_tuple_set;
+// mod stream_map;
+// mod stream_set;
 
-pub use futures_map::FuturesMap;
-pub use futures_set::FuturesSet;
-pub use futures_tuple_set::FuturesTupleSet;
-pub use stream_map::StreamMap;
-pub use stream_set::StreamSet;
+// pub use futures_map::FuturesMap;
+// pub use futures_set::FuturesSet;
+// pub use futures_tuple_set::FuturesTupleSet;
+// pub use stream_map::StreamMap;
+// pub use stream_set::StreamSet;
 
 use alloc::fmt;
 use alloc::fmt::Formatter;

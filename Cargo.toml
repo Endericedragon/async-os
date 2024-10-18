@@ -29,5 +29,6 @@ members = [
     "modules/async_vfs",
     "modules/async_api",
     "modules/async_futures-bounded",
+    "modules/async_futures-timer",
 ]
 resolver = "2"

@@ -1,0 +1,3 @@
+[submodule "modules/async_futures-timer"]
+	path = modules/async_futures-timer
+	url = https://github.com/Endericedragon/async_futures-timer
