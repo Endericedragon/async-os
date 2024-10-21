@@ -1,9 +1,0 @@
-[package]
-name = "async_futures-bounded"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-async_futures-timer = { path = "../async_futures-timer" }
-futures-util = { version = "0.3.29", default-features = false, features = ["alloc"]}
-async_std = { path = "../async_std" }

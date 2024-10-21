@@ -4,3 +4,6 @@
 [submodule "modules/async_axtask_with_sync"]
 	path = modules/async_axtask_with_sync
 	url = git@github.com:Endericedragon/async_axtask_with_sync.git
+[submodule "modules/async_futures-bounded"]
+	path = modules/async_futures-bounded
+	url = git@github.com:Endericedragon/async_futures-bounded.git

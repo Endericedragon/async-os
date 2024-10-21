@@ -10,4 +10,5 @@ modules/async-std
 error.txt
 
 # submodules
+modules/async_futures-bounded
 modules/async_futures-timer
