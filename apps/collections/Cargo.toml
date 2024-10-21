@@ -6,7 +6,6 @@ edition = "2021"
 [dependencies]
 async_std = { path = "../../modules/async_std", features = [
     "alloc",
-    "paging",
     "irq",
     "multitask",
     "fs",

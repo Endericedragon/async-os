@@ -10,7 +10,7 @@
 //! 
 
 #![cfg_attr(not(test), no_std)]
-#![feature(async_iterator)]
+#[allow(async_fn_in_trait)]
 
 #[macro_use]
 extern crate log;
