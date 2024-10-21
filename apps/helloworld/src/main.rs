@@ -12,8 +12,6 @@ use core::time::Duration;
 async fn main() -> i32 {
     async_test().await;
 
-
-
     0
 }
 
