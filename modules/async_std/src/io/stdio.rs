@@ -1,9 +1,9 @@
 //! 这里的实现，直接使用了 axhal 模块中的 console 的实现，
 //! 这里无法读出数据时，会直接调用 cx.waker().wake_by_ref() 函数
 //! 将任务重新放回到就绪队列中，定期轮询
-//! 
+//!
 //! 正常的做法应该是等键盘输入产生了中断后才唤醒任务，将其放入就绪队列
-//! 
+//!
 use async_io::{AsyncRead, AsyncWrite, BufReader, Write};
 use sync::Mutex;
 use core::{pin::Pin, task::{Context, Poll}};
@@ -30,7 +30,7 @@ impl AsyncRead for StdinRaw {
         }
         Poll::Ready(Ok(read_len))
     }
-    
+
 }
 
 impl AsyncWrite for StdoutRaw {

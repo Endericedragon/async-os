@@ -1,8 +1,8 @@
 //! 只能在 async 函数以及自定义 Poll 函数中使用的 Mutex 实现。
-//! 
+//!
 //! 该 Mutex 以协程的方式实现，去掉了 force_lock 函数，
 //! 因为协作式不存在强制的释放。
-//! 
+//!
 //! 去掉了 try_lock，因为 try_lock 本身也是一种协作的方式。
 //! 当被锁上时，不等待，暂时去处理其他的事情，
 //! 而这里的实现本身就是协作的方式，因此提供这个函数没有意义
@@ -21,8 +21,11 @@ use core::{future::Future, pin::Pin, task::{Context, Poll}};
 /// wait queue. When the mutex is unlocked, all tasks waiting on the queue
 /// will be woken up.
 pub struct Mutex<T: ?Sized> {
+    /// 等待队列，所有被poll但返回Pending的future都往里塞，等待下一次唤醒
     wq: WaitQueue,
+    /// 当前锁的持有者的数字ID。类型可以等价于usize
     owner_task: AtomicUsize,
+    /// Mutex中锁着的数据本体
     data: UnsafeCell<T>,
 }
 
@@ -36,11 +39,14 @@ pub struct MutexGuard<'a, T: ?Sized + 'a> {
 
 unsafe impl<'a, T: ?Sized + 'a> Send for MutexGuard<'a, T> {}
 
+/// 在调用`mutex.lock()`之后获得的`Future`。
 pub struct MutexGuardFuture<'a, T: ?Sized + 'a> {
     lock: &'a Mutex<T>,
 }
 
+/// `Send` trait 保证该对象可在线程间转移
 unsafe impl<'a, T: ?Sized + 'a> Send for MutexGuardFuture<'a, T> {}
+/// `Sync` trait 保证该对象可被多个线程安全共享
 unsafe impl<'a, T: ?Sized + 'a> Sync for MutexGuardFuture<'a, T> {}
 
 impl<'a, T: ?Sized + 'a> MutexGuardFuture<'a, T> {
@@ -51,6 +57,8 @@ impl<'a, T: ?Sized + 'a> MutexGuardFuture<'a, T> {
     }
 }
 
+/// 当`MutexGuardFuture`在`await`期间被`poll`到了，就去询问其内部的锁是否就绪，
+/// 因此直接调用内部的`lock.poll_lock(cx)`即可实现该`Future` trait。
 impl<'a, T: ?Sized + 'a> Future for MutexGuardFuture<'a, T> {
     type Output = MutexGuard<'a, T>;
 
@@ -86,6 +94,7 @@ impl<T> Mutex<T> {
 }
 
 impl<T: ?Sized> Mutex<T> {
+    /// 对比`self.owner_task`和0的关系，若不等说明该锁被别的Task持有。
     /// Returns `true` if the lock is currently held.
     ///
     /// # Safety
@@ -105,21 +114,25 @@ impl<T: ?Sized> Mutex<T> {
         MutexGuardFuture::new(self)
     }
 
+    /// 询问其内部的锁是否就绪。
     /// 这个函数是底层的实现，用于在 Poll 函数中使用，而不是在 async 函数中使用
     /// 不仅仅是 MutexGuardFuture 中，在其他的使用到了 Mutex 的数据结构中，
     /// 在为它们实现 Future trait 或者自定义 Poll 函数时，需要使用这个接口
     pub fn poll_lock<'a>(&'a self, cx: &mut Context<'_>) -> Poll<MutexGuard<'a, T>> {
         let current_task = cx.waker().as_raw().data() as usize;
+        // 实质上，就是看看当前锁的持有者是不是0。如果是0，那么进入Ok分支；否则说明锁被别人持有，进入Err分支
         match self.owner_task.compare_exchange_weak(
             0,
             current_task,
             Ordering::Acquire,
             Ordering::Relaxed,
         ) {
+            // 如果是0，那么说明锁被自己持有，进入Ok分支
             Ok(_) => Poll::Ready(MutexGuard {
                 lock: self,
                 data: self.data.get(),
             }),
+            // 否则说明锁被别人持有，进入Err分支
             Err(owner_task) => {
                 assert_ne!(
                     owner_task, current_task,

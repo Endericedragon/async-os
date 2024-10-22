@@ -7,3 +7,12 @@
 [submodule "modules/async_futures-bounded"]
 	path = modules/async_futures-bounded
 	url = git@github.com:Endericedragon/async_futures-bounded.git
+[submodule "modules/async_axsync_with_sync"]
+	path = modules/async_axsync_with_sync
+	url = git@github.com:Endericedragon/async_axsync_with_sync.git
+[submodule "modules/async_axtask_ZFL"]
+	path = modules/async_axtask_ZFL
+	url = git@github.com:Endericedragon/async_axtask_ZFL.git
+[submodule "modules/async_taskctx_ZFL"]
+	path = modules/async_taskctx_ZFL
+	url = git@github.com:AsyncModules/taskctx.git

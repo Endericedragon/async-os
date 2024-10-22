@@ -21,3 +21,13 @@ macro_rules! println {
         $crate::io::__print_impl(format_args!("{}\n", format_args!($($arg)*))).await;
     }
 }
+
+#[macro_export]
+macro_rules! println_sync {
+    () => {{
+        $crate::io::ax_console_write_byte(b'\n');
+    }};
+    ($($arg:tt)*) => {{
+        $crate::io::__print_fmt_sync(format_args!("{}\n", format_args!($($arg)*)));
+    }};
+}

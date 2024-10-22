@@ -32,7 +32,7 @@ impl WaitWakerNode {
 
 /// A simple FIFO wait waker list
 ///
-/// When a waker is added to the list, it's placed at the end of the waitlist. 
+/// When a waker is added to the list, it's placed at the end of the waitlist.
 /// When picking the next waker to run, the head of the wait list is taken.
 pub struct WaitTaskList {
     list: List<Arc<WaitWakerNode>>,
@@ -46,7 +46,7 @@ impl WaitTaskList {
         }
     }
 
-    /// Register a waker to the list.
+    /// 将一个任务的Waker加入等待队列中。
     pub fn prepare_to_wait(&mut self, waker: Arc<WaitWakerNode>) {
         self.list.push_back(waker);
     }

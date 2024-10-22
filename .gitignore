@@ -7,6 +7,7 @@ modules/async-std
 *.img
 
 .vscode/
+.idea/
 error.txt
 
 # submodules

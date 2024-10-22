@@ -10,3 +10,9 @@ async_std = { path = "../../modules/async_std", features = [
     "fs",
 ] }
 async_futures-timer = { path = "../../modules/async_futures-timer" }
+# async_axsync_with_sync = { path = "../../modules/async_axsync_with_sync", features = [
+#     "multitask",
+# ] }
+# async_axtask_ZFL = { path = "../../modules/async_axtask_ZFL", package = "axtask", features = [
+#     "multitask",
+# ] }

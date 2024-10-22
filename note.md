@@ -22,6 +22,12 @@
 
 ## 代码阅读
 
+### 异步的Mutex实现探究
+
+既然目前的问题聚焦于`Mutex`之上，那我们不如就抓着`Mutex`这一条线，采取纵向阅读的方法，探究这个异步的`Mutex`到底是如何实现的呗？
+
+我们知道这个`Mutex`来自`modules/sync/src/mutex.rs`，我们的阅读就从这里开始吧。
+
 ## 增添功能
 
 ### 新建模块async_std::collections
