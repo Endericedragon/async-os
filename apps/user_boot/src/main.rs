@@ -12,7 +12,10 @@ async fn main() -> i32 {
     async_std::println!("user_boot");
     // 初始化文件系统
     trampoline::fs_init().await;
-    let task = trampoline::init_user(vec!["hello".into()], &get_envs()).await.unwrap();
+    //? 如果直接将rCore中的ELF形式的hello_world复制到测例下，会导致内核报告`App not found: hello`。是不是这儿的名字要和ELF文件名一致呢？
+    // todo 确实如此，但又有了新的报错。
+    // let task = trampoline::init_user(vec!["hello".into()], &get_envs()).await.unwrap();
+    let task = trampoline::init_user(vec!["hello_world".into()], &get_envs()).await.unwrap();
     trampoline::wait(&task).await;
     async_std::println!("task count {}", alloc::sync::Arc::strong_count(&task));
     0

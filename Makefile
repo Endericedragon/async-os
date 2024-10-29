@@ -189,6 +189,12 @@ debug: build
 	  -ex 'continue' \
 	  -ex 'disp /16i $$pc'
 
+mydebug: build
+	$(call run_qemu_debug) &
+	sleep 1
+	$(GDB) $(OUT_ELF) \
+	  -ex 'target remote localhost:1234'
+
 clippy:
 ifeq ($(origin ARCH), command line)
 	$(call cargo_clippy,--target $(TARGET))

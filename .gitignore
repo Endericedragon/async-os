@@ -2,6 +2,7 @@ target/
 Cargo.lock
 *.lds
 qemu.log
+disassemble.txt
 *.asm
 modules/async-std
 *.img
@@ -13,3 +14,4 @@ error.txt
 # submodules
 modules/async_futures-bounded
 modules/async_futures-timer
+user_apps/

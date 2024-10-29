@@ -28,9 +28,7 @@ members = [
     # My additions:
     "modules/async_futures-bounded",
     "modules/async_futures-timer",
-    # "modules/async_taskctx_ZFL",
-    # "modules/async_axtask_ZFL",
-    # "modules/async_axsync_with_sync",
     "apps/collections",
+    "user_apps",
 ]
 resolver = "2"
