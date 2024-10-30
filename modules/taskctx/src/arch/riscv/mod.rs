@@ -107,12 +107,12 @@ impl TrapFrame {
         trap_frame.sepc = app_entry;
         trap_frame.sstatus =
             unsafe { (*(&sstatus as *const Sstatus as *const usize) & !(1 << 8)) & !(1 << 1) };
-        unsafe {
-            // a0为参数个数
-            // a1存储的是用户栈底，即argv
-            trap_frame.regs.a0 = *(user_sp as *const usize);
-            trap_frame.regs.a1 = *(user_sp as *const usize).add(1);
-        }
+        // unsafe {
+        //     // a0为参数个数
+        //     // a1存储的是用户栈底，即argv
+        //     trap_frame.regs.a0 = *(user_sp as *const usize);
+        //     trap_frame.regs.a1 = *(user_sp as *const usize).add(1);
+        // }
         trap_frame.scause = 0;
         trap_frame.stval = 0;
         trap_frame

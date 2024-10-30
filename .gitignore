@@ -14,4 +14,3 @@ error.txt
 # submodules
 modules/async_futures-bounded
 modules/async_futures-timer
-user_apps/

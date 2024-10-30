@@ -24,13 +24,13 @@
 
 就此请教赵前辈，得到的信息以及验证情况如下：
 
-- [ ] 目前，只有`apps/user_boot`这个App能进入用户态。进入后，将通过文件系统读取用户程序的`ELF`文件，然后加载运行。
+- [x] 目前，只有`apps/user_boot`这个App能进入用户态。进入后，将通过文件系统读取用户程序的`ELF`文件，然后加载运行。
 - [x] 运行上述App的`make`指令为`make A=apps/user_boot ARCH=riscv64 LOG=off SMP=1 FEATURES=sched_fifo,img  BLK=y run`。
 - [ ] 想要令某个app使用用户态，则必须在其依赖项中加入`features = [ "monolithic" ]`
 - [ ] 若要自行编写用户态App，需要遵循以下步骤：
-  - [ ] 参考rCore的用户态程序编写用户态代码，然后编译获得ELF文件。此时，工具链用 `riscv...unknown...elf` 的，并且可用Linux下的标准调用语法（个人理解：借助`libc` crate，将我们的操作翻译为系统调用）
-  - [ ] 将编译获得的ELF文件放在 `testcases/riscv64_linux_musl` 目录下
-  - [ ] 重新编译一次 `disk.img`
+  - [x] 参考rCore的用户态程序编写用户态代码，然后编译获得ELF文件。此时，工具链用 `riscv...unknown...elf` 的，并且可用Linux下的标准调用语法（个人理解：借助`libc` crate，将我们的操作翻译为系统调用）
+  - [x] 将编译获得的ELF文件放在 `testcases/riscv64_linux_musl` 目录下
+  - [x] 重新编译一次 `disk.img`
 
 按ZFL前辈的说法，rCore那里编写的用户态程序是可以直接在async-os的用户态中运行的。于是，我们采取这样的做法：
 
