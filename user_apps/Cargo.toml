@@ -11,6 +11,11 @@ lazy_static = { version = "1.4.0", features = ["spin_no_std"] }
 embedded-graphics = "0.7.1"
 oorandom = "11"
 virtio-input-decoder = "0.1.4"
+libc = { version = "0.2", default-features = false }
 
 [profile.release]
 debug = true
+panic = "abort"
+
+[profile.dev]
+panic = "abort"

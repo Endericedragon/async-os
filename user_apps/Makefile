@@ -33,10 +33,13 @@ build_without_strip: binary_without_strip
 clean:
 	@cargo clean
 
+build_img:
+	@cd .. && ./build_img.sh -a riscv64
+
 remake_disk_img:
 	@$(foreach elf_file, $(ELFS), cp $(elf_file) ../testcases/riscv64_linux_musl/)
 	@cd .. && ./build_img.sh -a riscv64
 
-my_process: build_without_strip
+my_process: build_without_strip remake_disk_img
 
 .PHONY: elf binary build clean

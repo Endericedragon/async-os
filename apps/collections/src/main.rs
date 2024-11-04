@@ -5,12 +5,13 @@
 use async_futures_timer::Delay;
 use async_std::{
     collections::{BinaryHeap, HashMap},
-    println, println_sync,
+    println, println_sync, time,
 };
 use core::time::Duration;
 
 #[async_std::async_main]
 async fn main() -> i32 {
+
     let mut map = HashMap::<i32, i32>::new();
     map.insert(1, 2);
     map.insert(3, 4);
@@ -45,6 +46,9 @@ async fn main() -> i32 {
     // let rua = mutex.lock();
     // println!("{}", *rua);
     // println_sync!("Can you reach the finals?");
+
+    let current_time = time::Instant::now();
+    println!("Current time: {:?}", current_time);
 
     0
 }

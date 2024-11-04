@@ -29,7 +29,10 @@ members = [
     "modules/async_futures-bounded",
     "modules/async_futures-timer",
     "apps/collections",
-    "user_apps",
+    # "user_apps",
 ]
 
+exclude = [
+    "user_apps",
+]
 resolver = "2"

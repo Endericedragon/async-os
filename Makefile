@@ -36,9 +36,11 @@ LOG ?= off
 V ?=
 LIBC_DIR = tools/axlibc
 # App options
-A ?= apps/helloworld
+# original: apps/helloworld
+A ?= apps/user_boot
 APP ?= $(A)
-FEATURES ?=
+# original: (Empty)
+FEATURES ?= sched_fifo,img
 APP_FEATURES ?=
 RUSTFLAGS ?=
 STRUCT ?= Unikernel

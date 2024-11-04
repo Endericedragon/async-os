@@ -26,6 +26,8 @@ pub use sync::*;
 use syscall::*;
 pub use task::*;
 
+extern crate libc;
+
 const USER_HEAP_SIZE: usize = 32768;
 
 static mut HEAP_SPACE: [u8; USER_HEAP_SIZE] = [0; USER_HEAP_SIZE];
