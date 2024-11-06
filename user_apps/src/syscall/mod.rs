@@ -1,3 +1,5 @@
+pub mod ctypes;
+
 const SYSCALL_DUP: usize = 24;
 const SYSCALL_CONNECT: usize = 29;
 const SYSCALL_LISTEN: usize = 30;
@@ -107,8 +109,11 @@ pub fn sys_kill(pid: usize, signal: i32) -> isize {
     syscall(SYSCALL_KILL, [pid, signal as usize, 0])
 }
 
-pub fn sys_get_time() -> isize {
-    syscall(SYSCALL_GET_TIME, [0, 0, 0])
+pub fn sys_get_time_of_day(tv: &mut ctypes::TimeVal) -> isize {
+    syscall(
+        SYSCALL_GET_TIME,
+        [{ tv as *mut ctypes::TimeVal as usize }, 0, 0],
+    )
 }
 
 pub fn sys_getpid() -> isize {

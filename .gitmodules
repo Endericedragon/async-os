@@ -16,3 +16,6 @@
 [submodule "modules/async_taskctx_ZFL"]
 	path = modules/async_taskctx_ZFL
 	url = git@github.com:AsyncModules/taskctx.git
+[submodule "user_apps/src/async_futures-timer"]
+	path = user_apps/src/async_futures-timer
+	url = git@github.com:Endericedragon/async_futures-timer.git

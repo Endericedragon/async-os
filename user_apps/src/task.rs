@@ -1,13 +1,13 @@
 use super::*;
 
 pub fn exit(exit_code: i32) -> ! {
-    sys_exit(exit_code);
+    sys_exit(exit_code)
 }
 pub fn yield_() -> isize {
     sys_yield()
 }
-pub fn get_time() -> isize {
-    sys_get_time()
+pub fn get_time_of_day(tv: &mut ctypes::TimeVal) -> isize {
+    sys_get_time_of_day(tv)
 }
 pub fn getpid() -> isize {
     sys_getpid()

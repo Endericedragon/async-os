@@ -12,6 +12,8 @@ embedded-graphics = "0.7.1"
 oorandom = "11"
 virtio-input-decoder = "0.1.4"
 libc = { version = "0.2", default-features = false }
+hashbrown = "0.15.1"
+spin = "0.9.8"
 
 [profile.release]
 debug = true
