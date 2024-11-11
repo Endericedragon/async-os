@@ -174,6 +174,9 @@ pre_update:
 
 build: $(OUT_DIR) $(OUT_BIN)
 
+build_what:
+	echo $(OUT_DIR) $(OUT_BIN)
+
 disasm:
 	$(OBJDUMP) $(OUT_ELF) | less
 
