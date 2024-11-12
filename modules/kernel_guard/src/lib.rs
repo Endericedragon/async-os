@@ -52,6 +52,7 @@
 //! ```
 
 #![no_std]
+#![feature(asm_const)] // to make older versions of Rust happy
 
 mod arch;
 
