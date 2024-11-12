@@ -67,7 +67,7 @@ pub fn init_board_info(dtb: usize) {
     }
     let mut of_cpus = of::cpus();
     let freq = {
-        if let Some(cpu) = of_cpus.nth(0) {
+        if let Some(cpu) = of_cpus.expect("REASON").nth(0) {
             cpu.timebase_frequency()
         } else {
             axconfig::TIMER_FREQUENCY

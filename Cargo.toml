@@ -26,8 +26,9 @@ members = [
     "modules/syscall",
     "modules/feat",
     # My additions:
-    "modules/async_futures-bounded",
-    "modules/async_futures-timer",
-    "apps/collections",
+    # "modules/async_futures-bounded",
+    # "modules/async_futures-timer",
+    # "apps/collections",
+
 ]
 resolver = "2"
