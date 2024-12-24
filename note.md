@@ -4,7 +4,14 @@
 
 > 新版本AsyncOS如何运行用户态程序？
 
-直接在 `user_apps/hello_world` 项目中编写代码即可。
+直接在 `user_apps/hello_world` 项目中编写代码即可。编写完成后，直接执行以下命令：
+
+```sh
+cd user_apps && make build_uapps && cd ..
+make A=apps/user_boot ARCH=riscv64 LOG=off SMP=1 FEATURES=sched_fifo,img BLK=y run
+```
+
+编译完成后，将ELF可执行文件的文件名放到 `apps/user_boot/src/main.rs` 的 `BUSYBOX_TESTCASES` 数组中，即可运行。
 
 > 条件编译一直标红线怎么办？
 

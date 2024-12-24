@@ -1,20 +1,24 @@
 #![no_std]
 #![no_main]
 
-use alloc::{string::{String, ToString}, vec::Vec, vec};
+use alloc::{
+    string::{String, ToString},
+    vec,
+    vec::Vec,
+};
 
 extern crate async_std;
 extern crate trampoline;
 
 #[async_std::async_main]
 async fn main() -> i32 {
-    async_std::println!("user_boot");
+    async_std::println!("Entering user_boot...");
     // 初始化文件系统
     trampoline::fs_init().await;
     for testcase in BUSYBOX_TESTCASES {
         let task = trampoline::init_user(get_args(testcase.as_bytes()), &get_envs().await)
-        .await
-        .unwrap();
+            .await
+            .unwrap();
         trampoline::wait(&task).await;
         async_std::println!("task count {}", alloc::sync::Arc::strong_count(&task));
     }
@@ -84,7 +88,9 @@ fn get_args(command_line: &[u8]) -> Vec<String> {
 
 #[allow(dead_code)]
 const BUSYBOX_TESTCASES: &[&str] = &[
-    "busybox sh busybox_testcode.sh",
-    "busybox sh lua_testcode.sh",
-    "libctest_testcode.sh",
+    // "hello_world",
+    "chat_example",
+    // "busybox sh busybox_testcode.sh",
+    // "busybox sh lua_testcode.sh",
+    // "libctest_testcode.sh",
 ];

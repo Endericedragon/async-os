@@ -1,0 +1,21 @@
+[package]
+name = "chat_example"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.34", features = ["full"] }
+async-trait = "0.1"
+futures = "0.3.29"
+libp2p = { path = "../../../rust-libp2p-pg/rust-libp2p-tailored/libp2p/", features = [
+    "tokio",
+    "gossipsub",
+    "mdns",
+    "noise",
+    "macros",
+    "tcp",
+    "yamux",
+    "quic"
+] }
+tracing = "0.1.37"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

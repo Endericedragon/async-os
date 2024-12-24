@@ -38,6 +38,6 @@ members = [
     "modules/axfutex",
     "user_apps/hello_world",
     # My additions
-    "modules/ring",
+    "user_apps/chat_example",
 ]
 resolver = "2"

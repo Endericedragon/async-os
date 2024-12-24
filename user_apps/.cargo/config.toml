@@ -3,4 +3,6 @@ target = "riscv64gc-unknown-linux-gnu"
 target-dir = "./target"
 
 [target.riscv64gc-unknown-linux-gnu]
-linker = "riscv64-linux-musl-gcc"
+# linker = "riscv64-linux-musl-gcc"
+linker = "riscv64-linux-gnu-gcc"
+rustflags = ["-C", "target-feature=+crt-static"]
