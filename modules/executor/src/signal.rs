@@ -89,7 +89,7 @@ use crate::{current_executor, current_task, exit, PID2PC, TID2TASK};
 /// 若确实存在可以被恢复的trap上下文，则返回true
 #[no_mangle]
 pub async fn load_trap_for_signal() -> bool {
-    let current_process = current_executor();
+    let current_process = current_executor().await;
     let current_task = current_task();
 
     let mut signal_modules = current_process.signal_modules.lock().await;
@@ -123,7 +123,7 @@ async fn terminate_process(signal: SignalNo, info: Option<SigInfo>) {
     warn!("Terminate process: {}", current_task.get_process_id());
     if current_task.is_leader() {
         // exit_current_task(signal as i32);
-        exit(signal as i32).await;
+        exit(signal as isize).await;
     } else {
         // 此时应当关闭当前进程
         // 选择向主线程发送信号内部来关闭
@@ -143,7 +143,7 @@ async fn terminate_process(signal: SignalNo, info: Option<SigInfo>) {
 ///
 /// 若返回值为真，代表需要进入处理信号，因此需要执行trap的返回
 pub async fn handle_signals() {
-    let process = current_executor();
+    let process = current_executor().await;
     let current_task = current_task();
     if let Some(signal_no) = current_task.check_pending_signal() {
         send_signal_to_thread(current_task.id().as_u64() as isize, signal_no as isize)
@@ -368,8 +368,7 @@ pub async fn send_signal_to_process(
             .try_add_signal(signum as usize, info);
         // 如果这个时候对应的线程是处于休眠状态的，则唤醒之，进入信号处理阶段
         if main_task.is_blocked() {
-            // axtask::wakeup_task(main_task);
-            taskctx::wakeup_task(main_task);
+            taskctx::wakeup_task(Arc::as_ptr(&main_task));
         }
     }
     // let mut now_id: Option<u64> = None;
@@ -423,13 +422,12 @@ pub async fn send_signal_to_thread(tid: isize, signum: isize) -> AxResult<()> {
         .try_add_signal(signum as usize, None);
     // 如果这个时候对应的线程是处于休眠状态的，则唤醒之，进入信号处理阶段
     if task.is_blocked() {
-        // axtask::wakeup_task(task);
-        taskctx::wakeup_task(task);
+        taskctx::wakeup_task(Arc::as_ptr(&task));
     }
     Ok(())
 }
 
 /// Whether the current process has signals pending
 pub async fn current_have_signals() -> bool {
-    current_executor().have_signals().await.is_some()
+    current_executor().await.have_signals().await.is_some()
 }

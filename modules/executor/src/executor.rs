@@ -25,7 +25,7 @@ use core::{
     cell::UnsafeCell,
     future::Future,
     pin::Pin,
-    sync::atomic::{AtomicBool, AtomicI32, AtomicU64, Ordering},
+    sync::atomic::{AtomicBool, AtomicI32, AtomicIsize, AtomicU64, Ordering},
 };
 use lazy_init::LazyInit;
 use spinlock::SpinNoIrq;
@@ -39,11 +39,12 @@ pub const KERNEL_EXECUTOR_ID: u64 = 1;
 pub static TID2TASK: Mutex<BTreeMap<u64, TaskRef>> = Mutex::new(BTreeMap::new());
 pub static PID2PC: Mutex<BTreeMap<u64, Arc<Executor>>> = Mutex::new(BTreeMap::new());
 
-pub static UTRAP_HANDLER: LazyInit<fn() -> Pin<Box<dyn Future<Output = i32> + 'static>>> =
+pub static UTRAP_HANDLER: LazyInit<fn() -> Pin<Box<dyn Future<Output = isize> + 'static>>> =
     LazyInit::new();
 
 pub static KERNEL_EXECUTOR: LazyInit<Arc<Executor>> = LazyInit::new();
 pub static KERNEL_PAGE_TABLE_TOKEN: LazyInit<usize> = LazyInit::new();
+pub static KERNEL_SCHEDULER: LazyInit<Arc<SpinNoIrq<Scheduler>>> = LazyInit::new();
 
 extern "C" {
     fn start_signal_trampoline();
@@ -54,13 +55,13 @@ pub struct Executor {
     pub parent: AtomicU64,
     /// 子进程
     pub children: Mutex<Vec<Arc<Executor>>>,
-    scheduler: Arc<SpinNoIrq<Scheduler>>,
+    // scheduler: Arc<SpinNoIrq<Scheduler>>,
     /// 文件描述符管理器
     pub fd_manager: FdManager,
     /// 进程状态
     pub is_zombie: AtomicBool,
     /// 退出状态码
-    pub exit_code: AtomicI32,
+    pub exit_code: AtomicIsize,
 
     /// 地址空间
     pub memory_set: Arc<Mutex<MemorySet>>,
@@ -78,6 +79,7 @@ pub struct Executor {
     /// 栈大小
     pub stack_size: AtomicU64,
     pub main_task: Mutex<Option<TaskRef>>,
+    pub tasks: Mutex<Vec<TaskRef>>,
 
     /// robust list存储模块
     /// 用来存储线程对共享变量的使用地址
@@ -99,16 +101,16 @@ impl Executor {
         cwd: Arc<Mutex<String>>,
         mask: Arc<AtomicI32>,
     ) -> Self {
-        let mut scheduler = Scheduler::new();
-        scheduler.init();
+        // let mut scheduler = Scheduler::new();
+        // scheduler.init();
         Self {
             pid,
             parent: AtomicU64::new(parent),
             children: Mutex::new(Vec::new()),
-            scheduler: Arc::new(SpinNoIrq::new(scheduler)),
+            // scheduler: Arc::new(SpinNoIrq::new(scheduler)),
             fd_manager: FdManager::new(fd_table, cwd, mask, FD_LIMIT_ORIGIN),
             is_zombie: AtomicBool::new(false),
-            exit_code: AtomicI32::new(0),
+            exit_code: AtomicIsize::new(0),
             memory_set,
             heap_bottom: AtomicU64::new(heap_bottom),
             heap_top: AtomicU64::new(heap_bottom),
@@ -117,6 +119,7 @@ impl Executor {
             signal_modules: Mutex::new(BTreeMap::new()),
             stack_size: AtomicU64::new(axconfig::TASK_STACK_SIZE as _),
             main_task: Mutex::new(None),
+            tasks: Mutex::new(Vec::new()),
             robust_list: Mutex::new(BTreeMap::new()),
         }
     }
@@ -151,10 +154,10 @@ impl Executor {
         )
     }
 
-    /// 获取调度器
-    pub fn get_scheduler(&self) -> Arc<SpinNoIrq<Scheduler>> {
-        self.scheduler.clone()
-    }
+    // /// 获取调度器
+    // pub fn get_scheduler(&self) -> Arc<SpinNoIrq<Scheduler>> {
+    //     self.scheduler.clone()
+    // }
 
     /// 获取 Executor（进程）id
     pub fn pid(&self) -> u64 {
@@ -172,12 +175,12 @@ impl Executor {
     }
 
     /// 获取 Executor（进程）退出码
-    pub fn get_exit_code(&self) -> i32 {
+    pub fn get_exit_code(&self) -> isize {
         self.exit_code.load(Ordering::Acquire)
     }
 
     /// 设置 Executor（进程）退出码
-    pub fn set_exit_code(&self, exit_code: i32) {
+    pub fn set_exit_code(&self, exit_code: isize) {
         self.exit_code.store(exit_code, Ordering::Release)
     }
 
@@ -244,7 +247,7 @@ impl Executor {
 
     /// 若进程运行完成，则获取其返回码
     /// 若正在运行（可能上锁或没有上锁），则返回None
-    pub fn get_code_if_exit(&self) -> Option<i32> {
+    pub fn get_code_if_exit(&self) -> Option<isize> {
         if self.get_zombie() {
             return Some(self.get_exit_code());
         }
@@ -254,63 +257,34 @@ impl Executor {
     #[inline]
     /// Pick one task from Executor
     pub fn pick_next_task(&self) -> Option<TaskRef> {
-        self.scheduler.lock().pick_next_task()
+        // self.scheduler.lock().pick_next_task()
+        KERNEL_SCHEDULER.lock().pick_next_task()
     }
 
-    #[inline]
-    /// Add curr task to Executor, it ususally add to back
-    pub fn put_prev_task(&self, task: TaskRef, front: bool) {
-        self.scheduler.lock().put_prev_task(task, front);
-    }
+    // #[inline]
+    // /// Add curr task to Executor, it ususally add to back
+    // pub fn put_prev_task(&self, task: TaskRef, front: bool) {
+    //     self.scheduler.lock().put_prev_task(task, front);
+    // }
 
-    #[inline]
-    /// Add task to Executor, now just put it to own Executor
-    /// TODO: support task migrate on differ Executor
-    pub fn add_task(task: TaskRef) {
-        task.get_scheduler().lock().add_task(task);
-    }
+    // #[inline]
+    // /// Add task to Executor, now just put it to own Executor
+    // /// TODO: support task migrate on differ Executor
+    // pub fn add_task(task: TaskRef) {
+    //     task.get_scheduler().lock().add_task(task);
+    // }
 
-    #[inline]
-    /// Executor Clean
-    pub fn task_tick(&self, task: &TaskRef) -> bool {
-        self.scheduler.lock().task_tick(task)
-    }
+    // #[inline]
+    // /// Executor Clean
+    // pub fn task_tick(&self, task: &TaskRef) -> bool {
+    //     self.scheduler.lock().task_tick(task)
+    // }
 
-    #[inline]
-    /// Executor Clean
-    pub fn set_priority(&self, task: &TaskRef, prio: isize) -> bool {
-        self.scheduler.lock().set_priority(task, prio)
-    }
-
-    /// TODO：这里需要存在问题，当进程结束时，这个任务也会结束，需要将这个任务删除，目前 wait 等待进程结束时，退出的操作还不正确
-    /// 在这里还需要回收 Executor 的操作
-    #[inline]
-    pub async fn run(self: Arc<Self>) -> i32 {
-        use core::{future::poll_fn, task::Poll};
-        let page_table_token = self.memory_set.lock().await.page_table_token();
-        poll_fn(|cx| {
-            #[cfg(feature = "preempt")]
-            use kernel_guard::BaseGuard;
-            #[cfg(feature = "preempt")]
-            let _ = kernel_guard::NoPreemptIrqSave::acquire();
-            if self.is_zombie.load(Ordering::Acquire) {
-                return Poll::Ready(0);
-            }
-            crate::CurrentExecutor::clean_current();
-            unsafe { crate::CurrentExecutor::init_current(self.clone()) };
-            if page_table_token != 0 {
-                unsafe {
-                    axhal::arch::write_page_table_root0(page_table_token.into());
-                    #[cfg(target_arch = "riscv64")]
-                    riscv::register::sstatus::set_sum();
-                    axhal::arch::flush_tlb(None);
-                };
-            }
-            cx.waker().wake_by_ref();
-            Poll::Pending
-        })
-        .await
-    }
+    // #[inline]
+    // /// Executor Clean
+    // pub fn set_priority(&self, task: &TaskRef, prio: isize) -> bool {
+    //     self.scheduler.lock().set_priority(task, prio)
+    // }
 }
 
 impl Drop for Executor {
@@ -450,10 +424,8 @@ impl Executor {
                 axhal::arch::write_page_table_root0(page_table_token.into());
                 #[cfg(target_arch = "riscv64")]
                 riscv::register::sstatus::set_sum();
-                axhal::arch::flush_tlb(None);
             };
         }
-        log::debug!("write page table done");
         let (entry, user_stack_bottom, heap_bottom) =
             if let Ok(ans) = load_app(path.clone(), args, envs, &mut memory_set).await {
                 ans
@@ -493,7 +465,7 @@ impl Executor {
             path = format!("{}{}", cwd, path);
         }
         new_executor.set_file_path(path.clone()).await;
-        let scheduler = new_executor.get_scheduler();
+        let scheduler = KERNEL_SCHEDULER.clone();
         let fut = UTRAP_HANDLER();
         let pid = new_executor.pid();
         let new_task = Arc::new(Task::new(TaskInner::new_user(
@@ -507,11 +479,8 @@ impl Executor {
                 user_stack_bottom.into(),
             )),
         )));
-
-        new_executor
-            .get_scheduler()
-            .lock()
-            .add_task(new_task.clone());
+        new_executor.tasks.lock().await.push(new_task.clone());
+        new_task.get_scheduler().lock().add_task(new_task.clone());
         TID2TASK
             .lock()
             .await
@@ -539,13 +508,11 @@ impl Executor {
             .await
             .insert(KERNEL_EXECUTOR_ID, KERNEL_EXECUTOR.clone());
         // 将其作为内核进程的子进程
-        KERNEL_EXECUTOR.children.lock().await.push(new_executor.clone());
-        let executor_task = crate::spawn_raw(|| new_executor.run(), "executor.run".into());
-        TID2TASK
+        KERNEL_EXECUTOR
+            .children
             .lock()
             .await
-            .insert(executor_task.id().as_u64(), executor_task);
-
+            .push(new_executor.clone());
         Ok(new_task)
     }
 
@@ -606,7 +573,7 @@ impl Executor {
             self.pid
         };
         let page_table_token = new_memory_set.lock().await.page_table_token();
-        let scheduler = self.get_scheduler();
+        let scheduler = KERNEL_SCHEDULER.clone();
         let fut = UTRAP_HANDLER();
         let utrap_frame = Box::new(*current_task().utrap_frame().unwrap());
         let new_task = Arc::new(Task::new(TaskInner::new_user(
@@ -732,7 +699,7 @@ impl Executor {
             //     "task address: {:X}",
             //     (&Arc::clone(&new_task)) as *const _ as usize
             // );
-            self.get_scheduler().lock().add_task(Arc::clone(&new_task));
+            self.tasks.lock().await.push(new_task.clone());
 
             let mut signal_module = SignalModule::init_signal(Some(new_handler));
             // exit signal, default to be SIGCHLD
@@ -779,12 +746,9 @@ impl Executor {
                 .lock()
                 .await
                 .insert(process_id, Arc::clone(&new_process));
-            let scheduler = new_process.get_scheduler();
-            new_task.set_scheduler(scheduler);
             new_task.set_leader(true);
             new_process.set_main_task(new_task.clone()).await;
-            new_process.put_prev_task(new_task.clone(), false);
-            // new_process.tasks.lock().push(Arc::clone(&new_task));
+            new_process.tasks.lock().await.push(Arc::clone(&new_task));
             // 若是新建了进程，那么需要把进程的父子关系进行记录
             let mut signal_module = SignalModule::init_signal(Some(new_handler));
             // exit signal, default to be SIGCHLD
@@ -812,33 +776,6 @@ impl Executor {
                 .lock()
                 .await
                 .push(Arc::clone(&new_process));
-
-            let scheduler = self.get_scheduler();
-            let fut = Box::pin(new_process.run());
-            let page_table_token = self.memory_set.lock().await.page_table_token();
-            let executor_task = Arc::new(Task::new(TaskInner::new(
-                "executor.run".into(),
-                self.pid,
-                scheduler,
-                page_table_token,
-                fut,
-            )));
-            TID2TASK
-                .lock()
-                .await
-                .insert(executor_task.id().as_u64(), executor_task.clone());
-            let signal_module = SignalModule::init_signal(None);
-            self
-                .signal_modules
-                .lock()
-                .await
-                .insert(executor_task.id().as_u64(), signal_module);
-            self
-                .robust_list
-                .lock()
-                .await
-                .insert(executor_task.id().as_u64(), FutexRobustList::default());
-            self.get_scheduler().lock().add_task(executor_task);
         };
 
         // if !clone_flags.contains(CloneFlags::CLONE_THREAD) {
@@ -869,6 +806,7 @@ impl Executor {
             //     trap_frame.sepc, trap_frame.regs.sp
             // );
         }
+        new_task.get_scheduler().lock().add_task(new_task.clone());
         // 判断是否为VFORK
         if clone_flags.contains(CloneFlags::CLONE_VFORK) {
             self.set_vfork_block(true).await;
@@ -896,21 +834,14 @@ impl Executor {
             *self.memory_set.lock().await = memory_set;
             self.memory_set.lock().await.unmap_user_areas();
             let new_page_table = self.memory_set.lock().await.page_table_token();
-            while let Some(task) = self.pick_next_task() {
+            let mut tasks = self.tasks.lock().await;
+            for task in tasks.iter_mut() {
                 task.inner().set_page_table_token(new_page_table);
-                self.put_prev_task(task, false);
             }
-            // let mut tasks = self.tasks.lock();
-            // for task in tasks.iter_mut() {
-            //     task.inner().set_page_table_token(new_page_table);
-            // }
-            // 切换到新的页表上，并且重新设置当前任务的页表
-            current_task().set_page_table_token(new_page_table);
             unsafe {
                 axhal::arch::write_page_table_root0(new_page_table.into());
                 #[cfg(target_arch = "riscv64")]
                 riscv::register::sstatus::set_sum();
-                axhal::arch::flush_tlb(None);
             }
         }
         // 清空用户堆，重置堆顶
@@ -921,30 +852,30 @@ impl Executor {
         let current_task = current_task();
         // 再考虑手动结束其他所有的task
         // 暂时不支持其他任务，因此直接注释掉下面的代码，并且目前的设计也不支持寻找其他的任务
-        // let mut tasks = self.tasks.lock();
-        // for _ in 0..tasks.len() {
-        //     let task = tasks.pop().unwrap();
-        //     if task.id() == current_task.id() {
-        //         // FIXME: This will reset tls forcefully
-        //         #[cfg(target_arch = "x86_64")]
-        //         unsafe {
-        //             task.set_tls_force(0);
-        //             axhal::arch::write_thread_pointer(0);
-        //         }
-        //         tasks.push(task);
-        //     } else {
-        //         TID2TASK.lock().remove(&task.id().as_u64());
-        //         panic!("currently not support exec when has another task ");
-        //     }
-        // }
+        let mut tasks = self.tasks.lock().await;
+        for _ in 0..tasks.len() {
+            let task = tasks.pop().unwrap();
+            if task.id() == current_task.id() {
+                // FIXME: This will reset tls forcefully
+                #[cfg(target_arch = "x86_64")]
+                unsafe {
+                    task.set_tls_force(0);
+                    axhal::arch::write_thread_pointer(0);
+                }
+                tasks.push(task);
+            } else {
+                TID2TASK.lock().await.remove(&task.id().as_u64());
+                panic!("currently not support exec when has another task ");
+            }
+        }
         // 当前任务被设置为主线程
         current_task.set_leader(true);
         self.set_main_task(current_task.clone()).await;
         // 重置统计时间
         current_task.time_stat_reset(current_time_nanos() as usize);
         current_task.set_name(name.split('/').last().unwrap());
-        // assert!(tasks.len() == 1);
-        // drop(tasks);
+        assert!(tasks.len() == 1);
+        drop(tasks);
         let args = if args.is_empty() {
             vec![name.clone()]
         } else {
@@ -969,7 +900,6 @@ impl Executor {
                 axhal::arch::write_page_table_root0(page_table_token.into());
                 #[cfg(target_arch = "riscv64")]
                 riscv::register::sstatus::set_sum();
-                axhal::arch::flush_tlb(None);
             };
             // 清空用户堆，重置堆顶
         }
@@ -1024,5 +954,28 @@ impl Executor {
             drop(pid2pc);
         }
         Ok(())
+    }
+}
+
+impl Executor {
+    pub async fn new_ktask(
+        &self,
+        name: String,
+        fut: Pin<Box<dyn Future<Output = isize> + 'static>>,
+    ) -> TaskRef {
+        let scheduler = KERNEL_SCHEDULER.clone();
+        let page_table_token = self.memory_set.lock().await.page_table_token();
+        let ktask = Arc::new(Task::new(TaskInner::new(
+            name,
+            self.pid,
+            scheduler,
+            page_table_token,
+            fut,
+        )));
+        self.signal_modules
+            .lock()
+            .await
+            .insert(ktask.id().as_u64(), SignalModule::init_signal(None));
+        ktask
     }
 }

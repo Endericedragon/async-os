@@ -1,0 +1,14 @@
+[package]
+name = "pipetest"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+user-lib = { path = "../../user-lib" }
+
+[features]
+async-await = []
+async-non-await = ["user-lib/thread"]
+non-async-non-await = ["user-lib/thread"]
+blocking = ["user-lib/blocking"]
+default = ["non-async-non-await"]

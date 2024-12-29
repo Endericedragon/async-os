@@ -1,16 +1,23 @@
 use crate::{
-    flags::WaitStatus, futex::futex_wake, send_signal_to_process, send_signal_to_thread, CurrentExecutor, Executor, KERNEL_EXECUTOR, KERNEL_EXECUTOR_ID, PID2PC, TID2TASK, UTRAP_HANDLER
+    flags::WaitStatus, futex::futex_wake, send_signal_to_process, send_signal_to_thread,
+    CurrentExecutor, Executor, KERNEL_EXECUTOR, KERNEL_EXECUTOR_ID, KERNEL_SCHEDULER, PID2PC,
+    TID2TASK, UTRAP_HANDLER,
 };
 use alloc::{boxed::Box, string::String, sync::Arc};
 use axsignal::signal_no::SignalNo;
 use core::{future::Future, ops::Deref, pin::Pin};
+use spinlock::SpinNoIrq;
 pub use task_api::*;
 
 // Initializes the executor (for the primary CPU).
-pub fn init(utrap_handler: fn() -> Pin<Box<dyn Future<Output = i32> + 'static>>) {
+pub fn init(utrap_handler: fn() -> Pin<Box<dyn Future<Output = isize> + 'static>>) {
     info!("Initialize executor...");
+    vdso::init();
     taskctx::init();
     UTRAP_HANDLER.init_by(utrap_handler);
+    let mut scheduler = Scheduler::new();
+    scheduler.init();
+    KERNEL_SCHEDULER.init_by(Arc::new(SpinNoIrq::new(scheduler)));
     let kexecutor = Arc::new(Executor::new_init());
     KERNEL_EXECUTOR.init_by(kexecutor.clone());
     unsafe { CurrentExecutor::init_current(kexecutor) };
@@ -36,8 +43,16 @@ pub fn current_task() -> CurrentTask {
     CurrentTask::get()
 }
 
-pub fn current_executor() -> CurrentExecutor {
-    CurrentExecutor::get()
+pub async fn current_executor() -> Arc<Executor> {
+    let current_task = current_task();
+    let current_process = Arc::clone(
+        PID2PC
+            .lock()
+            .await
+            .get(&current_task.get_process_id())
+            .unwrap(),
+    );
+    current_process
 }
 
 /// Spawns a new task with the given parameters.
@@ -46,9 +61,9 @@ pub fn current_executor() -> CurrentExecutor {
 pub fn spawn_raw<F, T>(f: F, name: String) -> TaskRef
 where
     F: FnOnce() -> T,
-    T: Future<Output = i32> + 'static,
+    T: Future<Output = isize> + 'static,
 {
-    let scheduler = current_executor().get_scheduler();
+    let scheduler = &*KERNEL_SCHEDULER;
     let task = Arc::new(Task::new(TaskInner::new(
         name,
         KERNEL_EXECUTOR_ID,
@@ -60,11 +75,17 @@ where
     task
 }
 
-pub async fn exit(exit_code: i32) {
+// 这里直接将进程从 PID2PC 中删除会导致问题
+// 因为当两个核并行时，这里的还没有回到调度函数，
+// 其它核上运行的父进程 wait 到这个任务后，将会把进程释放掉，页表也会失效
+// 这个核此时才回到调度函数，就会产生页错误
+// 1. 把删除的操作放到 wait_pid 那里进行，同样会导致这个问题，因为没有保证在这个核上运行的任务已经回到了调度函数
+// 2. 在这里更换页表，并且关闭中断，若产生中断，则下一次恢复执行时，会继续使用原来的页表
+pub async fn exit(exit_code: isize) {
     let curr = current_task();
     let curr_id = curr.id().as_u64();
 
-    let current_executor = current_executor();
+    let current_executor = current_executor().await;
     info!("exit task id {} with code _{}_", curr_id, exit_code);
 
     let exit_signal = current_executor
@@ -109,8 +130,7 @@ pub async fn exit(exit_code: i32) {
     if curr.is_leader() {
         loop {
             let mut all_exited = true;
-            // TODO：这里是存在问题的，处于 blocked 状态的任务是无法收到信号的
-            while let Some(task) = current_executor.get_scheduler().lock().pick_next_task() {
+            for task in current_executor.tasks.lock().await.deref() {
                 if !task.is_leader() && task.state() != TaskState::Exited {
                     all_exited = false;
                     send_signal_to_thread(task.id().as_u64() as isize, SignalNo::SIGKILL as isize)
@@ -125,14 +145,8 @@ pub async fn exit(exit_code: i32) {
             }
         }
         TID2TASK.lock().await.remove(&curr_id);
-        curr.set_exit_code(exit_code);
-        curr.set_state(TaskState::Exited);
-        current_executor.set_exit_code(exit_code);
-        current_executor.set_zombie(true);
         current_executor.exit_main_task().await;
-        while let Some(task) = current_executor.get_scheduler().lock().pick_next_task() {
-            drop(task);
-        }
+        current_executor.tasks.lock().await.clear();
 
         current_executor.fd_manager.fd_table.lock().await.clear();
 
@@ -155,11 +169,25 @@ pub async fn exit(exit_code: i32) {
         }
         pid2pc.remove(&current_executor.pid());
         drop(pid2pc);
+        // 在这里直接更换为内核页表，并且关闭中断
+        axhal::arch::disable_irqs();
+        unsafe {
+            axhal::arch::write_page_table_root0((*crate::KERNEL_PAGE_TABLE_TOKEN).into());
+        };
+        current_executor.set_exit_code(exit_code);
+        current_executor.set_zombie(true);
         drop(current_executor);
     } else {
         TID2TASK.lock().await.remove(&curr_id);
-        curr.set_exit_code(exit_code);
-        curr.set_state(TaskState::Exited);
+        // 从进程中删除当前线程
+        let mut tasks = current_executor.tasks.lock().await;
+        let len = tasks.len();
+        for index in 0..len {
+            if tasks[index].id().as_u64() == curr_id {
+                tasks.remove(index);
+                break;
+            }
+        }
         // 从进程中删除当前线程
         current_executor
             .signal_modules
@@ -167,6 +195,8 @@ pub async fn exit(exit_code: i32) {
             .await
             .remove(&curr_id);
     }
+    curr.set_exit_code(exit_code);
+    curr.set_state(TaskState::Exited);
 }
 
 /// Spawns a new task with the default parameters.
@@ -178,7 +208,7 @@ pub async fn exit(exit_code: i32) {
 pub fn spawn<F, T>(f: F) -> TaskRef
 where
     F: FnOnce() -> T,
-    T: Future<Output = i32> + 'static,
+    T: Future<Output = isize> + 'static,
 {
     spawn_raw(f, "".into())
 }
@@ -193,7 +223,10 @@ where
 ///
 /// [CFS]: https://en.wikipedia.org/wiki/Completely_Fair_Scheduler
 pub fn set_priority(prio: isize) -> bool {
-    current_executor().set_priority(current_task().as_task_ref(), prio)
+    let curr = current_task();
+    let scheduler = curr.get_scheduler();
+    let mut scheduler_guard = scheduler.lock();
+    scheduler_guard.set_priority(current_task().as_task_ref(), prio)
 }
 
 /// 在当前进程找对应的子进程，并等待子进程结束
@@ -205,7 +238,7 @@ pub fn set_priority(prio: isize) -> bool {
 /// 保证传入的 ptr 是有效的
 pub async unsafe fn wait_pid(pid: i32, exit_code_ptr: *mut i32) -> Result<u64, WaitStatus> {
     // 获取当前进程
-    let curr_process = current_executor();
+    let curr_process = current_executor().await;
     let mut exit_task_id: usize = 0;
     let mut answer_id: u64 = 0;
     let mut answer_status = WaitStatus::NotExist;
@@ -218,16 +251,12 @@ pub async unsafe fn wait_pid(pid: i32, exit_code_ptr: *mut i32) -> Result<u64, W
             answer_status = WaitStatus::Running;
             if let Some(exit_code) = child.get_code_if_exit() {
                 answer_status = WaitStatus::Exited;
-                info!(
-                    "wait pid _{}_ with code _{}_",
-                    child.pid(),
-                    exit_code
-                );
+                info!("wait pid _{}_ with code _{}_", child.pid(), exit_code);
                 exit_task_id = index;
                 if !exit_code_ptr.is_null() {
                     unsafe {
                         // 因为没有切换页表，所以可以直接填写
-                        *exit_code_ptr = exit_code << 8;
+                        *exit_code_ptr = (exit_code as i32) << 8;
                     }
                 }
                 answer_id = child.pid();
@@ -237,15 +266,11 @@ pub async unsafe fn wait_pid(pid: i32, exit_code_ptr: *mut i32) -> Result<u64, W
             // 找到了对应的进程
             if let Some(exit_code) = child.get_code_if_exit() {
                 answer_status = WaitStatus::Exited;
-                info!(
-                    "wait pid _{}_ with code _{:?}_",
-                    child.pid(),
-                    exit_code
-                );
+                info!("wait pid _{}_ with code _{:?}_", child.pid(), exit_code);
                 exit_task_id = index;
                 if !exit_code_ptr.is_null() {
                     unsafe {
-                        *exit_code_ptr = exit_code << 8;
+                        *exit_code_ptr = (exit_code as i32) << 8;
                         // 用于WEXITSTATUS设置编码
                     }
                 }

@@ -157,7 +157,7 @@ impl EpollFile {
     pub async fn epoll_wait(&self, expire_time: usize) -> AxResult<Vec<EpollEvent>> {
         let mut ret_events = Vec::new();
         loop {
-            let current_process = current_executor();
+            let current_process = current_executor().await;
             for (fd, req_event) in self.inner.lock().await.monitor_list.iter() {
                 let fd_table = current_process.fd_manager.fd_table.lock().await;
                 if let Some(file) = &fd_table[*fd as usize] {
@@ -288,7 +288,7 @@ impl FileIO for EpollFile {
         Poll::Ready(false)
     }
 
-    fn as_any(&self) ->  &dyn core::any::Any {
+    fn as_any(&self) -> &dyn core::any::Any {
         self
     }
 }

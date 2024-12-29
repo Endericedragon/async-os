@@ -77,7 +77,6 @@ impl FileIO for EventFd {
 
         if self.should_block() {
             drop(value_guard);
-            cx.waker().wake_by_ref();
             return Poll::Pending;
         } else {
             return Poll::Ready(Err(AxError::WouldBlock));
@@ -106,7 +105,6 @@ impl FileIO for EventFd {
             None => {
                 if self.should_block() {
                     drop(value_guard);
-                    cx.waker().wake_by_ref();
                     return Poll::Pending;
                 } else {
                     return Poll::Ready(Err(AxError::WouldBlock));
@@ -156,7 +154,7 @@ impl FileIO for EventFd {
         Poll::Ready(status)
     }
 
-    fn as_any(&self) ->  &dyn core::any::Any {
+    fn as_any(&self) -> &dyn core::any::Any {
         self
     }
 }

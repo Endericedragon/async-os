@@ -8,11 +8,12 @@ use core::{
     cell::UnsafeCell,
     fmt,
     future::Future,
+    mem::ManuallyDrop,
     pin::Pin,
-    sync::atomic::{AtomicBool, AtomicI32, AtomicU64, Ordering},
+    sync::atomic::{AtomicBool, AtomicIsize, AtomicU64, Ordering},
     task::Waker,
 };
-use spinlock::SpinNoIrq;
+use spinlock::{SpinNoIrq, SpinNoIrqGuard};
 
 /// A unique identifier for a thread.
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -42,10 +43,12 @@ impl Default for TaskId {
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 #[allow(missing_docs)]
 pub enum TaskState {
+    Running = 0,
     Runable = 1,
     Blocking = 2,
-    Blocked = 3,
-    Exited = 4,
+    Waked = 3,
+    Blocked = 4,
+    Exited = 5,
 }
 
 #[derive(PartialEq, Eq, Clone, Copy)]
@@ -104,7 +107,7 @@ pub struct SchedStatus {
 }
 
 pub struct TaskInner {
-    fut: UnsafeCell<Pin<Box<dyn Future<Output = i32> + 'static>>>,
+    fut: UnsafeCell<Pin<Box<dyn Future<Output = isize> + 'static>>>,
     utrap_frame: UnsafeCell<Option<Box<TrapFrame>>>,
 
     // executor: SpinNoIrq<Arc<Executor>>,
@@ -120,7 +123,7 @@ pub struct TaskInner {
     pub(crate) is_init: bool,
     pub(crate) state: SpinNoIrq<TaskState>,
     time: UnsafeCell<TimeStat>,
-    exit_code: AtomicI32,
+    exit_code: AtomicIsize,
     set_child_tid: AtomicU64,
     clear_child_tid: AtomicU64,
     #[cfg(feature = "preempt")]
@@ -160,14 +163,14 @@ impl TaskInner {
         process_id: u64,
         scheduler: Arc<SpinNoIrq<Scheduler>>,
         page_table_token: usize,
-        fut: Pin<Box<dyn Future<Output = i32> + 'static>>,
+        fut: Pin<Box<dyn Future<Output = isize> + 'static>>,
     ) -> Self {
         let is_init = &name == "main";
         let t = Self {
             id: TaskId::new(),
             name: UnsafeCell::new(name),
             is_init,
-            exit_code: AtomicI32::new(0),
+            exit_code: AtomicIsize::new(0),
             fut: UnsafeCell::new(fut),
             utrap_frame: UnsafeCell::new(None),
             wait_wakers: UnsafeCell::new(VecDeque::new()),
@@ -200,7 +203,7 @@ impl TaskInner {
         process_id: u64,
         scheduler: Arc<SpinNoIrq<Scheduler>>,
         page_table_token: usize,
-        fut: Pin<Box<dyn Future<Output = i32> + 'static>>,
+        fut: Pin<Box<dyn Future<Output = isize> + 'static>>,
         utrap_frame: Box<TrapFrame>,
     ) -> Self {
         let is_init = &name == "main";
@@ -208,7 +211,7 @@ impl TaskInner {
             id: TaskId::new(),
             name: UnsafeCell::new(name),
             is_init,
-            exit_code: AtomicI32::new(0),
+            exit_code: AtomicIsize::new(0),
             fut: UnsafeCell::new(fut),
             utrap_frame: UnsafeCell::new(Some(utrap_frame)),
             wait_wakers: UnsafeCell::new(VecDeque::new()),
@@ -237,7 +240,7 @@ impl TaskInner {
     }
 
     /// 获取到任务的 Future
-    pub fn get_fut(&self) -> &mut Pin<Box<dyn Future<Output = i32> + 'static>> {
+    pub fn get_fut(&self) -> &mut Pin<Box<dyn Future<Output = isize> + 'static>> {
         unsafe { &mut *self.fut.get() }
     }
 
@@ -301,13 +304,13 @@ impl TaskInner {
 
     /// Get the exit code
     #[inline]
-    pub fn get_exit_code(&self) -> i32 {
+    pub fn get_exit_code(&self) -> isize {
         self.exit_code.load(Ordering::Acquire)
     }
 
     /// Set the task exit code
     #[inline]
-    pub fn set_exit_code(&self, code: i32) {
+    pub fn set_exit_code(&self, code: isize) {
         self.exit_code.store(code, Ordering::Release)
     }
 
@@ -315,6 +318,12 @@ impl TaskInner {
     /// set the state of the task
     pub fn state(&self) -> TaskState {
         *self.state.lock()
+    }
+
+    #[inline]
+    /// lock the task state and ctx_ptr access
+    pub fn state_lock_manual(&self) -> ManuallyDrop<SpinNoIrqGuard<TaskState>> {
+        ManuallyDrop::new(self.state.lock())
     }
 
     #[inline]
@@ -417,6 +426,8 @@ impl TaskInner {
     }
 
     pub fn join(&self, waker: Waker) {
+        let task = waker.data() as *const crate::Task;
+        unsafe { &*task }.set_state(TaskState::Blocking);
         let wait_wakers = unsafe { &mut *self.wait_wakers.get() };
         wait_wakers.push_back(waker);
     }
@@ -596,7 +607,8 @@ impl TaskInner {
         let stack_ctx = unsafe { &mut *self.stack_ctx.get() };
         assert!(
             stack_ctx.is_none(),
-            "{} cannot use thread api to do task switch", self.id_name()
+            "{} cannot use thread api to do task switch",
+            self.id_name()
         );
         let kstack = crate::pick_current_stack();
         stack_ctx.replace(StackCtx {

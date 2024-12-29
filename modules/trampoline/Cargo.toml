@@ -21,6 +21,7 @@ preempt = ["irq", "percpu/preempt", "kernel_guard/preempt", "executor/preempt", 
 sched_fifo = ["multitask", "executor/sched_fifo"]
 sched_rr = ["multitask", "executor/sched_rr", "preempt"]
 sched_cfs = ["multitask", "executor/sched_cfs", "preempt"]
+sched_taic = ["multitask", "executor/sched_taic"]
 
 [dependencies]
 log = "0.4"
@@ -32,6 +33,7 @@ axerrno = { git = "https://github.com/Starry-OS/axerrno.git" }
 axconfig = { git = "https://github.com/Starry-OS/axconfig.git"}
 spin = "0.9"
 crate_interface = "0.1"
+syscalls = { version = "0.6", default-features = false }
 
 task_api = { path = "../task_api" }
 sync = { path = "../sync" }
@@ -41,6 +43,7 @@ axhal = { path = "../axhal" }
 syscall = { path = "../syscall" }
 async_mem = { path = "../async_mem" }
 async_fs = { path = "../async_fs" }
+taic_driver = { path = "../../crates/taic_driver" }
 
 
 [target.'cfg(any(target_arch = "riscv32", target_arch = "riscv64"))'.dependencies]

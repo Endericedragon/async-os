@@ -183,6 +183,9 @@ disasm:
 
 run: build justrun
 
+run_split_log: build
+	$(call run_qemu) | python3 dslog.py -c $(SMP)
+
 justrun:
 	$(call run_qemu)
 
@@ -229,6 +232,7 @@ endif
 
 clean: clean_c
 	rm -rf $(APP)/*.bin $(APP)/*.elf
+	rm -rf user_apps/target
 	cargo clean
 
 clean_c::

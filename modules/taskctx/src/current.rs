@@ -297,6 +297,7 @@ impl CurrentTask {
     }
 
     pub unsafe fn init_current(init_task: TaskRef) {
+        init_task.set_state(crate::TaskState::Running);
         let ptr = Arc::into_raw(init_task);
         set_current_task_ptr(ptr);
     }
@@ -315,7 +316,7 @@ impl CurrentTask {
     }
 
     pub fn waker(&self) -> Waker {
-        crate::waker_from_task(self.as_task_ref())
+        crate::waker::waker_from_task(current_task_ptr() as _)
     }
 }
 

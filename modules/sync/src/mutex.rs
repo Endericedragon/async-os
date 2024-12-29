@@ -158,8 +158,12 @@ impl<T: ?Sized> Mutex<T> {
         assert_eq!(
             owner_task,
             current_task,
-            "{} tried to release mutex it doesn't own",
-            curr.id_name()
+            "{} tried to release mutex it doesn't own, which belong to {}",
+            curr.id_name(),
+            (owner_task as *const task_api::Task)
+                .as_ref()
+                .unwrap()
+                .id_name()
         );
         self.wq.notify_one();
     }
@@ -275,11 +279,12 @@ impl<'a, T: ?Sized + 'a> Future for MutexGuard<'a, T> {
                             );
 
                             // 当前线程让权，并将 cx 注册到等待队列上
-                            let _ = core::task::ready!(Pin::new(&mut lock.wq.wait_until(|| !lock.is_locked())).poll(_cx));
+                            let a = core::task::ready!(Pin::new(&mut lock.wq.wait_until(|| !lock.is_locked())).poll(_cx));
+                            assert_eq!(a, ());
                         }
                     }
                 }
-                
+
             }
         }
     }

@@ -56,7 +56,7 @@ pub async fn handle_syscall(syscall_id: usize, args: [usize; 6]) -> isize {
 /// * `flags` - The permission which the page fault needs
 pub async fn handle_page_fault(addr: VirtAddr, flags: MappingFlags) {
     time_stat_from_user_to_kernel();
-    let current_executor = current_executor();
+    let current_executor = current_executor().await;
     if current_executor
         .memory_set
         .lock()
@@ -67,7 +67,11 @@ pub async fn handle_page_fault(addr: VirtAddr, flags: MappingFlags) {
     {
         axhal::arch::flush_tlb(None);
     } else {
-        let _ = send_signal_to_thread(current_task().id().as_u64() as isize, SignalNo::SIGSEGV as isize).await;
+        let _ = send_signal_to_thread(
+            current_task().id().as_u64() as isize,
+            SignalNo::SIGSEGV as isize,
+        )
+        .await;
     }
     time_stat_from_kernel_to_user();
 }

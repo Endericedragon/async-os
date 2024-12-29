@@ -11,11 +11,12 @@ extern crate async_std;
 extern crate trampoline;
 
 #[async_std::async_main]
-async fn main() -> i32 {
+async fn main() -> isize {
     async_std::println!("Entering user_boot...");
     // 初始化文件系统
     trampoline::fs_init().await;
-    for testcase in BUSYBOX_TESTCASES {
+    // for testcase in BUSYBOX_TESTCASES {
+    for testcase in TESTCASES {
         let task = trampoline::init_user(get_args(testcase.as_bytes()), &get_envs().await)
             .await
             .unwrap();
