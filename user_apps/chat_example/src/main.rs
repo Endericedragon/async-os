@@ -1,10 +1,9 @@
-use futures::stream::StreamExt;
-use libp2p::{gossipsub, mdns, noise, swarm::NetworkBehaviour, swarm::SwarmEvent, tcp, yamux};
+use libp2p::{gossipsub, mdns, noise, swarm::NetworkBehaviour, tcp, yamux};
 use std::collections::hash_map::DefaultHasher;
 use std::error::Error;
 use std::hash::{Hash, Hasher};
 use std::time::Duration;
-use tokio::{io, io::AsyncBufReadExt, select};
+use tokio::{io, io::AsyncBufReadExt};
 use tracing_subscriber::EnvFilter;
 
 // We create a custom network behaviour that combines Gossipsub and Mdns.

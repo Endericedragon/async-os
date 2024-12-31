@@ -1,6 +1,7 @@
 # QEMU arguments
 
-QEMU := ../qemu_build/qemu-system-$(ARCH)
+# QEMU := ../qemu_build/qemu-system-$(ARCH)
+QEMU := qemu-system-$(ARCH) # 笔者的QEMU已计入环境变量，故不需也不应使用相对路径
 ifeq ($(BUS), mmio)
   vdev-suffix := device
 else ifeq ($(BUS), pci)

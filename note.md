@@ -4,12 +4,27 @@
 
 > 新版本AsyncOS如何运行用户态程序？
 
-直接在 `user_apps/hello_world` 项目中编写代码即可。编写完成后，直接执行以下命令：
+直接在 `user_apps/hello_world` 项目中编写代码即可。编写完成后，直接在根目录下执行以下命令：
 
 ```sh
 cd user_apps && make build_uapps && cd ..
 make A=apps/user_boot ARCH=riscv64 LOG=off SMP=1 FEATURES=sched_fifo,img BLK=y run
 ```
+
+如果提示 `error: Could not find incbin file 'vdso/target/riscv64gc-unknown-linux-musl/release/libcops.so'` ，则需要到 `vdso` 目录下执行 `make build` 命令。
+
+如果提示 `Error loading shared library libgcc_s.so.1` ，则有两种办法：
+
+- 指定rustc让它静态链接。方法是在 `user_apps/.cargo/config.toml` 中写：
+
+  ```toml
+  [target.riscv64gc-unknown-linux-musl]
+  linker = "riscv64-linux-musl-gcc" # 原本就有
+  rustflags = ["-C", "target-feature=+crt-static"] # 指定静态链接
+  ```
+- 在 `modules/trampoline/src/fs_api.rs` 的 `fs_init` 函数中，手动指定缺失的文件的链接情况。此处的情况是，`libgcc_s.so.1` 位于 `tool-libs` 中，需要将其手动复制到 `testcases/riscv64_linux_musl` 中，才能正确链接到它。
+
+如果提示找不到 qemu-system-riscv64，则需要确认已安装 qemu-riscv64 软件包，然后在 `scripts/make/qemu.mk` 中修改 `QEMU` 变量为 qemu-system-riscv64 所在的路径。
 
 编译完成后，将ELF可执行文件的文件名放到 `apps/user_boot/src/main.rs` 的 `BUSYBOX_TESTCASES` 数组中，即可运行。
 

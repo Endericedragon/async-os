@@ -8,7 +8,6 @@ license = "GPL-3.0-or-later OR Apache-2.0"
 keywords = ["Task Switching"]
 
 [features]
-
 thread = []
 preempt = ["thread"]
 sched_fifo = []
@@ -26,7 +25,6 @@ numeric-enum-macro = { git = "https://github.com/mexus/numeric-enum-macro" }
 axconfig = { git = "https://github.com/Starry-OS/axconfig.git" }
 spinlock = { git = "https://github.com/Starry-OS/spinlock.git" }
 percpu = { git = "https://github.com/Starry-OS/percpu.git" }
-
 axhal = { path = "../axhal" }
 crate_interface = "0.1"
 kernel_guard = { path = "../kernel_guard" }
