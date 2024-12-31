@@ -48,5 +48,6 @@ members = [
     "user_apps/batch_syscall",
     # My additions
     "user_apps/chat_example",
+    "modules/ak_futures-timer",
 ]
 resolver = "2"
