@@ -35,6 +35,7 @@ members = [
     "modules/async_utils/afit",
     "modules/task_api",
     "modules/axfutex",
+    "modules/async_net",
     "user_apps/hello_world",
     "syscalls",
     "user_apps/pipetest",
