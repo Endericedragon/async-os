@@ -1,0 +1,1942 @@
+sh ./build_img.sh -a riscv64
+mkfs.fat 4.2 (2021-01-31)
+Copying riscv64 fat32 riscv64_linux_musl/* to disk
+    [92;1mBuilding[0m App: user_boot, Arch: riscv64, Platform: riscv64-qemu-virt, App type: rust
+[37mcargo build[0m [90m--target riscv64gc-unknown-none-elf --target-dir /home/endericedragon/repos/async-os/target --release  --manifest-path apps/user_boot/Cargo.toml --features "async_std/log-level-debug async_std/sched_fifo async_std/img"[0m
+[37mrust-objcopy --binary-architecture=riscv64[0m [90mapps/user_boot/user_boot_riscv64-qemu-virt.elf --strip-all -O binary apps/user_boot/user_boot_riscv64-qemu-virt.bin[0m
+    [96;1mRunning[0m on qemu...
+[37mqemu-system-riscv64 [0m [90m-m 2G -smp 1 -machine virt -bios default -kernel apps/user_boot/user_boot_riscv64-qemu-virt.bin -device virtio-blk-pci,drive=disk0 -drive id=disk0,if=none,format=raw,file=disk.img -device virtio-net-pci,netdev=net0 -netdev user,id=net0,hostfwd=tcp::5555-:5555,hostfwd=udp::5555-:5555 -nographic[0m
+
+OpenSBI v1.0
+   ____                    _____ ____ _____
+  / __ \                  / ____|  _ \_   _|
+ | |  | |_ __   ___ _ __ | (___ | |_) || |
+ | |  | | '_ \ / _ \ '_ \ \___ \|  _ < | |
+ | |__| | |_) |  __/ | | |____) | |_) || |_
+  \____/| .__/ \___|_| |_|_____/|____/_____|
+        | |
+        |_|
+
+Platform Name             : riscv-virtio,qemu
+Platform Features         : medeleg
+Platform HART Count       : 1
+Platform IPI Device       : aclint-mswi
+Platform Timer Device     : aclint-mtimer @ 10000000Hz
+Platform Console Device   : uart8250
+Platform HSM Device       : ---
+Platform Reboot Device    : sifive_test
+Platform Shutdown Device  : sifive_test
+Firmware Base             : 0x80000000
+Firmware Size             : 252 KB
+Runtime SBI Version       : 0.3
+
+Domain0 Name              : root
+Domain0 Boot HART         : 0
+Domain0 HARTs             : 0*
+Domain0 Region00          : 0x0000000002000000-0x000000000200ffff (I)
+Domain0 Region01          : 0x0000000080000000-0x000000008003ffff ()
+Domain0 Region02          : 0x0000000000000000-0xffffffffffffffff (R,W,X)
+Domain0 Next Address      : 0x0000000080200000
+Domain0 Next Arg1         : 0x00000000bf000000
+Domain0 Next Mode         : S-mode
+Domain0 SysReset          : yes
+
+Boot HART ID              : 0
+Boot HART Domain          : root
+Boot HART ISA             : rv64imafdcsuh
+Boot HART Features        : scounteren,mcounteren,time
+Boot HART PMP Count       : 16
+Boot HART PMP Granularity : 4
+Boot HART PMP Address Bits: 54
+Boot HART MHPM Count      : 0
+Boot HART MIDELEG         : 0x0000000000001666
+Boot HART MEDELEG         : 0x0000000000f0b509
+
+       d8888                            .d88888b.   .d8888b.
+      d88888                           d88P" "Y88b d88P  Y88b
+     d88P888                           888     888 Y88b.
+    d88P 888 888d888  .d8888b  .d88b.  888     888  "Y888b.
+   d88P  888 888P"   d88P"    d8P  Y8b 888     888     "Y88b.
+  d88P   888 888     888      88888888 888     888       "888
+ d8888888888 888     Y88b.    Y8b.     Y88b. .d88P Y88b  d88P
+d88P     888 888      "Y8888P  "Y8888   "Y88888P"   "Y8888P"
+
+arch = riscv64
+platform = riscv64-qemu-virt
+target = riscv64gc-unknown-none-elf
+smp = 1
+build_mode = release
+log_level = debug
+
+[37m[  0.031854 0 runtime:115] [32mLogging is enabled.[m
+[m[37m[  0.033957 0 runtime:116] [32mPrimary CPU 0 started, dtb = 0xbf000000.[m
+[m[37m[  0.035212 0 runtime:117] [32mPlatform name riscv64_qemu_virt.[m
+[m[37m[  0.036224 0 runtime:119] [32mFound physcial memory regions:[m
+[m[37m[  0.037214 0 runtime:121] [32m  [PA:0x80200000, PA:0x80325000) .text (READ | EXECUTE | RESERVED)[m
+[m[37m[  0.038739 0 runtime:121] [32m  [PA:0x80325000, PA:0x80359000) .rodata (READ | RESERVED)[m
+[m[37m[  0.039692 0 runtime:121] [32m  [PA:0x80360000, PA:0x87b72000) .data .tdata .tbss .percpu (READ | WRITE | RESERVED)[m
+[m[37m[  0.040016 0 runtime:121] [32m  [PA:0x87b72000, PA:0x87bb2000) boot stack (READ | WRITE | RESERVED)[m
+[m[37m[  0.040285 0 runtime:121] [32m  [PA:0x87bb2000, PA:0x87bd8000) .bss (READ | WRITE | RESERVED)[m
+[m[37m[  0.040634 0 runtime:121] [32m  [PA:0x87bd8000, PA:0x88000000) free memory (READ | WRITE | FREE)[m
+[m[37m[  0.041054 0 runtime:121] [32m  [PA:0xc000000, PA:0xc210000) mmio (READ | WRITE | DEVICE | RESERVED)[m
+[m[37m[  0.041387 0 runtime:121] [32m  [PA:0x1000000, PA:0x2000000) mmio (READ | WRITE | DEVICE | RESERVED)[m
+[m[37m[  0.041812 0 runtime:121] [32m  [PA:0x10000000, PA:0x10001000) mmio (READ | WRITE | DEVICE | RESERVED)[m
+[m[37m[  0.042202 0 runtime:121] [32m  [PA:0x10001000, PA:0x10009000) mmio (READ | WRITE | DEVICE | RESERVED)[m
+[m[37m[  0.042492 0 runtime:121] [32m  [PA:0x30000000, PA:0x40000000) mmio (READ | WRITE | DEVICE | RESERVED)[m
+[m[37m[  0.042872 0 runtime:121] [32m  [PA:0x40000000, PA:0x80000000) mmio (READ | WRITE | DEVICE | RESERVED)[m
+[m[37m[  0.043311 0 runtime:121] [32m  [PA:0xa0000000, PA:0x1a0000000) extend free memory (READ | WRITE | FREE)[m
+[m[37m[  0.043968 0 runtime:201] [32mInitialize global memory allocator...[m
+[m[37m[  0.044386 0 runtime:202] [32m  use TLSF allocator.[m
+[m[37m[  0.044879 0 axalloc:212] [36minitialize global allocator at: [0xffffffc0a0000000, 0xffffffc1a0000000)[m
+[m[37m[  0.047767 0 axalloc:227] [36madd a memory region to global allocator: [0xffffffc087bd8000, 0xffffffc088000000)[m
+[m[37m[  0.049482 0 runtime:133] [32mInitialize kernel page table...[m
+[m[37m[  0.052003 0 runtime:137] [32mInitialize platform devices...[m
+[m[37m[  0.052376 0 executor::api:14] [32mInitialize executor...[m
+[m[37m[  0.052783 0 arch_boot:36] [36mget sp 0xffffffc087bb1820 in boot_stack[m
+[m[37m[  0.053356 0 async_mem:78] [36mmapping kernel region [0xffffffc080200000, 0xffffffc080325000)[m
+[m[37m[  0.054355 0 async_mem:78] [36mmapping kernel region [0xffffffc080325000, 0xffffffc080359000)[m
+[m[37m[  0.055065 0 async_mem:78] [36mmapping kernel region [0xffffffc080360000, 0xffffffc087b72000)[m
+[m[37m[  0.055844 0 async_mem:78] [36mmapping kernel region [0xffffffc087b72000, 0xffffffc087bb2000)[m
+[m[37m[  0.056261 0 async_mem:78] [36mmapping kernel region [0xffffffc087bb2000, 0xffffffc087bd8000)[m
+[m[37m[  0.056760 0 async_mem:78] [36mmapping kernel region [0xffffffc087bd8000, 0xffffffc088000000)[m
+[m[37m[  0.057264 0 async_mem:78] [36mmapping kernel region [0xffffffc00c000000, 0xffffffc00c210000)[m
+[m[37m[  0.057820 0 async_mem:78] [36mmapping kernel region [0xffffffc001000000, 0xffffffc002000000)[m
+[m[37m[  0.058248 0 async_mem:78] [36mmapping kernel region [0xffffffc010000000, 0xffffffc010001000)[m
+[m[37m[  0.058869 0 async_mem:78] [36mmapping kernel region [0xffffffc010001000, 0xffffffc010009000)[m
+[m[37m[  0.059308 0 async_mem:78] [36mmapping kernel region [0xffffffc030000000, 0xffffffc040000000)[m
+[m[37m[  0.059838 0 async_mem:78] [36mmapping kernel region [0xffffffc040000000, 0xffffffc080000000)[m
+[m[37m[  0.060244 0 async_mem:78] [36mmapping kernel region [0xffffffc0a0000000, 0xffffffc1a0000000)[m
+[m[37m[  0.060968 0 executor::api:26] [32m  use FIFO scheduler.[m
+[m[37m[  0.061365 0 runtime:144] [32mInitialize interrupt handlers...[m
+[m[37m[  0.062217 0 runtime:156] [32mPrimary CPU 0 init OK.[m
+[m[37m[  0.062687 0:1 axdriver:155] [32mInitialize device drivers...[m
+[m[37m[  0.063074 0:1 axdriver:156] [32m  device model: static[m
+[m[37m[  0.064397 0:1 axalloc:118] [36mexpand heap memory: [0xffffffc0a0058000, 0xffffffc0a8058000)[m
+[m[37m[  0.067542 0:1 axalloc:118] [36mexpand heap memory: [0xffffffc0a8058000, 0xffffffc0b8058000)[m
+[m[37m[  0.223350 0:1 axdriver:127] [32mregistered a new Block device: "ramdisk"[m
+[m[37m[  0.224285 0:1 axdriver::bus::pci:97] [36mPCI 00:00.0: 1b36:0008 (class 06.00, rev 00) Standard[m
+[m[37m[  0.225629 0:1 axdriver::bus::pci:97] [36mPCI 00:01.0: 1af4:1001 (class 01.00, rev 00) Standard[m
+[m[37m[  0.226220 0:1 axdriver::bus::pci:54] [36m  BAR 1: MEM [0x40000000, 0x40001000)[m
+[m[37m[  0.226664 0:1 axdriver::bus::pci:54] [36m  BAR 4: MEM [0x40004000, 0x40008000) 64bit pref[m
+[m[37m[  0.227676 0:1 axdriver::bus::pci:97] [36mPCI 00:02.0: 1af4:1000 (class 02.00, rev 00) Standard[m
+[m[37m[  0.228258 0:1 axdriver::bus::pci:54] [36m  BAR 1: MEM [0x40008000, 0x40009000)[m
+[m[37m[  0.228666 0:1 axdriver::bus::pci:54] [36m  BAR 4: MEM [0x4000c000, 0x40010000) 64bit pref[m
+[m[37m[  0.230983 0:1 virtio_drivers::transport:78] [36mDevice features: Features(CTRL_GUEST_OFFLOADS | MAC | MRG_RXBUF | STATUS | CTRL_VQ | CTRL_RX | CTRL_VLAN | CTRL_RX_EXTRA | GUEST_ANNOUNCE | CTL_MAC_ADDR | RING_INDIRECT_DESC | RING_EVENT_IDX | VERSION_1)[m
+[m[37m[  0.233248 0:1 virtio_drivers::device::net::dev_raw:30] [32mnegotiated_features Features(MAC | STATUS | RING_INDIRECT_DESC | RING_EVENT_IDX)[m
+[m[37m[  0.233990 0:1 virtio_drivers::device::net::dev_raw:37] [36mGot MAC=[52, 54, 00, 12, 34, 56], status=Status(LINK_UP)[m
+[m[37m[  0.236771 0:1 axdriver::bus::pci:104] [32mregistered a new Net device at 00:02.0: "virtio-net"[m
+[m[37m[  0.252227 0:1 axdriver:188] [36mnumber of NICs: 1[m
+[m[37m[  0.252785 0:1 axdriver:191] [36m  NIC 0: "virtio-net"[m
+[m[37m[  0.253249 0:1 axdriver:196] [36mnumber of block devices: 1[m
+[m[37m[  0.253534 0:1 axdriver:199] [36m  block device 0: "ramdisk"[m
+[m[37m[  0.254015 0:1 async_fs:34] [32mInitialize filesystems...[m
+[m[37m[  0.254403 0:1 async_fs:37] [32m  use block device 0: "ramdisk"[m
+[m[37m[  0.256500 0:1 async_fs::fs::fatfs:192] [36mcreate Dir at fatfs: /dev[m
+[m[37m[  0.265560 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: /dev[m
+[m[37m[  0.269460 0:1 async_fs::fs::fatfs:192] [36mcreate Dir at fatfs: /dev/shm[m
+[m[37m[  0.272586 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: /dev/shm[m
+[m[37m[  0.273058 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: dev[m
+[m[37m[  0.276539 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: shm[m
+[m[37m[  0.277425 0:1 async_fs::fs::fatfs:192] [36mcreate Dir at fatfs: /tmp[m
+[m[37m[  0.282693 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: /tmp[m
+[m[37m[  0.285529 0:1 async_fs::fs::fatfs:192] [36mcreate Dir at fatfs: /var[m
+[m[37m[  0.290129 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: /var[m
+[m[37m[  0.293044 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: sys[m
+[m[37m[  0.293665 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: sys/net[m
+[m[37m[  0.294124 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: net[m
+[m[37m[  0.294488 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: sys/net/core[m
+[m[37m[  0.294723 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: net/core[m
+[m[37m[  0.294905 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: core[m
+[m[37m[  0.295180 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: sys/net/core/somaxconn[m
+[m[37m[  0.295756 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: net/core/somaxconn[m
+[m[37m[  0.296250 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: core/somaxconn[m
+[m[37m[  0.296554 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: somaxconn[m
+[m[37m[  0.297430 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: sys/vm[m
+[m[37m[  0.297707 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: vm[m
+[m[37m[  0.298251 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: sys/vm/overcommit_memory[m
+[m[37m[  0.298703 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: vm/overcommit_memory[m
+[m[37m[  0.299079 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: overcommit_memory[m
+[m[37m[  0.299450 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: self[m
+[m[37m[  0.299786 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: self/stat[m
+[m[37m[  0.300261 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: stat[m
+[m[37m[  0.300574 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: self/exe[m
+[m[37m[  0.301060 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: exe[m
+[m[37m[  0.301573 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: self/status[m
+[m[37m[  0.302309 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: status[m
+[m[37m[  0.302779 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: filesystems[m
+[m[37m[  0.303465 0:1 async_fs::fs::fatfs:192] [36mcreate Dir at fatfs: /proc[m
+[m[37m[  0.306342 0:1 fatfs::io:71] [36mfailed to fill whole buffer in read_exact[m
+[m[37m[  0.308692 0:1 fatfs::io:71] [36mfailed to fill whole buffer in read_exact[m
+[m[37m[  0.309230 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: /proc[m
+[m[37m[  0.312036 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: kernel[m
+[m[37m[  0.312450 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: kernel/mm[m
+[m[37m[  0.312793 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: mm[m
+[m[37m[  0.313069 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: kernel/mm/transparent_hugepage[m
+[m[37m[  0.313641 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: mm/transparent_hugepage[m
+[m[37m[  0.314049 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: transparent_hugepage[m
+[m[37m[  0.314573 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: kernel/mm/transparent_hugepage/enabled[m
+[m[37m[  0.315183 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: mm/transparent_hugepage/enabled[m
+[m[37m[  0.315632 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: transparent_hugepage/enabled[m
+[m[37m[  0.316008 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: enabled[m
+[m[37m[  0.316427 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: devices[m
+[m[37m[  0.316785 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: devices/system[m
+[m[37m[  0.317218 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: system[m
+[m[37m[  0.317507 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: devices/system/clocksource[m
+[m[37m[  0.317997 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: system/clocksource[m
+[m[37m[  0.318475 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: clocksource[m
+[m[37m[  0.319078 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: devices/system/clocksource/clocksource0[m
+[m[37m[  0.319698 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: system/clocksource/clocksource0[m
+[m[37m[  0.320414 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: clocksource/clocksource0[m
+[m[37m[  0.320998 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: clocksource0[m
+[m[37m[  0.321366 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: devices/system/clocksource/clocksource0/current_clocksource[m
+[m[37m[  0.322150 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: system/clocksource/clocksource0/current_clocksource[m
+[m[37m[  0.322779 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: clocksource/clocksource0/current_clocksource[m
+[m[37m[  0.323378 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: clocksource0/current_clocksource[m
+[m[37m[  0.324004 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: current_clocksource[m
+[m[37m[  0.324464 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: devices/system/cpu[m
+[m[37m[  0.324965 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: system/cpu[m
+[m[37m[  0.325548 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: cpu[m
+[m[37m[  0.326064 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: devices/system/cpu/online[m
+[m[37m[  0.326741 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: system/cpu/online[m
+[m[37m[  0.327522 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: cpu/online[m
+[m[37m[  0.327824 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: online[m
+[m[37m[  0.328552 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: devices/system/cpu/cpu0[m
+[m[37m[  0.328912 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: system/cpu/cpu0[m
+[m[37m[  0.329304 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: cpu/cpu0[m
+[m[37m[  0.329646 0:1 axfs_ramfs::dir:148] [36mcreate Dir at ramfs: cpu0[m
+[m[37m[  0.330100 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: devices/system/cpu/cpu0/online[m
+[m[37m[  0.330573 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: system/cpu/cpu0/online[m
+[m[37m[  0.330970 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: cpu/cpu0/online[m
+[m[37m[  0.331353 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: cpu0/online[m
+[m[37m[  0.331701 0:1 axfs_ramfs::dir:148] [36mcreate File at ramfs: online[m
+[m[37m[  0.332277 0:1 async_fs::fs::fatfs:192] [36mcreate Dir at fatfs: /sys[m
+[m[37m[  0.337154 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: /sys[m
+[m[37m[  0.340510 0:1 async_net:49] [32mInitialize network subsystem...[m
+[m[37m[  0.340868 0:1 async_net:52] [32m  use NIC 0: "virtio-net"[m
+[m[37m[  0.341829 0:1 async_net::smoltcp_impl:407] [32mcreated net interface "eth0":[m
+[m[37m[  0.342479 0:1 async_net::smoltcp_impl:408] [32m  ether:    52-54-00-12-34-56[m
+[m[37m[  0.343006 0:1 async_net::smoltcp_impl:409] [32m  ip:       10.0.2.15/24[m
+[m[37m[  0.343523 0:1 async_net::smoltcp_impl:410] [32m  gateway:  10.0.2.2[m
+[mEntering user_boot...
+[37m[  0.346944 0:1 executor::link:247] [32mcreate_link: /lib/ld-musl-riscv64-sf.so.1 -> /libc.so[m
+[m[37m[  0.347575 0:1 async_fs::root:85] [36mlookup at root: /libc.so[m
+[m[37m[  0.348122 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: libc.so[m
+[m[37m[  0.350444 0:1 executor::link:247] [32mcreate_link: /lib/ld-musl-riscv64.so.1 -> /libc.so[m
+[m[37m[  0.350979 0:1 async_fs::root:85] [36mlookup at root: /libc.so[m
+[m[37m[  0.351303 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: libc.so[m
+[m[37m[  0.353092 0:1 executor::link:247] [32mcreate_link: /lib/tls_get_new-dtv_dso.so -> /tls_get_new-dtv_dso.so[m
+[m[37m[  0.353685 0:1 async_fs::root:85] [36mlookup at root: /tls_get_new-dtv_dso.so[m
+[m[37m[  0.354104 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: tls_get_new-dtv_dso.so[m
+[m[37m[  0.356920 0:1 executor::link:247] [32mcreate_link: /usr/sbin/ls -> /busybox[m
+[m[37m[  0.357332 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.357677 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.358493 0:1 executor::link:247] [32mcreate_link: /usr/bin/ls -> /busybox[m
+[m[37m[  0.358879 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.359225 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.359928 0:1 executor::link:247] [32mcreate_link: /bin/ls -> /busybox[m
+[m[37m[  0.360322 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.360694 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.361879 0:1 executor::link:247] [32mcreate_link: /usr/sbin/mkdir -> /busybox[m
+[m[37m[  0.363938 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.365123 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.366324 0:1 executor::link:247] [32mcreate_link: /usr/bin/mkdir -> /busybox[m
+[m[37m[  0.367583 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.368005 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.368773 0:1 executor::link:247] [32mcreate_link: /bin/mkdir -> /busybox[m
+[m[37m[  0.369171 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.369524 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.369944 0:1 executor::link:247] [32mcreate_link: /usr/sbin/touch -> /busybox[m
+[m[37m[  0.370311 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.370575 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.371005 0:1 executor::link:247] [32mcreate_link: /usr/bin/touch -> /busybox[m
+[m[37m[  0.371375 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.372361 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.372868 0:1 executor::link:247] [32mcreate_link: /bin/touch -> /busybox[m
+[m[37m[  0.373321 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.373710 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.374275 0:1 executor::link:247] [32mcreate_link: /usr/sbin/mv -> /busybox[m
+[m[37m[  0.374764 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.375132 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.375657 0:1 executor::link:247] [32mcreate_link: /usr/bin/mv -> /busybox[m
+[m[37m[  0.376027 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.376393 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.376864 0:1 executor::link:247] [32mcreate_link: /bin/mv -> /busybox[m
+[m[37m[  0.377234 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.377585 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.377944 0:1 executor::link:247] [32mcreate_link: /usr/sbin/busybox -> /busybox[m
+[m[37m[  0.378337 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.378709 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.379217 0:1 executor::link:247] [32mcreate_link: /usr/bin/busybox -> /busybox[m
+[m[37m[  0.379903 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.380996 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.382308 0:1 executor::link:247] [32mcreate_link: /bin/busybox -> /busybox[m
+[m[37m[  0.382772 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.383097 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.383510 0:1 executor::link:247] [32mcreate_link: /usr/sbin/sh -> /busybox[m
+[m[37m[  0.383876 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.384096 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.384502 0:1 executor::link:247] [32mcreate_link: /usr/bin/sh -> /busybox[m
+[m[37m[  0.384912 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.385780 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.386299 0:1 executor::link:247] [32mcreate_link: /bin/sh -> /busybox[m
+[m[37m[  0.386574 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.386898 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.387442 0:1 executor::link:247] [32mcreate_link: /usr/sbin/which -> /busybox[m
+[m[37m[  0.387888 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.388293 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.388792 0:1 executor::link:247] [32mcreate_link: /usr/bin/which -> /busybox[m
+[m[37m[  0.389201 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.389522 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.389978 0:1 executor::link:247] [32mcreate_link: /bin/which -> /busybox[m
+[m[37m[  0.390412 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.390748 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.391230 0:1 executor::link:247] [32mcreate_link: /usr/sbin/cp -> /busybox[m
+[m[37m[  0.391690 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.393339 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.393823 0:1 executor::link:247] [32mcreate_link: /usr/bin/cp -> /busybox[m
+[m[37m[  0.394219 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.394467 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.394892 0:1 executor::link:247] [32mcreate_link: /bin/cp -> /busybox[m
+[m[37m[  0.395375 0:1 async_fs::root:85] [36mlookup at root: /busybox[m
+[m[37m[  0.395594 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: busybox[m
+[m[37m[  0.396246 0:1 executor::link:247] [32mcreate_link: /bin/lmbench_all -> /lmbench_all[m
+[m[37m[  0.396773 0:1 async_fs::root:85] [36mlookup at root: /lmbench_all[m
+[m[37m[  0.397023 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: lmbench_all[m
+[m[37m[  0.398740 0:1 executor::link:247] [32mcreate_link: /bin/iozone -> /iozone[m
+[m[37m[  0.399163 0:1 async_fs::root:85] [36mlookup at root: /iozone[m
+[m[37m[  0.399527 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: iozone[m
+[m[37m[  0.401148 0:1 executor::link:247] [32mcreate_link: /riscv64-linux-musl-native/lib/ld-musl-riscv64.so.1 -> /lib/libc.so[m
+[m[37m[  0.401765 0:1 async_fs::root:85] [36mlookup at root: /lib/libc.so[m
+[m[37m[  0.402225 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: lib/libc.so[m
+[m[37m[  0.402649 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: lib[m
+[m[37m[  0.405863 0:1 executor::link:257] [36mlink dest file not exists[m
+[m[37m[  0.406952 0:1 executor::link:247] [32mcreate_link: /riscv64-linux-musl-native/lib/libatomic.so -> /riscv64-linux-musl-native/lib/libatomic.so.1.2.0[m
+[m[37m[  0.408712 0:1 async_fs::root:85] [36mlookup at root: /riscv64-linux-musl-native/lib/libatomic.so.1.2.0[m
+[m[37m[  0.409433 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: riscv64-linux-musl-native/lib/libatomic.so.1.2.0[m
+[m[37m[  0.410937 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: riscv64-linux-musl-native[m
+[m[37m[  0.414515 0:1 executor::link:257] [36mlink dest file not exists[m
+[m[37m[  0.414980 0:1 executor::link:247] [32mcreate_link: /riscv64-linux-musl-native/lib/libatomic.so.1 -> /riscv64-linux-musl-native/lib/libatomic.so.1.2.0[m
+[m[37m[  0.415796 0:1 async_fs::root:85] [36mlookup at root: /riscv64-linux-musl-native/lib/libatomic.so.1.2.0[m
+[m[37m[  0.416140 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: riscv64-linux-musl-native/lib/libatomic.so.1.2.0[m
+[m[37m[  0.417230 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: riscv64-linux-musl-native[m
+[m[37m[  0.419864 0:1 executor::link:257] [36mlink dest file not exists[m
+[m[37m[  0.420268 0:1 executor::link:247] [32mcreate_link: /riscv64-linux-musl-native/lib/libgfortran.so -> /riscv64-linux-musl-native/lib/libgfortran.so.5.0.0[m
+[m[37m[  0.420729 0:1 async_fs::root:85] [36mlookup at root: /riscv64-linux-musl-native/lib/libgfortran.so.5.0.0[m
+[m[37m[  0.421086 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: riscv64-linux-musl-native/lib/libgfortran.so.5.0.0[m
+[m[37m[  0.421412 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: riscv64-linux-musl-native[m
+[m[37m[  0.424075 0:1 executor::link:257] [36mlink dest file not exists[m
+[m[37m[  0.424469 0:1 executor::link:247] [32mcreate_link: /riscv64-linux-musl-native/lib/libgfortran.so.5 -> /riscv64-linux-musl-native/lib/libgfortran.so.5.0.0[m
+[m[37m[  0.424910 0:1 async_fs::root:85] [36mlookup at root: /riscv64-linux-musl-native/lib/libgfortran.so.5.0.0[m
+[m[37m[  0.425256 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: riscv64-linux-musl-native/lib/libgfortran.so.5.0.0[m
+[m[37m[  0.425563 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: riscv64-linux-musl-native[m
+[m[37m[  0.428210 0:1 executor::link:257] [36mlink dest file not exists[m
+[m[37m[  0.428601 0:1 executor::link:247] [32mcreate_link: /riscv64-linux-musl-native/lib/libgomp.so -> /riscv64-linux-musl-native/lib/libgomp.so.1.0.0[m
+[m[37m[  0.429019 0:1 async_fs::root:85] [36mlookup at root: /riscv64-linux-musl-native/lib/libgomp.so.1.0.0[m
+[m[37m[  0.429301 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: riscv64-linux-musl-native/lib/libgomp.so.1.0.0[m
+[m[37m[  0.429592 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: riscv64-linux-musl-native[m
+[m[37m[  0.432373 0:1 executor::link:257] [36mlink dest file not exists[m
+[m[37m[  0.432943 0:1 executor::link:247] [32mcreate_link: /riscv64-linux-musl-native/lib/libgomp.so.1 -> /riscv64-linux-musl-native/lib/libgomp.so.1.0.0[m
+[m[37m[  0.434031 0:1 async_fs::root:85] [36mlookup at root: /riscv64-linux-musl-native/lib/libgomp.so.1.0.0[m
+[m[37m[  0.434469 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: riscv64-linux-musl-native/lib/libgomp.so.1.0.0[m
+[m[37m[  0.434912 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: riscv64-linux-musl-native[m
+[m[37m[  0.438192 0:1 executor::link:257] [36mlink dest file not exists[m
+[m[37m[  0.439134 0:1 executor::link:247] [32mcreate_link: /riscv64-linux-musl-native/lib/libssp.so -> /riscv64-linux-musl-native/lib/libssp.so.0.0.0[m
+[m[37m[  0.439635 0:1 async_fs::root:85] [36mlookup at root: /riscv64-linux-musl-native/lib/libssp.so.0.0.0[m
+[m[37m[  0.439986 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: riscv64-linux-musl-native/lib/libssp.so.0.0.0[m
+[m[37m[  0.440301 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: riscv64-linux-musl-native[m
+[m[37m[  0.442956 0:1 executor::link:257] [36mlink dest file not exists[m
+[m[37m[  0.443361 0:1 executor::link:247] [32mcreate_link: /riscv64-linux-musl-native/lib/libssp.so.0 -> /riscv64-linux-musl-native/lib/libssp.so.0.0.0[m
+[m[37m[  0.443853 0:1 async_fs::root:85] [36mlookup at root: /riscv64-linux-musl-native/lib/libssp.so.0.0.0[m
+[m[37m[  0.444517 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: riscv64-linux-musl-native/lib/libssp.so.0.0.0[m
+[m[37m[  0.444909 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: riscv64-linux-musl-native[m
+[m[37m[  0.447799 0:1 executor::link:257] [36mlink dest file not exists[m
+[m[37m[  0.448256 0:1 executor::link:247] [32mcreate_link: /riscv64-linux-musl-native/lib/libstdc++.so -> /riscv64-linux-musl-native/lib/libstdc++.so.6.0.29[m
+[m[37m[  0.448696 0:1 async_fs::root:85] [36mlookup at root: /riscv64-linux-musl-native/lib/libstdc++.so.6.0.29[m
+[m[37m[  0.449124 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: riscv64-linux-musl-native/lib/libstdc++.so.6.0.29[m
+[m[37m[  0.449492 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: riscv64-linux-musl-native[m
+[m[37m[  0.452292 0:1 executor::link:257] [36mlink dest file not exists[m
+[m[37m[  0.452792 0:1 executor::link:247] [32mcreate_link: /riscv64-linux-musl-native/lib/libstdc++.so.6 -> /riscv64-linux-musl-native/lib/libstdc++.so.6.0.29[m
+[m[37m[  0.453330 0:1 async_fs::root:85] [36mlookup at root: /riscv64-linux-musl-native/lib/libstdc++.so.6.0.29[m
+[m[37m[  0.453629 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: riscv64-linux-musl-native/lib/libstdc++.so.6.0.29[m
+[m[37m[  0.453905 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: riscv64-linux-musl-native[m
+[m[37m[  0.456646 0:1 executor::link:257] [36mlink dest file not exists[m
+[m[37m[  0.457191 0:1 executor::link:247] [32mcreate_link: /lib/libgcc_s.so.1 -> /libgcc_s.so.1[m
+[m[37m[  0.457569 0:1 async_fs::root:85] [36mlookup at root: /libgcc_s.so.1[m
+[m[37m[  0.457872 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: libgcc_s.so.1[m
+[m[37m[  0.459842 0:1 async_fs::fops:195] [36mopen file: /etc/environment READ[m
+[m[37m[  0.460330 0:1 async_fs::root:85] [36mlookup at root: /etc/environment[m
+[m[37m[  0.460590 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: etc/environment[m
+[m[37m[  0.460837 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: etc[m
+[m[37m[  0.461727 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: environment[m
+[m[37m[  0.464309 0:1 async_mem:78] [36mmapping kernel region [0xffffffc080200000, 0xffffffc080325000)[m
+[m[37m[  0.464895 0:1 async_mem:78] [36mmapping kernel region [0xffffffc080325000, 0xffffffc080359000)[m
+[m[37m[  0.465489 0:1 async_mem:78] [36mmapping kernel region [0xffffffc080360000, 0xffffffc087b72000)[m
+[m[37m[  0.466154 0:1 async_mem:78] [36mmapping kernel region [0xffffffc087b72000, 0xffffffc087bb2000)[m
+[m[37m[  0.466700 0:1 async_mem:78] [36mmapping kernel region [0xffffffc087bb2000, 0xffffffc087bd8000)[m
+[m[37m[  0.467293 0:1 async_mem:78] [36mmapping kernel region [0xffffffc087bd8000, 0xffffffc088000000)[m
+[m[37m[  0.468127 0:1 async_mem:78] [36mmapping kernel region [0xffffffc00c000000, 0xffffffc00c210000)[m
+[m[37m[  0.468717 0:1 async_mem:78] [36mmapping kernel region [0xffffffc001000000, 0xffffffc002000000)[m
+[m[37m[  0.469103 0:1 async_mem:78] [36mmapping kernel region [0xffffffc010000000, 0xffffffc010001000)[m
+[m[37m[  0.469683 0:1 async_mem:78] [36mmapping kernel region [0xffffffc010001000, 0xffffffc010009000)[m
+[m[37m[  0.470224 0:1 async_mem:78] [36mmapping kernel region [0xffffffc030000000, 0xffffffc040000000)[m
+[m[37m[  0.470845 0:1 async_mem:78] [36mmapping kernel region [0xffffffc040000000, 0xffffffc080000000)[m
+[m[37m[  0.471413 0:1 async_mem:78] [36mmapping kernel region [0xffffffc0a0000000, 0xffffffc1a0000000)[m
+[m[37m[  0.472095 0:1 async_fs::fops:195] [36mopen file: chat_example READ[m
+[m[37m[  0.472769 0:1 async_fs::root:85] [36mlookup at root: chat_example[m
+[m[37m[  0.473280 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: chat_example[m
+[m[37m[  1.230534 0:1 async_fs::fops:195] [36mopen file: /libc.so READ[m
+[m[37m[  1.230906 0:1 async_fs::root:85] [36mlookup at root: /libc.so[m
+[m[37m[  1.231164 0:1 async_fs::fs::fatfs:160] [36mlookup at fatfs: libc.so[m
+[m[37m[  1.318619 0:1 executor::loader:56] [32mload app args: ["/libc.so", "chat_example"] name: /libc.so[m
+[m[37m[  1.319382 0:1 executor::loader:58] [33mThe elf base addr may be different in different arch![m
+[m[37m[  1.319977 0:1 elf_parser:142] [32mBase addr for the elf: 0x4000000[m
+[m[37m[  1.320551 0:1 elf_parser:66] [32mBase addr for the elf: 0x4000000[m
+[m[37m[  1.321558 0:1 elf_parser::arch::riscv:54] [32mBase addr for the elf: 0x4000000[m
+[m[37m[  1.322497 0:1 elf_parser::arch::riscv:69] [32mRelocating .rela.dyn[m
+[m[37m[  1.323054 0:1 elf_parser::arch::riscv:144] [32mRelocating .rela.plt[m
+[m[37m[  1.324511 0:1 elf_parser::arch::riscv:168] [32mRelocating done[m
+[m[37m[  1.325871 0:1 async_mem::area:98] [36mstart: VA:0x4000000, size: A3000,  page start: VA:0xffffffc0b8066000 flags: MappingFlags(READ | EXECUTE | USER)[m
+[m[37m[  1.327866 0:1 async_mem:144] [36mallocating [0x4000000, 0x40a22a4) to [0x4000000, 0x40a3000) flag: MappingFlags(READ | EXECUTE | USER)[m
+[m[37m[  1.328697 0:1 async_mem::area:98] [36mstart: VA:0x40a3000, size: 5000,  page start: VA:0xffffffc0b810b000 flags: MappingFlags(READ | WRITE | USER)[m
+[m[37m[  1.329802 0:1 async_mem:144] [36mallocating [0x40a3000, 0x40a7218) to [0x40a3000, 0x40a8000) flag: MappingFlags(READ | WRITE | USER)[m
+[m[37m[  1.330822 0:1 async_mem:144] [36mallocating [0x40a8000, 0x40aa000) to [0x40a8000, 0x40aa000) flag: MappingFlags(READ | WRITE | USER)[m
+[m[37m[  1.331476 0:1 elf_parser::arch::riscv:54] [32mBase addr for the elf: 0x40aa000[m
+[m[37m[  1.331995 0:1 elf_parser::arch::riscv:168] [32mRelocating done[m
+[m[37m[  1.339048 0:1 async_mem::area:98] [36mstart: VA:0x3fa00000, size: 400000,  page start: VA:0xffffffc0b8110000 flags: MappingFlags(READ | WRITE | USER)[m
+[m[37m[  1.340298 0:1 async_mem:144] [36mallocating [0x3fa00000, 0x3fe00000) to [0x3fa00000, 0x3fe00000) flag: MappingFlags(READ | WRITE | USER)[m
+[m[37m[  1.341119 0:1 executor::loader:98] [32m[new region] user heap: [VA:0x3fa00000, VA:0x3fe00000)[m
+[m[37m[  1.341660 0:1 elf_parser::auxv:48] [32mELF header addr: 0x4000000[m
+[m[37m[  1.346931 0:1 async_mem::area:98] [36mstart: VA:0x3fe00000, size: 200000,  page start: VA:0xffffffc0b8512000 flags: MappingFlags(READ | WRITE | USER)[m
+[m[37m[  1.347842 0:1 async_mem:144] [36mallocating [0x3fe00000, 0x40000000) to [0x3fe00000, 0x40000000) flag: MappingFlags(READ | WRITE | USER)[m
+[m[37m[  1.348756 0:1 executor::loader:122] [32m[new region] user stack: [VA:0x3fe00000, VA:0x40000000)[m
+[m[37m[  1.352134 0:3 syscall::syscall:42] [32m[syscall] id = SET_TID_ADDRESS, args = [67793268, 67783040, 16, 427088, 67784960, 1], entry[m
+[m[37m[  1.353029 0:3 syscall::syscall:69] [32m[syscall] id = 96,return 3[m
+[m[37m[  1.354112 0:3 syscall::syscall:30] [32m[syscall] id = OPENAT, args = [18446744073709551516, 1073741365, 32768, 0, 0, 0], entry[m
+[m[37m[  1.356136 0:3 syscall::syscall_fs::imp::io:408] [36mallocated fd_num: 3[m
+[m[37m[  1.356640 0:3 syscall::syscall_fs::imp::io:412] [32mpath: "/chat_example"[m
+[m[37m[  1.356961 0:3 syscall::syscall_fs::imp::io:426] [36mopen file[m
+[m[37m[  1.357315 0:3 syscall::syscall_fs::ctype::file:240] [36mInto function new_fd, path: /chat_example[m
+[m[37m[  1.357719 0:3 async_fs::fops:195] [36mopen file: /chat_example READ[m
+[m[37m[  1.358071 0:3 async_fs::root:85] [36mlookup at root: /chat_example[m
+[m[37m[  1.358350 0:3 async_fs::fs::fatfs:160] [36mlookup at fatfs: chat_example[m
+[m[37m[  1.371668 0:3 syscall::syscall_fs::imp::io:428] [36mnew file_desc successfully allocated[m
+[m[37m[  1.372133 0:3 executor::link:247] [32mcreate_link: /chat_example -> /chat_example[m
+[m[37m[  1.372460 0:3 async_fs::root:85] [36mlookup at root: /chat_example[m
+[m[37m[  1.372712 0:3 async_fs::fs::fatfs:160] [36mlookup at fatfs: chat_example[m
+[m[37m[  1.373803 0:3 syscall::syscall:69] [32m[syscall] id = 56,return 3[m
+[m[37m[  1.374232 0:3 syscall::syscall:30] [32m[syscall] id = READ, args = [3, 1073739296, 960, 0, 0, 0], entry[m
+[m[37m[  1.374637 0:3 syscall::syscall_fs::imp::io:30] [32m[read()] fd: 3, buf: 0x3ffff620, len: 960[m
+[m[37m[  1.375234 0:3 async_mem:640] [36mallocating page at 3ffff000[m
+[m[37m[  1.376099 0:3 syscall::syscall:69] [32m[syscall] id = 63,return 960[m
+[m[37m[  1.376596 0:3 syscall::syscall:20] [32m[syscall] id = MMAP, args = [0, 6365184, 5, 2, 3, 0], entry[m
+[m[37m[  1.377127 0:3 syscall::syscall_mem::imp:52] [32mflags: MMAPFlags(MAP_PRIVATE)[m
+[m[37m[  1.377721 0:3 syscall::syscall_mem::imp:73] [36m[mmap] fd: 3, offset: 0x0[m
+[m[37m[  1.390795 0:3 async_mem:277] [32m[mmap] vaddr: [VA:0x0, VA:0x612000), MappingFlags(READ | EXECUTE | USER), shared: false, fixed: false, backend: true[m
+[m[37m[  1.391436 0:3 async_mem:297] [32mfind free area[m
+[m[37m[  1.392063 0:3 async_mem:302] [32mfound area [VA:0x1000, VA:0x613000)[m
+[m[37m[  1.392793 0:3 async_mem:144] [36mallocating [0x1000, 0x613000) to [0x1000, 0x613000) flag: MappingFlags(READ | EXECUTE | USER)[m
+[m[37m[  1.393749 0:3 syscall::syscall:69] [32m[syscall] id = 222,return 4096[m
+[m[37m[  1.394361 0:3 syscall::syscall:20] [32m[syscall] id = MMAP, args = [5951488, 417792, 3, 18, 3, 5943296], entry[m
+[m[37m[  1.394977 0:3 syscall::syscall_mem::imp:52] [32mflags: MMAPFlags(MAP_PRIVATE | MAP_FIXED)[m
+[m[37m[  1.395535 0:3 syscall::syscall_mem::imp:73] [36m[mmap] fd: 3, offset: 0x5ab000[m
+[m[37m[  1.395929 0:3 async_mem:277] [32m[mmap] vaddr: [VA:0x5ad000, VA:0x613000), MappingFlags(READ | WRITE | USER), shared: false, fixed: true, backend: true[m
+[m[37m[  1.397191 0:3 async_mem:188] [32msplitting for [VA:0x5ad000, VA:0x613000)[m
+[m[37m[  1.397780 0:3 async_mem:222] [32m  shrink_right [VA:0x1000, VA:0x613000) to [VA:0x1000, VA:0x5ad000)[m
+[m[37m[  1.398535 0:3 async_mem:144] [36mallocating [0x5ad000, 0x613000) to [0x5ad000, 0x613000) flag: MappingFlags(READ | WRITE | USER)[m
+[m[37m[  1.399360 0:3 syscall::syscall:69] [32m[syscall] id = 222,return 5951488[m
+[m[37m[  1.400509 0:3 async_mem::area:174] [36mpage index 101[m
+[m[37m[  1.400995 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8717000[m
+[m[37m[  1.424859 0:3 async_mem::area:174] [36mpage index 98[m
+[m[37m[  1.425150 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8718000[m
+[m[37m[  1.448617 0:3 syscall::syscall:20] [32m[syscall] id = MPROTECT, args = [4096, 6365184, 7, 18446744073709547520, 6369279, 6373375], entry[m
+[m[37m[  1.449584 0:3 async_mem:347] [32m[mprotect] addr: [VA:0x1000, VA:0x613000), flags: MappingFlags(READ | WRITE | EXECUTE | USER)[m
+[m[37m[  1.450771 0:3 syscall::syscall:69] [32m[syscall] id = 226,return 0[m
+[m[37m[  1.451393 0:3 syscall::syscall:30] [32m[syscall] id = CLOSE, args = [3, 0, 0, 0, 0, 0], entry[m
+[m[37m[  1.451789 0:3 syscall::syscall_fs::imp::io:473] [32mInto syscall_close. fd: 3[m
+[m[37m[  1.452291 0:3 syscall::syscall:69] [32m[syscall] id = 57,return 0[m
+[m[37m[  1.452644 0:3 async_mem::area:174] [36mpage index 0[m
+[m[37m[  1.452970 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8719000[m
+[m[37m[  1.466563 0:3 async_mem::area:174] [36mpage index 1[m
+[m[37m[  1.466820 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b871a000[m
+[m[37m[  1.480925 0:3 syscall::syscall:30] [32m[syscall] id = OPENAT, args = [18446744073709551516, 1073739056, 557056, 438, 114, 114], entry[m
+[m[37m[  1.481743 0:3 syscall::syscall_fs::imp::io:408] [36mallocated fd_num: 3[m
+[m[37m[  1.482150 0:3 syscall::syscall_fs::imp::io:412] [32mpath: "/etc/ld-musl-riscv64-sf.path"[m
+[m[37m[  1.482621 0:3 syscall::syscall_fs::imp::io:426] [36mopen file[m
+[m[37m[  1.482897 0:3 syscall::syscall_fs::ctype::file:240] [36mInto function new_fd, path: /etc/ld-musl-riscv64-sf.path[m
+[m[37m[  1.483353 0:3 async_fs::fops:195] [36mopen file: /etc/ld-musl-riscv64-sf.path READ[m
+[m[37m[  1.483792 0:3 async_fs::root:85] [36mlookup at root: /etc/ld-musl-riscv64-sf.path[m
+[m[37m[  1.484118 0:3 async_fs::fs::fatfs:160] [36mlookup at fatfs: etc/ld-musl-riscv64-sf.path[m
+[m[37m[  1.484547 0:3 async_fs::fs::fatfs:160] [36mlookup at fatfs: etc[m
+[m[37m[  1.485496 0:3 async_fs::fs::fatfs:160] [36mlookup at fatfs: ld-musl-riscv64-sf.path[m
+[m[37m[  1.486000 0:3 syscall::syscall_fs::imp::io:433] [36mopen file failed[m
+[m[37m[  1.486252 0:3 syscall::syscall:69] [32m[syscall] id = 56,return -2[m
+[m[37m[  1.486982 0:3 syscall::syscall:30] [32m[syscall] id = OPENAT, args = [18446744073709551516, 1073739648, 557056, 0, 0, 0], entry[m
+[m[37m[  1.487490 0:3 syscall::syscall_fs::imp::io:408] [36mallocated fd_num: 3[m
+[m[37m[  1.487871 0:3 syscall::syscall_fs::imp::io:412] [32mpath: "/libgcc_s.so.1"[m
+[m[37m[  1.488192 0:3 syscall::syscall_fs::imp::io:426] [36mopen file[m
+[m[37m[  1.488467 0:3 syscall::syscall_fs::ctype::file:240] [36mInto function new_fd, path: /libgcc_s.so.1[m
+[m[37m[  1.488842 0:3 async_fs::fops:195] [36mopen file: /libgcc_s.so.1 READ[m
+[m[37m[  1.489132 0:3 async_fs::root:85] [36mlookup at root: /libgcc_s.so.1[m
+[m[37m[  1.489358 0:3 async_fs::fs::fatfs:160] [36mlookup at fatfs: libgcc_s.so.1[m
+[m[37m[  1.491822 0:3 syscall::syscall_fs::imp::io:428] [36mnew file_desc successfully allocated[m
+[m[37m[  1.492131 0:3 executor::link:247] [32mcreate_link: /libgcc_s.so.1 -> /libgcc_s.so.1[m
+[m[37m[  1.492459 0:3 async_fs::root:85] [36mlookup at root: /libgcc_s.so.1[m
+[m[37m[  1.493988 0:3 async_fs::fs::fatfs:160] [36mlookup at fatfs: libgcc_s.so.1[m
+[m[37m[  1.495860 0:3 syscall::syscall:69] [32m[syscall] id = 56,return 3[m
+[m[37m[  1.496144 0:3 syscall::syscall:30] [32m[syscall] id = FCNTL64, args = [3, 2, 1, 0, 0, 3], entry[m
+[m[37m[  1.496672 0:3 syscall::syscall_fs::imp::ctl:380] [32mfd: 3, cmd: 2[m
+[m[37m[  1.497505 0:3 syscall::syscall:69] [32m[syscall] id = 25,return 0[m
+[m[37m[  1.498457 0:3 syscall::syscall:30] [32m[syscall] id = FSTAT, args = [3, 1073738848, 1073738848, 4096, 67764856, 3], entry[m
+[m[37m[  1.499943 0:3 syscall::syscall_fs::imp::stat:39] [32mstat: Kstat { st_dev: 1, st_ino: 3, st_mode: 33279, st_nlink: 2, st_uid: 0, st_gid: 0, st_rdev: 0, _pad0: 0, st_size: 597656, st_blksize: 512, _pad1: 0, st_blocks: 1168, st_atime_sec: 0, st_atime_nsec: 0, st_mtime_sec: 0, st_mtime_nsec: 0, st_ctime_sec: 0, st_ctime_nsec: 0 }[m
+[m[37m[  1.502271 0:3 syscall::syscall:69] [32m[syscall] id = 80,return 0[m
+[m[37m[  1.502637 0:3 syscall::syscall:30] [32m[syscall] id = READ, args = [3, 1073738016, 960, 0, 0, 0], entry[m
+[m[37m[  1.503076 0:3 syscall::syscall_fs::imp::io:30] [32m[read()] fd: 3, buf: 0x3ffff120, len: 960[m
+[m[37m[  1.504165 0:3 async_mem:640] [36mallocating page at 3ffff000[m
+[m[37m[  1.505265 0:3 syscall::syscall:69] [32m[syscall] id = 63,return 960[m
+[m[37m[  1.505718 0:3 syscall::syscall:20] [32m[syscall] id = MMAP, args = [0, 81920, 5, 2, 3, 0], entry[m
+[m[37m[  1.506148 0:3 syscall::syscall_mem::imp:52] [32mflags: MMAPFlags(MAP_PRIVATE)[m
+[m[37m[  1.506437 0:3 syscall::syscall_mem::imp:73] [36m[mmap] fd: 3, offset: 0x0[m
+[m[37m[  1.507642 0:3 async_mem:277] [32m[mmap] vaddr: [VA:0x0, VA:0x14000), MappingFlags(READ | EXECUTE | USER), shared: false, fixed: false, backend: true[m
+[m[37m[  1.508164 0:3 async_mem:297] [32mfind free area[m
+[m[37m[  1.508416 0:3 async_mem:302] [32mfound area [VA:0x613000, VA:0x627000)[m
+[m[37m[  1.508713 0:3 async_mem:144] [36mallocating [0x613000, 0x627000) to [0x613000, 0x627000) flag: MappingFlags(READ | EXECUTE | USER)[m
+[m[37m[  1.509310 0:3 syscall::syscall:69] [32m[syscall] id = 222,return 6369280[m
+[m[37m[  1.509638 0:3 syscall::syscall:20] [32m[syscall] id = MMAP, args = [6443008, 8192, 3, 18, 3, 69632], entry[m
+[m[37m[  1.510860 0:3 syscall::syscall_mem::imp:52] [32mflags: MMAPFlags(MAP_PRIVATE | MAP_FIXED)[m
+[m[37m[  1.511334 0:3 syscall::syscall_mem::imp:73] [36m[mmap] fd: 3, offset: 0x11000[m
+[m[37m[  1.511614 0:3 async_mem:277] [32m[mmap] vaddr: [VA:0x625000, VA:0x627000), MappingFlags(READ | WRITE | USER), shared: false, fixed: true, backend: true[m
+[m[37m[  1.512207 0:3 async_mem:188] [32msplitting for [VA:0x625000, VA:0x627000)[m
+[m[37m[  1.512484 0:3 async_mem:222] [32m  shrink_right [VA:0x613000, VA:0x627000) to [VA:0x613000, VA:0x625000)[m
+[m[37m[  1.512861 0:3 async_mem:144] [36mallocating [0x625000, 0x627000) to [0x625000, 0x627000) flag: MappingFlags(READ | WRITE | USER)[m
+[m[37m[  1.513947 0:3 syscall::syscall:69] [32m[syscall] id = 222,return 6443008[m
+[m[37m[  1.514738 0:3 async_mem::area:174] [36mpage index 1[m
+[m[37m[  1.515245 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b871b000[m
+[m[37m[  1.516842 0:3 async_mem::area:174] [36mpage index 0[m
+[m[37m[  1.517122 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b871c000[m
+[m[37m[  1.518832 0:3 syscall::syscall:30] [32m[syscall] id = CLOSE, args = [3, 0, 0, 0, 0, 0], entry[m
+[m[37m[  1.519359 0:3 syscall::syscall_fs::imp::io:473] [32mInto syscall_close. fd: 3[m
+[m[37m[  1.519871 0:3 syscall::syscall:69] [32m[syscall] id = 57,return 0[m
+[m[37m[  1.520202 0:3 async_mem::area:174] [36mpage index 0[m
+[m[37m[  1.520609 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b871d000[m
+[m[37m[  1.522401 0:3 async_mem::area:174] [36mpage index 2[m
+[m[37m[  1.522618 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b871e000[m
+[m[37m[  1.524478 0:3 async_mem::area:174] [36mpage index 1[m
+[m[37m[  1.524787 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b871f000[m
+[m[37m[  1.526323 0:3 async_mem::area:174] [36mpage index 3[m
+[m[37m[  1.526583 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8720000[m
+[m[37m[  1.528153 0:3 syscall::syscall:20] [32m[syscall] id = MPROTECT, args = [6443008, 4096, 1, 18446744073709547520, 8191, 6451199], entry[m
+[m[37m[  1.528733 0:3 async_mem:347] [32m[mprotect] addr: [VA:0x625000, VA:0x626000), flags: MappingFlags(READ | USER)[m
+[m[37m[  1.529582 0:3 syscall::syscall:69] [32m[syscall] id = 226,return 0[m
+[m[37m[  1.530279 0:3 async_mem::area:174] [36mpage index 131[m
+[m[37m[  1.530541 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8721000[m
+[m[37m[  1.544114 0:3 async_mem::area:174] [36mpage index 100[m
+[m[37m[  1.544425 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8722000[m
+[m[37m[  1.568065 0:3 async_mem::area:174] [36mpage index 132[m
+[m[37m[  1.568367 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8723000[m
+[m[37m[  1.582075 0:3 async_mem::area:174] [36mpage index 0[m
+[m[37m[  1.582296 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8724000[m
+[m[37m[  1.603900 0:3 async_mem::area:174] [36mpage index 2[m
+[m[37m[  1.604127 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8725000[m
+[m[37m[  1.616804 0:3 async_mem::area:174] [36mpage index 1[m
+[m[37m[  1.617122 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8726000[m
+[m[37m[  1.641062 0:3 async_mem::area:174] [36mpage index 3[m
+[m[37m[  1.641278 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8727000[m
+[m[37m[  1.653801 0:3 async_mem::area:174] [36mpage index 4[m
+[m[37m[  1.654010 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8728000[m
+[m[37m[  1.666718 0:3 async_mem::area:174] [36mpage index 2[m
+[m[37m[  1.667009 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8729000[m
+[m[37m[  1.688744 0:3 async_mem::area:174] [36mpage index 5[m
+[m[37m[  1.689018 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b872a000[m
+[m[37m[  1.701756 0:3 async_mem::area:174] [36mpage index 3[m
+[m[37m[  1.702189 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b872b000[m
+[m[37m[  1.724089 0:3 async_mem::area:174] [36mpage index 6[m
+[m[37m[  1.724354 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b872c000[m
+[m[37m[  1.737556 0:3 async_mem::area:174] [36mpage index 7[m
+[m[37m[  1.737892 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b872d000[m
+[m[37m[  1.751053 0:3 async_mem::area:174] [36mpage index 4[m
+[m[37m[  1.751320 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b872e000[m
+[m[37m[  1.774037 0:3 async_mem::area:174] [36mpage index 8[m
+[m[37m[  1.774255 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b872f000[m
+[m[37m[  1.787283 0:3 async_mem::area:174] [36mpage index 5[m
+[m[37m[  1.787526 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8730000[m
+[m[37m[  1.810017 0:3 async_mem::area:174] [36mpage index 9[m
+[m[37m[  1.810237 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8731000[m
+[m[37m[  1.823548 0:3 async_mem::area:174] [36mpage index 6[m
+[m[37m[  1.823766 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8732000[m
+[m[37m[  1.846858 0:3 async_mem::area:174] [36mpage index 10[m
+[m[37m[  1.847128 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8733000[m
+[m[37m[  1.860214 0:3 async_mem::area:174] [36mpage index 7[m
+[m[37m[  1.860524 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8734000[m
+[m[37m[  1.883106 0:3 async_mem::area:174] [36mpage index 11[m
+[m[37m[  1.883414 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8735000[m
+[m[37m[  1.896651 0:3 async_mem::area:174] [36mpage index 8[m
+[m[37m[  1.896944 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8736000[m
+[m[37m[  1.919069 0:3 async_mem::area:174] [36mpage index 12[m
+[m[37m[  1.919749 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8737000[m
+[m[37m[  1.933884 0:3 async_mem::area:174] [36mpage index 13[m
+[m[37m[  1.934559 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8738000[m
+[m[37m[  1.948806 0:3 async_mem::area:174] [36mpage index 9[m
+[m[37m[  1.949018 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8739000[m
+[m[37m[  1.971065 0:3 async_mem::area:174] [36mpage index 14[m
+[m[37m[  1.971286 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b873a000[m
+[m[37m[  1.984000 0:3 async_mem::area:174] [36mpage index 10[m
+[m[37m[  1.984217 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b873b000[m
+[m[37m[  2.006198 0:3 async_mem::area:174] [36mpage index 15[m
+[m[37m[  2.006468 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b873c000[m
+[m[37m[  2.019214 0:3 async_mem::area:174] [36mpage index 16[m
+[m[37m[  2.019503 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b873d000[m
+[m[37m[  2.032287 0:3 async_mem::area:174] [36mpage index 11[m
+[m[37m[  2.032563 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b873e000[m
+[m[37m[  2.055385 0:3 async_mem::area:174] [36mpage index 17[m
+[m[37m[  2.055625 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b873f000[m
+[m[37m[  2.068547 0:3 async_mem::area:174] [36mpage index 12[m
+[m[37m[  2.068783 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8740000[m
+[m[37m[  2.090722 0:3 async_mem::area:174] [36mpage index 18[m
+[m[37m[  2.090935 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8741000[m
+[m[37m[  2.103970 0:3 async_mem::area:174] [36mpage index 19[m
+[m[37m[  2.104223 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8742000[m
+[m[37m[  2.117279 0:3 async_mem::area:174] [36mpage index 13[m
+[m[37m[  2.117492 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8743000[m
+[m[37m[  2.139306 0:3 async_mem::area:174] [36mpage index 20[m
+[m[37m[  2.139565 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8744000[m
+[m[37m[  2.152507 0:3 async_mem::area:174] [36mpage index 14[m
+[m[37m[  2.152719 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8745000[m
+[m[37m[  2.174284 0:3 async_mem::area:174] [36mpage index 21[m
+[m[37m[  2.174868 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8746000[m
+[m[37m[  2.190379 0:3 async_mem::area:174] [36mpage index 22[m
+[m[37m[  2.190951 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8747000[m
+[m[37m[  2.207215 0:3 async_mem::area:174] [36mpage index 15[m
+[m[37m[  2.207966 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8748000[m
+[m[37m[  2.234311 0:3 async_mem::area:174] [36mpage index 23[m
+[m[37m[  2.235350 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8749000[m
+[m[37m[  2.249790 0:3 async_mem::area:174] [36mpage index 16[m
+[m[37m[  2.250134 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b874a000[m
+[m[37m[  2.272921 0:3 async_mem::area:174] [36mpage index 24[m
+[m[37m[  2.273632 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b874b000[m
+[m[37m[  2.290265 0:3 async_mem::area:174] [36mpage index 17[m
+[m[37m[  2.291144 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b874c000[m
+[m[37m[  2.317555 0:3 async_mem::area:174] [36mpage index 25[m
+[m[37m[  2.317865 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b874d000[m
+[m[37m[  2.330670 0:3 async_mem::area:174] [36mpage index 26[m
+[m[37m[  2.330925 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b874e000[m
+[m[37m[  2.343761 0:3 async_mem::area:174] [36mpage index 18[m
+[m[37m[  2.343985 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b874f000[m
+[m[37m[  2.366445 0:3 async_mem::area:174] [36mpage index 27[m
+[m[37m[  2.366676 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8750000[m
+[m[37m[  2.379630 0:3 async_mem::area:174] [36mpage index 19[m
+[m[37m[  2.379850 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8751000[m
+[m[37m[  2.402072 0:3 async_mem::area:174] [36mpage index 28[m
+[m[37m[  2.402343 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8752000[m
+[m[37m[  2.415582 0:3 async_mem::area:174] [36mpage index 29[m
+[m[37m[  2.415903 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8753000[m
+[m[37m[  2.429532 0:3 async_mem::area:174] [36mpage index 20[m
+[m[37m[  2.429753 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8754000[m
+[m[37m[  2.452221 0:3 async_mem::area:174] [36mpage index 30[m
+[m[37m[  2.452493 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8755000[m
+[m[37m[  2.465587 0:3 async_mem::area:174] [36mpage index 21[m
+[m[37m[  2.465807 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8756000[m
+[m[37m[  2.487945 0:3 async_mem::area:174] [36mpage index 31[m
+[m[37m[  2.488173 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8757000[m
+[m[37m[  2.501086 0:3 async_mem::area:174] [36mpage index 22[m
+[m[37m[  2.501352 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8758000[m
+[m[37m[  2.523566 0:3 async_mem::area:174] [36mpage index 32[m
+[m[37m[  2.523790 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8759000[m
+[m[37m[  2.536650 0:3 async_mem::area:174] [36mpage index 23[m
+[m[37m[  2.536894 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b875a000[m
+[m[37m[  2.559789 0:3 async_mem::area:174] [36mpage index 33[m
+[m[37m[  2.560029 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b875b000[m
+[m[37m[  2.573762 0:3 async_mem::area:174] [36mpage index 34[m
+[m[37m[  2.574068 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b875c000[m
+[m[37m[  2.586985 0:3 async_mem::area:174] [36mpage index 24[m
+[m[37m[  2.587245 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b875d000[m
+[m[37m[  2.610773 0:3 async_mem::area:174] [36mpage index 35[m
+[m[37m[  2.611168 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b875e000[m
+[m[37m[  2.624901 0:3 async_mem::area:174] [36mpage index 25[m
+[m[37m[  2.625169 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b875f000[m
+[m[37m[  2.647212 0:3 async_mem::area:174] [36mpage index 36[m
+[m[37m[  2.647613 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8760000[m
+[m[37m[  2.660565 0:3 async_mem::area:174] [36mpage index 26[m
+[m[37m[  2.660869 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8761000[m
+[m[37m[  2.683771 0:3 async_mem::area:174] [36mpage index 37[m
+[m[37m[  2.684228 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8762000[m
+[m[37m[  2.699410 0:3 async_mem::area:174] [36mpage index 38[m
+[m[37m[  2.699671 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8763000[m
+[m[37m[  2.712677 0:3 async_mem::area:174] [36mpage index 27[m
+[m[37m[  2.712984 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8764000[m
+[m[37m[  2.734944 0:3 async_mem::area:174] [36mpage index 39[m
+[m[37m[  2.735194 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8765000[m
+[m[37m[  2.748338 0:3 async_mem::area:174] [36mpage index 28[m
+[m[37m[  2.748628 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8766000[m
+[m[37m[  2.770917 0:3 async_mem::area:174] [36mpage index 40[m
+[m[37m[  2.771212 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8767000[m
+[m[37m[  2.784357 0:3 async_mem::area:174] [36mpage index 29[m
+[m[37m[  2.784585 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8768000[m
+[m[37m[  2.806567 0:3 async_mem::area:174] [36mpage index 41[m
+[m[37m[  2.806853 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8769000[m
+[m[37m[  2.819960 0:3 async_mem::area:174] [36mpage index 30[m
+[m[37m[  2.820333 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b876a000[m
+[m[37m[  2.842525 0:3 async_mem::area:174] [36mpage index 42[m
+[m[37m[  2.842837 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b876b000[m
+[m[37m[  2.855931 0:3 async_mem::area:174] [36mpage index 31[m
+[m[37m[  2.856182 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b876c000[m
+[m[37m[  2.878119 0:3 async_mem::area:174] [36mpage index 43[m
+[m[37m[  2.878505 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b876d000[m
+[m[37m[  2.891523 0:3 async_mem::area:174] [36mpage index 32[m
+[m[37m[  2.891774 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b876e000[m
+[m[37m[  2.913826 0:3 async_mem::area:174] [36mpage index 44[m
+[m[37m[  2.914072 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b876f000[m
+[m[37m[  2.926974 0:3 async_mem::area:174] [36mpage index 33[m
+[m[37m[  2.927482 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8770000[m
+[m[37m[  2.952718 0:3 async_mem::area:174] [36mpage index 45[m
+[m[37m[  2.953811 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8771000[m
+[m[37m[  2.966813 0:3 async_mem::area:174] [36mpage index 34[m
+[m[37m[  2.967056 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8772000[m
+[m[37m[  2.989185 0:3 async_mem::area:174] [36mpage index 46[m
+[m[37m[  2.989818 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8773000[m
+[m[37m[  3.003124 0:3 async_mem::area:174] [36mpage index 35[m
+[m[37m[  3.003364 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8774000[m
+[m[37m[  3.025425 0:3 async_mem::area:174] [36mpage index 47[m
+[m[37m[  3.025636 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8775000[m
+[m[37m[  3.038752 0:3 async_mem::area:174] [36mpage index 36[m
+[m[37m[  3.039043 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8776000[m
+[m[37m[  3.061225 0:3 async_mem::area:174] [36mpage index 48[m
+[m[37m[  3.061430 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8777000[m
+[m[37m[  3.074687 0:3 async_mem::area:174] [36mpage index 37[m
+[m[37m[  3.074892 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8778000[m
+[m[37m[  3.096881 0:3 async_mem::area:174] [36mpage index 49[m
+[m[37m[  3.097123 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8779000[m
+[m[37m[  3.110243 0:3 async_mem::area:174] [36mpage index 38[m
+[m[37m[  3.110504 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b877a000[m
+[m[37m[  3.132623 0:3 async_mem::area:174] [36mpage index 50[m
+[m[37m[  3.132897 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b877b000[m
+[m[37m[  3.145859 0:3 async_mem::area:174] [36mpage index 39[m
+[m[37m[  3.146076 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b877c000[m
+[m[37m[  3.168307 0:3 async_mem::area:174] [36mpage index 51[m
+[m[37m[  3.168516 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b877d000[m
+[m[37m[  3.181476 0:3 async_mem::area:174] [36mpage index 40[m
+[m[37m[  3.181735 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b877e000[m
+[m[37m[  3.203744 0:3 async_mem::area:174] [36mpage index 52[m
+[m[37m[  3.203969 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b877f000[m
+[m[37m[  3.216911 0:3 async_mem::area:174] [36mpage index 41[m
+[m[37m[  3.217129 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8780000[m
+[m[37m[  3.239150 0:3 async_mem::area:174] [36mpage index 53[m
+[m[37m[  3.239373 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8781000[m
+[m[37m[  3.252276 0:3 async_mem::area:174] [36mpage index 42[m
+[m[37m[  3.252598 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8782000[m
+[m[37m[  3.275026 0:3 async_mem::area:174] [36mpage index 54[m
+[m[37m[  3.275292 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8783000[m
+[m[37m[  3.288717 0:3 async_mem::area:174] [36mpage index 43[m
+[m[37m[  3.288961 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8784000[m
+[m[37m[  3.310936 0:3 async_mem::area:174] [36mpage index 55[m
+[m[37m[  3.311182 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8785000[m
+[m[37m[  3.324694 0:3 async_mem::area:174] [36mpage index 44[m
+[m[37m[  3.324919 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8786000[m
+[m[37m[  3.347056 0:3 async_mem::area:174] [36mpage index 56[m
+[m[37m[  3.347312 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8787000[m
+[m[37m[  3.360418 0:3 async_mem::area:174] [36mpage index 45[m
+[m[37m[  3.360655 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8788000[m
+[m[37m[  3.382711 0:3 async_mem::area:174] [36mpage index 57[m
+[m[37m[  3.382972 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8789000[m
+[m[37m[  3.395997 0:3 async_mem::area:174] [36mpage index 46[m
+[m[37m[  3.396272 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b878a000[m
+[m[37m[  3.418569 0:3 async_mem::area:174] [36mpage index 58[m
+[m[37m[  3.418875 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b878b000[m
+[m[37m[  3.432094 0:3 async_mem::area:174] [36mpage index 47[m
+[m[37m[  3.432422 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b878c000[m
+[m[37m[  3.454798 0:3 async_mem::area:174] [36mpage index 59[m
+[m[37m[  3.455202 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b878d000[m
+[m[37m[  3.468360 0:3 async_mem::area:174] [36mpage index 48[m
+[m[37m[  3.468677 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b878e000[m
+[m[37m[  3.491616 0:3 async_mem::area:174] [36mpage index 60[m
+[m[37m[  3.491981 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b878f000[m
+[m[37m[  3.505121 0:3 async_mem::area:174] [36mpage index 49[m
+[m[37m[  3.505534 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8790000[m
+[m[37m[  3.527675 0:3 async_mem::area:174] [36mpage index 61[m
+[m[37m[  3.527886 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8791000[m
+[m[37m[  3.540922 0:3 async_mem::area:174] [36mpage index 50[m
+[m[37m[  3.541205 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8792000[m
+[m[37m[  3.563268 0:3 async_mem::area:174] [36mpage index 62[m
+[m[37m[  3.563597 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8793000[m
+[m[37m[  3.577141 0:3 async_mem::area:174] [36mpage index 63[m
+[m[37m[  3.577390 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8794000[m
+[m[37m[  3.590762 0:3 async_mem::area:174] [36mpage index 51[m
+[m[37m[  3.591046 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8795000[m
+[m[37m[  3.613262 0:3 async_mem::area:174] [36mpage index 64[m
+[m[37m[  3.613626 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8796000[m
+[m[37m[  3.627137 0:3 async_mem::area:174] [36mpage index 52[m
+[m[37m[  3.627394 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8797000[m
+[m[37m[  3.650178 0:3 async_mem::area:174] [36mpage index 65[m
+[m[37m[  3.650415 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8798000[m
+[m[37m[  3.663504 0:3 async_mem::area:174] [36mpage index 66[m
+[m[37m[  3.663713 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8799000[m
+[m[37m[  3.676880 0:3 async_mem::area:174] [36mpage index 53[m
+[m[37m[  3.677179 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b879a000[m
+[m[37m[  3.699199 0:3 async_mem::area:174] [36mpage index 67[m
+[m[37m[  3.700243 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b879b000[m
+[m[37m[  3.713486 0:3 async_mem::area:174] [36mpage index 54[m
+[m[37m[  3.713699 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b879c000[m
+[m[37m[  3.736043 0:3 async_mem::area:174] [36mpage index 68[m
+[m[37m[  3.736296 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b879d000[m
+[m[37m[  3.749813 0:3 async_mem::area:174] [36mpage index 69[m
+[m[37m[  3.750074 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b879e000[m
+[m[37m[  3.763169 0:3 async_mem::area:174] [36mpage index 55[m
+[m[37m[  3.763418 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b879f000[m
+[m[37m[  3.785531 0:3 async_mem::area:174] [36mpage index 70[m
+[m[37m[  3.785820 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87a0000[m
+[m[37m[  3.799095 0:3 async_mem::area:174] [36mpage index 56[m
+[m[37m[  3.799402 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87a1000[m
+[m[37m[  3.821544 0:3 async_mem::area:174] [36mpage index 71[m
+[m[37m[  3.821776 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87a2000[m
+[m[37m[  3.834828 0:3 async_mem::area:174] [36mpage index 72[m
+[m[37m[  3.835122 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87a3000[m
+[m[37m[  3.848292 0:3 async_mem::area:174] [36mpage index 57[m
+[m[37m[  3.848592 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87a4000[m
+[m[37m[  3.870783 0:3 async_mem::area:174] [36mpage index 73[m
+[m[37m[  3.871048 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87a5000[m
+[m[37m[  3.884384 0:3 async_mem::area:174] [36mpage index 58[m
+[m[37m[  3.884596 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87a6000[m
+[m[37m[  3.907350 0:3 async_mem::area:174] [36mpage index 74[m
+[m[37m[  3.907604 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87a7000[m
+[m[37m[  3.921508 0:3 async_mem::area:174] [36mpage index 75[m
+[m[37m[  3.921717 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87a8000[m
+[m[37m[  3.935460 0:3 async_mem::area:174] [36mpage index 59[m
+[m[37m[  3.935687 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87a9000[m
+[m[37m[  3.957884 0:3 async_mem::area:174] [36mpage index 76[m
+[m[37m[  3.958131 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87aa000[m
+[m[37m[  3.971266 0:3 async_mem::area:174] [36mpage index 60[m
+[m[37m[  3.971560 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87ab000[m
+[m[37m[  3.993653 0:3 async_mem::area:174] [36mpage index 77[m
+[m[37m[  3.993905 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87ac000[m
+[m[37m[  4.007373 0:3 async_mem::area:174] [36mpage index 61[m
+[m[37m[  4.007626 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87ad000[m
+[m[37m[  4.029571 0:3 async_mem::area:174] [36mpage index 78[m
+[m[37m[  4.029785 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87ae000[m
+[m[37m[  4.042826 0:3 async_mem::area:174] [36mpage index 62[m
+[m[37m[  4.043075 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87af000[m
+[m[37m[  4.065009 0:3 async_mem::area:174] [36mpage index 79[m
+[m[37m[  4.065224 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87b0000[m
+[m[37m[  4.078310 0:3 async_mem::area:174] [36mpage index 63[m
+[m[37m[  4.078607 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87b1000[m
+[m[37m[  4.100608 0:3 async_mem::area:174] [36mpage index 80[m
+[m[37m[  4.101919 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87b2000[m
+[m[37m[  4.115090 0:3 async_mem::area:174] [36mpage index 64[m
+[m[37m[  4.115419 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87b3000[m
+[m[37m[  4.137866 0:3 async_mem::area:174] [36mpage index 81[m
+[m[37m[  4.138076 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87b4000[m
+[m[37m[  4.152209 0:3 async_mem::area:174] [36mpage index 65[m
+[m[37m[  4.153113 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87b5000[m
+[m[37m[  4.179827 0:3 async_mem::area:174] [36mpage index 82[m
+[m[37m[  4.180590 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87b6000[m
+[m[37m[  4.196224 0:3 async_mem::area:174] [36mpage index 66[m
+[m[37m[  4.196468 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87b7000[m
+[m[37m[  4.218607 0:3 async_mem::area:174] [36mpage index 83[m
+[m[37m[  4.218845 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87b8000[m
+[m[37m[  4.232150 0:3 async_mem::area:174] [36mpage index 67[m
+[m[37m[  4.232567 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87b9000[m
+[m[37m[  4.255566 0:3 async_mem::area:174] [36mpage index 84[m
+[m[37m[  4.256035 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87ba000[m
+[m[37m[  4.269719 0:3 async_mem::area:174] [36mpage index 68[m
+[m[37m[  4.270205 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87bb000[m
+[m[37m[  4.292409 0:3 async_mem::area:174] [36mpage index 85[m
+[m[37m[  4.292623 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87bc000[m
+[m[37m[  4.305833 0:3 async_mem::area:174] [36mpage index 69[m
+[m[37m[  4.306155 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87bd000[m
+[m[37m[  4.328414 0:3 async_mem::area:174] [36mpage index 86[m
+[m[37m[  4.328673 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87be000[m
+[m[37m[  4.341957 0:3 async_mem::area:174] [36mpage index 70[m
+[m[37m[  4.342184 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87bf000[m
+[m[37m[  4.364700 0:3 async_mem::area:174] [36mpage index 87[m
+[m[37m[  4.365175 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87c0000[m
+[m[37m[  4.378504 0:3 async_mem::area:174] [36mpage index 71[m
+[m[37m[  4.378800 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87c1000[m
+[m[37m[  4.401487 0:3 async_mem::area:174] [36mpage index 88[m
+[m[37m[  4.402081 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87c2000[m
+[m[37m[  4.415811 0:3 async_mem::area:174] [36mpage index 72[m
+[m[37m[  4.416062 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87c3000[m
+[m[37m[  4.438868 0:3 async_mem::area:174] [36mpage index 89[m
+[m[37m[  4.439205 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87c4000[m
+[m[37m[  4.452755 0:3 async_mem::area:174] [36mpage index 73[m
+[m[37m[  4.453024 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87c5000[m
+[m[37m[  4.475564 0:3 async_mem::area:174] [36mpage index 90[m
+[m[37m[  4.475805 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87c6000[m
+[m[37m[  4.489233 0:3 async_mem::area:174] [36mpage index 74[m
+[m[37m[  4.489472 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87c7000[m
+[m[37m[  4.511941 0:3 async_mem::area:174] [36mpage index 91[m
+[m[37m[  4.512269 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87c8000[m
+[m[37m[  4.525653 0:3 async_mem::area:174] [36mpage index 75[m
+[m[37m[  4.525939 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87c9000[m
+[m[37m[  4.548314 0:3 async_mem::area:174] [36mpage index 92[m
+[m[37m[  4.548720 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87ca000[m
+[m[37m[  4.562145 0:3 async_mem::area:174] [36mpage index 76[m
+[m[37m[  4.562404 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87cb000[m
+[m[37m[  4.584797 0:3 async_mem::area:174] [36mpage index 93[m
+[m[37m[  4.585010 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87cc000[m
+[m[37m[  4.598432 0:3 async_mem::area:174] [36mpage index 77[m
+[m[37m[  4.598671 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87cd000[m
+[m[37m[  4.621161 0:3 async_mem::area:174] [36mpage index 94[m
+[m[37m[  4.621395 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87ce000[m
+[m[37m[  4.635159 0:3 async_mem::area:174] [36mpage index 78[m
+[m[37m[  4.635496 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87cf000[m
+[m[37m[  4.659075 0:3 async_mem::area:174] [36mpage index 95[m
+[m[37m[  4.659294 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87d0000[m
+[m[37m[  4.673019 0:3 async_mem::area:174] [36mpage index 96[m
+[m[37m[  4.673229 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87d1000[m
+[m[37m[  4.688239 0:3 async_mem::area:174] [36mpage index 79[m
+[m[37m[  4.689220 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87d2000[m
+[m[37m[  4.716885 0:3 async_mem::area:174] [36mpage index 97[m
+[m[37m[  4.717638 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87d3000[m
+[m[37m[  4.733727 0:3 async_mem::area:174] [36mpage index 80[m
+[m[37m[  4.735080 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87d4000[m
+[m[37m[  4.757348 0:3 async_mem::area:174] [36mpage index 98[m
+[m[37m[  4.757695 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87d5000[m
+[m[37m[  4.771579 0:3 async_mem::area:174] [36mpage index 99[m
+[m[37m[  4.771798 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87d6000[m
+[m[37m[  4.785920 0:3 async_mem::area:174] [36mpage index 81[m
+[m[37m[  4.786312 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87d7000[m
+[m[37m[  4.808738 0:3 async_mem::area:174] [36mpage index 100[m
+[m[37m[  4.808980 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87d8000[m
+[m[37m[  4.822640 0:3 async_mem::area:174] [36mpage index 82[m
+[m[37m[  4.822889 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87d9000[m
+[m[37m[  4.845449 0:3 async_mem::area:174] [36mpage index 101[m
+[m[37m[  4.845672 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87da000[m
+[m[37m[  4.859099 0:3 async_mem::area:174] [36mpage index 102[m
+[m[37m[  4.859321 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87db000[m
+[m[37m[  4.872804 0:3 async_mem::area:174] [36mpage index 83[m
+[m[37m[  4.873056 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87dc000[m
+[m[37m[  4.895296 0:3 async_mem::area:174] [36mpage index 103[m
+[m[37m[  4.895527 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87dd000[m
+[m[37m[  4.908902 0:3 async_mem::area:174] [36mpage index 84[m
+[m[37m[  4.909118 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87de000[m
+[m[37m[  4.931873 0:3 async_mem::area:174] [36mpage index 104[m
+[m[37m[  4.932140 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87df000[m
+[m[37m[  4.945650 0:3 async_mem::area:174] [36mpage index 105[m
+[m[37m[  4.945922 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87e0000[m
+[m[37m[  4.959990 0:3 async_mem::area:174] [36mpage index 85[m
+[m[37m[  4.960304 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87e1000[m
+[m[37m[  4.983583 0:3 async_mem::area:174] [36mpage index 106[m
+[m[37m[  4.984138 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87e2000[m
+[m[37m[  4.998577 0:3 async_mem::area:174] [36mpage index 86[m
+[m[37m[  4.998916 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87e3000[m
+[m[37m[  5.021420 0:3 async_mem::area:174] [36mpage index 107[m
+[m[37m[  5.021650 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87e4000[m
+[m[37m[  5.035255 0:3 async_mem::area:174] [36mpage index 108[m
+[m[37m[  5.035677 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87e5000[m
+[m[37m[  5.049148 0:3 async_mem::area:174] [36mpage index 87[m
+[m[37m[  5.049395 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87e6000[m
+[m[37m[  5.071766 0:3 async_mem::area:174] [36mpage index 109[m
+[m[37m[  5.072067 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87e7000[m
+[m[37m[  5.085352 0:3 async_mem::area:174] [36mpage index 88[m
+[m[37m[  5.085643 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87e8000[m
+[m[37m[  5.107811 0:3 async_mem::area:174] [36mpage index 110[m
+[m[37m[  5.108036 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87e9000[m
+[m[37m[  5.121624 0:3 async_mem::area:174] [36mpage index 89[m
+[m[37m[  5.121828 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87ea000[m
+[m[37m[  5.146382 0:3 async_mem::area:174] [36mpage index 111[m
+[m[37m[  5.147018 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87eb000[m
+[m[37m[  5.160358 0:3 async_mem::area:174] [36mpage index 90[m
+[m[37m[  5.160617 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87ec000[m
+[m[37m[  5.183142 0:3 async_mem::area:174] [36mpage index 112[m
+[m[37m[  5.183361 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87ed000[m
+[m[37m[  5.196800 0:3 async_mem::area:174] [36mpage index 113[m
+[m[37m[  5.197042 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87ee000[m
+[m[37m[  5.210513 0:3 async_mem::area:174] [36mpage index 91[m
+[m[37m[  5.210726 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87ef000[m
+[m[37m[  5.232969 0:3 async_mem::area:174] [36mpage index 114[m
+[m[37m[  5.233196 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87f0000[m
+[m[37m[  5.246607 0:3 async_mem::area:174] [36mpage index 92[m
+[m[37m[  5.246859 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87f1000[m
+[m[37m[  5.269258 0:3 async_mem::area:174] [36mpage index 115[m
+[m[37m[  5.269618 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87f2000[m
+[m[37m[  5.283786 0:3 async_mem::area:174] [36mpage index 93[m
+[m[37m[  5.284105 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87f3000[m
+[m[37m[  5.309268 0:3 async_mem::area:174] [36mpage index 116[m
+[m[37m[  5.309611 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87f4000[m
+[m[37m[  5.323917 0:3 async_mem::area:174] [36mpage index 117[m
+[m[37m[  5.324182 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87f5000[m
+[m[37m[  5.337967 0:3 async_mem::area:174] [36mpage index 94[m
+[m[37m[  5.338290 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87f6000[m
+[m[37m[  5.361015 0:3 async_mem::area:174] [36mpage index 118[m
+[m[37m[  5.361268 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87f7000[m
+[m[37m[  5.374783 0:3 async_mem::area:174] [36mpage index 95[m
+[m[37m[  5.375016 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87f8000[m
+[m[37m[  5.397206 0:3 async_mem::area:174] [36mpage index 119[m
+[m[37m[  5.397458 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87f9000[m
+[m[37m[  5.410862 0:3 async_mem::area:174] [36mpage index 96[m
+[m[37m[  5.411114 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87fa000[m
+[m[37m[  5.433730 0:3 async_mem::area:174] [36mpage index 120[m
+[m[37m[  5.433998 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87fb000[m
+[m[37m[  5.448894 0:3 async_mem::area:174] [36mpage index 97[m
+[m[37m[  5.449253 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87fc000[m
+[m[37m[  5.475367 0:3 async_mem::area:174] [36mpage index 121[m
+[m[37m[  5.475699 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87fd000[m
+[m[37m[  5.490813 0:3 async_mem::area:174] [36mpage index 122[m
+[m[37m[  5.491196 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87fe000[m
+[m[37m[  5.504811 0:3 async_mem::area:174] [36mpage index 123[m
+[m[37m[  5.505205 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b87ff000[m
+[m[37m[  5.520081 0:3 async_mem::area:174] [36mpage index 124[m
+[m[37m[  5.520398 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8800000[m
+[m[37m[  5.534315 0:3 async_mem::area:174] [36mpage index 125[m
+[m[37m[  5.534670 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8801000[m
+[m[37m[  5.548258 0:3 async_mem::area:174] [36mpage index 99[m
+[m[37m[  5.548511 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8802000[m
+[m[37m[  5.571052 0:3 async_mem::area:174] [36mpage index 126[m
+[m[37m[  5.571278 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8803000[m
+[m[37m[  5.584628 0:3 async_mem::area:174] [36mpage index 127[m
+[m[37m[  5.584841 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8804000[m
+[m[37m[  5.598413 0:3 async_mem::area:174] [36mpage index 128[m
+[m[37m[  5.598636 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8805000[m
+[m[37m[  5.612521 0:3 async_mem::area:174] [36mpage index 129[m
+[m[37m[  5.613911 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8806000[m
+[m[37m[  5.628887 0:3 async_mem::area:174] [36mpage index 130[m
+[m[37m[  5.629807 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8807000[m
+[m[37m[  5.646738 0:3 syscall::syscall:20] [32m[syscall] id = MPROTECT, args = [5951488, 405504, 1, 18446744073709547520, 409599, 6361087], entry[m
+[m[37m[  5.647377 0:3 async_mem:347] [32m[mprotect] addr: [VA:0x5ad000, VA:0x610000), flags: MappingFlags(READ | USER)[m
+[m[37m[  5.649259 0:3 syscall::syscall:69] [32m[syscall] id = 226,return 0[m
+[m[37m[  5.650020 0:3 syscall::syscall:42] [32m[syscall] id = SET_TID_ADDRESS, args = [67793268, 5952928, 0, 0, 67784960, 1], entry[m
+[m[37m[  5.651432 0:3 syscall::syscall:69] [32m[syscall] id = 96,return 3[m
+[m[37m[  5.652822 0:3 async_mem::area:174] [36mpage index 171[m
+[m[37m[  5.653865 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8808000[m
+[m[37m[  5.671301 0:3 async_mem::area:174] [36mpage index 15[m
+[m[37m[  5.672264 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8809000[m
+[m[37m[  5.674833 0:3 async_mem::area:174] [36mpage index 16[m
+[m[37m[  5.675623 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b880a000[m
+[m[37m[  5.678534 0:3 async_mem::area:174] [36mpage index 1315[m
+[m[37m[  5.679338 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b880b000[m
+[m[37m[  5.704303 0:3 async_mem::area:174] [36mpage index 290[m
+[m[37m[  5.705104 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b880c000[m
+[m[37m[  5.721757 0:3 syscall::syscall:30] [32m[syscall] id = PPOLL, args = [1073740864, 3, 1073740768, 0, 8, 0], entry[m
+[m[37m[  5.722221 0:3 async_mem:640] [36mallocating page at 3ffff000[m
+[m[37m[  5.722710 0:3 async_mem:640] [36mallocating page at 3ffff000[m
+[m[37m[  5.723431 0:3 syscall::syscall:69] [32m[syscall] id = 73,return 0[m
+[m[37m[  5.723814 0:3 syscall::syscall:42] [32m[syscall] id = SIGACTION, args = [13, 1073740352, 1073740384, 8, 0, 1073740384], entry[m
+[m[37m[  5.725393 0:3 syscall::syscall_task::imp::signal:20] [32msignum: 13, action: 3FFFFA40, old_action: 3FFFFA60[m
+[m[37m[  5.726129 0:3 syscall::syscall:69] [32m[syscall] id = 134,return 0[m
+[m[37m[  5.726567 0:3 syscall::syscall:42] [32m[syscall] id = SIGACTION, args = [11, 0, 1073740720, 8, 63, 10], entry[m
+[m[37m[  5.727124 0:3 syscall::syscall_task::imp::signal:20] [32msignum: 11, action: 0, old_action: 3FFFFBB0[m
+[m[37m[  5.727425 0:3 syscall::syscall:69] [32m[syscall] id = 134,return 0[m
+[m[37m[  5.727671 0:3 async_mem::area:174] [36mpage index 965[m
+[m[37m[  5.727888 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b880d000[m
+[m[37m[  5.746678 0:3 syscall::syscall:42] [32m[syscall] id = SIGALTSTACK, args = [0, 1073740680, 8, 0, 0, 18446744073709547520], entry[m
+[m[37m[  5.747270 0:3 async_mem:640] [36mallocating page at 3ffff000[m
+[m[37m[  5.747622 0:3 syscall::syscall:69] [32m[syscall] id = 132,return 0[m
+[m[37m[  5.748003 0:3 syscall::syscall:20] [32m[syscall] id = MMAP, args = [0, 12288, 3, 131106, 18446744073709551615, 0], entry[m
+[m[37m[  5.748416 0:3 syscall::syscall_mem::imp:52] [32mflags: MMAPFlags(MAP_PRIVATE | MAP_ANONYMOUS | MAP_STACK)[m
+[m[37m[  5.748929 0:3 async_mem:277] [32m[mmap] vaddr: [VA:0x0, VA:0x3000), MappingFlags(READ | WRITE | USER), shared: false, fixed: false, backend: false[m
+[m[37m[  5.749357 0:3 async_mem:297] [32mfind free area[m
+[m[37m[  5.749601 0:3 async_mem:302] [32mfound area [VA:0x627000, VA:0x62a000)[m
+[m[37m[  5.749842 0:3 async_mem:144] [36mallocating [0x627000, 0x62a000) to [0x627000, 0x62a000) flag: MappingFlags(READ | WRITE | USER)[m
+[m[37m[  5.750552 0:3 syscall::syscall:69] [32m[syscall] id = 222,return 6451200[m
+[m[37m[  5.750869 0:3 syscall::syscall:20] [32m[syscall] id = MPROTECT, args = [6451200, 4096, 0, 18446744073709547520, 8191, 6459391], entry[m
+[m[37m[  5.751407 0:3 async_mem:347] [32m[mprotect] addr: [VA:0x627000, VA:0x628000), flags: MappingFlags(USER)[m
+[m[37m[  5.752390 0:3 syscall::syscall:69] [32m[syscall] id = 226,return 0[m
+[m[37m[  5.752741 0:3 syscall::syscall:42] [32m[syscall] id = SIGALTSTACK, args = [1073740680, 0, 0, 8192, 2047, 0], entry[m
+[m[37m[  5.753148 0:3 async_mem:640] [36mallocating page at 3ffff000[m
+[m[37m[  5.753430 0:3 syscall::syscall:69] [32m[syscall] id = 132,return 0[m
+[m[37m[  5.753681 0:3 async_mem::area:174] [36mpage index 966[m
+[m[37m[  5.753873 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b880e000[m
+[m[37m[  5.772864 0:3 syscall::syscall:42] [32m[syscall] id = SIGPROCMASK, args = [1, 1073740720, 0, 8, 67793348, 12884901888], entry[m
+[m[37m[  5.773741 0:3 syscall::syscall:69] [32m[syscall] id = 135,return 0[m
+[m[37m[  5.774117 0:3 syscall::syscall:42] [32m[syscall] id = SIGACTION, args = [11, 1073740688, 0, 8, 0, 1073740720], entry[m
+[m[37m[  5.774915 0:3 syscall::syscall_task::imp::signal:20] [32msignum: 11, action: 3FFFFB90, old_action: 0[m
+[m[37m[  5.775326 0:3 syscall::syscall:69] [32m[syscall] id = 134,return 0[m
+[m[37m[  5.775633 0:3 syscall::syscall:42] [32m[syscall] id = SIGACTION, args = [7, 0, 1073740720, 8, 63, 6], entry[m
+[m[37m[  5.776676 0:3 syscall::syscall_task::imp::signal:20] [32msignum: 7, action: 0, old_action: 3FFFFBB0[m
+[m[37m[  5.777908 0:3 syscall::syscall:69] [32m[syscall] id = 134,return 0[m
+[m[37m[  5.778889 0:3 syscall::syscall:42] [32m[syscall] id = SIGACTION, args = [7, 1073740688, 0, 8, 0, 1073740720], entry[m
+[m[37m[  5.779680 0:3 syscall::syscall_task::imp::signal:20] [32msignum: 7, action: 3FFFFB90, old_action: 0[m
+[m[37m[  5.780842 0:3 syscall::syscall:69] [32m[syscall] id = 134,return 0[m
+[m[37m[  5.782153 0:3 syscall::syscall:42] [32m[syscall] id = SIGPROCMASK, args = [0, 67765344, 1073740544, 8, 2147483647, 67789832], entry[m
+[m[37m[  5.783418 0:3 syscall::syscall:69] [32m[syscall] id = 135,return 0[m
+[m[37m[  5.783774 0:3 syscall::syscall:42] [32m[syscall] id = SIGPROCMASK, args = [2, 1073740544, 0, 8, 2147483647, 67789832], entry[m
+[m[37m[  5.784370 0:3 syscall::syscall:69] [32m[syscall] id = 135,return 0[m
+[m[37m[  5.784710 0:3 async_mem::area:174] [36mpage index 328[m
+[m[37m[  5.784914 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b880f000[m
+[m[37m[  5.800224 0:3 async_mem::area:174] [36mpage index 1027[m
+[m[37m[  5.800507 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8810000[m
+[m[37m[  5.819507 0:3 async_mem::area:174] [36mpage index 1008[m
+[m[37m[  5.819779 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8811000[m
+[m[37m[  5.840323 0:3 syscall::syscall:42] [32m[syscall] id = GETRANDOM, args = [1073713928, 16, 4, 0, 0, 0], entry[m
+[m[37m[  5.841083 0:3 async_mem:640] [36mallocating page at 3fff9000[m
+[m[37m[  5.841611 0:3 syscall::syscall:69] [32m[syscall] id = 278,return 16[m
+[m[37m[  5.842015 0:3 async_mem::area:174] [36mpage index 1028[m
+[m[37m[  5.842234 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8812000[m
+[m[37m[  5.861351 0:3 async_mem::area:174] [36mpage index 1029[m
+[m[37m[  5.861595 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8813000[m
+[m[37m[  5.881076 0:3 async_mem::area:174] [36mpage index 1003[m
+[m[37m[  5.881566 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8814000[m
+[m[37m[  5.901285 0:3 async_mem::area:174] [36mpage index 1293[m
+[m[37m[  5.901563 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8815000[m
+[m[37m[  5.922434 0:3 async_mem::area:174] [36mpage index 968[m
+[m[37m[  5.922697 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8816000[m
+[m[37m[  5.941543 0:3 async_mem::area:174] [36mpage index 1292[m
+[m[37m[  5.941837 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8817000[m
+[m[37m[  5.962850 0:3 syscall::syscall:30] [32m[syscall] id = OPENAT, args = [18446744073709551516, 1073711944, 557056, 0, 0, 0], entry[m
+[m[37m[  5.963352 0:3 syscall::syscall_fs::imp::io:408] [36mallocated fd_num: 3[m
+[m[37m[  5.963637 0:3 syscall::syscall_fs::imp::io:412] [32mpath: "/proc/self/cgroup"[m
+[m[37m[  5.963909 0:3 syscall::syscall_fs::imp::io:426] [36mopen file[m
+[m[37m[  5.964120 0:3 syscall::syscall_fs::ctype::file:240] [36mInto function new_fd, path: /proc/self/cgroup[m
+[m[37m[  5.964452 0:3 async_fs::fops:195] [36mopen file: /proc/self/cgroup READ[m
+[m[37m[  5.964687 0:3 async_fs::root:85] [36mlookup at root: /proc/self/cgroup[m
+[m[37m[  5.965078 0:3 syscall::syscall_fs::imp::io:433] [36mopen file failed[m
+[m[37m[  5.965336 0:3 syscall::syscall:69] [32m[syscall] id = 56,return -2[m
+[m[37m[  5.965679 0:3 syscall::syscall:42] [32m[syscall] id = SCHED_GETAFFINITY, args = [0, 128, 1073713344, 8, 1073713464, 31], entry[m
+[m[37m[  5.966428 0:3 syscall::syscall:69] [32m[syscall] id = 123,return 1[m
+[m[37m[  5.966782 0:3 syscall::syscall:42] [32m[syscall] id = SCHED_GETAFFINITY, args = [0, 128, 1073711984, 0, 1073712112, 31], entry[m
+[m[37m[  5.967201 0:3 syscall::syscall:69] [32m[syscall] id = 123,return 1[m
+[m[37m[  5.967484 0:3 async_mem::area:174] [36mpage index 1021[m
+[m[37m[  5.967802 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8818000[m
+[m[37m[  5.987222 0:3 syscall::syscall:30] [32m[syscall] id = EPOLL_CREATE, args = [524288, 1, 1, 0, 1024, 0], entry[m
+[m[37m[  5.987887 0:3 syscall::syscall:69] [32m[syscall] id = 20,return 3[m
+[m[37m[  5.988336 0:3 syscall::syscall:30] [32m[syscall] id = EVENTFD, args = [0, 526336, 1, 0, 1024, 18446744073709547520], entry[m
+[m[37m[  5.989192 0:3 syscall::syscall:69] [32m[syscall] id = 19,return 4[m
+[m[37m[  5.989474 0:3 syscall::syscall:30] [32m[syscall] id = EPOLL_CTL, args = [3, 1, 4, 1073712008, 1024, 18446744073709547520], entry[m
+[m[37m[  5.989968 0:3 async_mem:640] [36mallocating page at 3fff8000[m
+[m[37m[  5.990592 0:3 syscall::syscall:69] [32m[syscall] id = 21,return 0[m
+[m[37m[  5.990893 0:3 syscall::syscall:30] [32m[syscall] id = FCNTL64, args = [3, 1030, 3, 1073712008, 1030, 4], entry[m
+[m[37m[  5.991391 0:3 syscall::syscall_fs::imp::ctl:380] [32mfd: 3, cmd: 1030[m
+[m[37m[  5.991769 0:3 syscall::syscall:69] [32m[syscall] id = 25,return 5[m
+[m[37m[  5.992025 0:3 syscall::syscall:30] [32m[syscall] id = FCNTL64, args = [5, 2, 1, 1073712008, 1030, 18446744073709551594], entry[m
+[m[37m[  5.992444 0:3 syscall::syscall_fs::imp::ctl:380] [32mfd: 5, cmd: 2[m
+[m[37m[  5.992704 0:3 syscall::syscall:69] [32m[syscall] id = 25,return 0[m
+[m[37m[  5.993023 0:3 syscall::syscall:20] [32m[syscall] id = BRK, args = [0, 16448, 67783048, 67783672, 0, 20480], entry[m
+[m[37m[  5.993465 0:3 syscall::syscall:69] [32m[syscall] id = 214,return 1067450368[m
+[m[37m[  5.993812 0:3 syscall::syscall:20] [32m[syscall] id = MMAP, args = [0, 20480, 3, 34, 18446744073709551615, 0], entry[m
+[m[37m[  5.994201 0:3 syscall::syscall_mem::imp:52] [32mflags: MMAPFlags(MAP_PRIVATE | MAP_ANONYMOUS)[m
+[m[37m[  5.994519 0:3 async_mem:277] [32m[mmap] vaddr: [VA:0x0, VA:0x5000), MappingFlags(READ | WRITE | USER), shared: false, fixed: false, backend: false[m
+[m[37m[  5.995167 0:3 async_mem:297] [32mfind free area[m
+[m[37m[  5.995348 0:3 async_mem:302] [32mfound area [VA:0x62a000, VA:0x62f000)[m
+[m[37m[  5.995583 0:3 async_mem:144] [36mallocating [0x62a000, 0x62f000) to [0x62a000, 0x62f000) flag: MappingFlags(READ | WRITE | USER)[m
+[m[37m[  5.995986 0:3 syscall::syscall:69] [32m[syscall] id = 222,return 6463488[m
+[m[37m[  5.996484 0:3 async_mem::area:174] [36mpage index 0[m
+[m[37m[  5.996716 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8819000[m
+[m[37m[  5.997520 0:3 async_mem::area:174] [36mpage index 4[m
+[m[37m[  5.997753 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b881a000[m
+[m[37m[  5.998329 0:3 async_mem::area:174] [36mpage index 165[m
+[m[37m[  5.998536 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b881b000[m
+[m[37m[  6.012956 0:3 async_mem::area:174] [36mpage index 164[m
+[m[37m[  6.013203 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b881c000[m
+[m[37m[  6.027266 0:3 async_mem::area:174] [36mpage index 1015[m
+[m[37m[  6.027530 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b881d000[m
+[m[37m[  6.046907 0:3 async_mem::area:174] [36mpage index 504[m
+[m[37m[  6.047121 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b881e000[m
+[m[37m[  6.063829 0:3 syscall::syscall:10] [32m[syscall] id = SOCKETPAIR, args = [1, 526337, 0, 1073711368, 0, 0], entry[m
+[m[37m[  6.065027 0:3 syscall::syscall_net::imp:671] [32malloc fd1 6 fd2 7 as socketpair[m
+[m[37m[  6.065477 0:3 syscall::syscall:69] [32m[syscall] id = 199,return 0[m
+[m[37m[  6.065819 0:3 async_mem::area:174] [36mpage index 1025[m
+[m[37m[  6.066021 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b881f000[m
+[m[37m[  6.085384 0:3 async_mem::area:174] [36mpage index 1016[m
+[m[37m[  6.085631 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8820000[m
+[m[37m[  6.104743 0:3 async_mem::area:174] [36mpage index 1019[m
+[m[37m[  6.105064 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8821000[m
+[m[37m[  6.124336 0:3 syscall::syscall:20] [32m[syscall] id = MMAP, args = [0, 4096, 3, 34, 18446744073709551615, 0], entry[m
+[m[37m[  6.124745 0:3 syscall::syscall_mem::imp:52] [32mflags: MMAPFlags(MAP_PRIVATE | MAP_ANONYMOUS)[m
+[m[37m[  6.125159 0:3 async_mem:277] [32m[mmap] vaddr: [VA:0x0, VA:0x1000), MappingFlags(READ | WRITE | USER), shared: false, fixed: false, backend: false[m
+[m[37m[  6.125704 0:3 async_mem:297] [32mfind free area[m
+[m[37m[  6.125866 0:3 async_mem:302] [32mfound area [VA:0x62f000, VA:0x630000)[m
+[m[37m[  6.126107 0:3 async_mem:144] [36mallocating [0x62f000, 0x630000) to [0x62f000, 0x630000) flag: MappingFlags(READ | WRITE | USER)[m
+[m[37m[  6.126500 0:3 syscall::syscall:69] [32m[syscall] id = 222,return 6483968[m
+[m[37m[  6.127060 0:3 async_mem::area:174] [36mpage index 0[m
+[m[37m[  6.127294 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8822000[m
+[m[37m[  6.127697 0:3 syscall::syscall:20] [32m[syscall] id = MMAP, args = [0, 8192, 3, 34, 18446744073709551615, 0], entry[m
+[m[37m[  6.128083 0:3 syscall::syscall_mem::imp:52] [32mflags: MMAPFlags(MAP_PRIVATE | MAP_ANONYMOUS)[m
+[m[37m[  6.128484 0:3 async_mem:277] [32m[mmap] vaddr: [VA:0x0, VA:0x2000), MappingFlags(READ | WRITE | USER), shared: false, fixed: false, backend: false[m
+[m[37m[  6.129013 0:3 async_mem:297] [32mfind free area[m
+[m[37m[  6.129172 0:3 async_mem:302] [32mfound area [VA:0x630000, VA:0x632000)[m
+[m[37m[  6.129432 0:3 async_mem:144] [36mallocating [0x630000, 0x632000) to [0x630000, 0x632000) flag: MappingFlags(READ | WRITE | USER)[m
+[m[37m[  6.129810 0:3 syscall::syscall:69] [32m[syscall] id = 222,return 6488064[m
+[m[37m[  6.130131 0:3 async_mem::area:174] [36mpage index 1[m
+[m[37m[  6.130345 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8823000[m
+[m[37m[  6.130764 0:3 async_mem::area:174] [36mpage index 0[m
+[m[37m[  6.131026 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8824000[m
+[m[37m[  6.131536 0:3 syscall::syscall:30] [32m[syscall] id = FCNTL64, args = [6, 1030, 3, 0, 1030, 4], entry[m
+[m[37m[  6.131922 0:3 syscall::syscall_fs::imp::ctl:380] [32mfd: 6, cmd: 1030[m
+[m[37m[  6.132254 0:3 syscall::syscall:69] [32m[syscall] id = 25,return 8[m
+[m[37m[  6.132649 0:3 syscall::syscall:30] [32m[syscall] id = FCNTL64, args = [8, 2, 1, 0, 1030, 18446744073709551594], entry[m
+[m[37m[  6.133061 0:3 syscall::syscall_fs::imp::ctl:380] [32mfd: 8, cmd: 2[m
+[m[37m[  6.133284 0:3 syscall::syscall:69] [32m[syscall] id = 25,return 0[m
+[m[37m[  6.133593 0:3 syscall::syscall:30] [32m[syscall] id = EPOLL_CTL, args = [5, 1, 8, 1073712232, 1030, 18446744073709547520], entry[m
+[m[37m[  6.134101 0:3 async_mem:640] [36mallocating page at 3fff8000[m
+[m[37m[  6.134860 0:3 syscall::syscall:69] [32m[syscall] id = 21,return 0[m
+[m[37m[  6.135292 0:3 async_mem::area:174] [36mpage index 967[m
+[m[37m[  6.135504 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8825000[m
+[m[37m[  6.155212 0:3 syscall::syscall:42] [32m[syscall] id = CLOCK_GET_TIME, args = [1, 1073711680, 4, 1024, 6449120, 1], entry[m
+[m[37m[  6.156979 0:3 syscall::syscall:69] [32m[syscall] id = 113,return 0[m
+[m[37m[  6.158078 0:3 syscall::syscall:20] [32m[syscall] id = MMAP, args = [0, 8192, 3, 34, 18446744073709551615, 0], entry[m
+[m[37m[  6.159761 0:3 syscall::syscall_mem::imp:52] [32mflags: MMAPFlags(MAP_PRIVATE | MAP_ANONYMOUS)[m
+[m[37m[  6.161123 0:3 async_mem:277] [32m[mmap] vaddr: [VA:0x0, VA:0x2000), MappingFlags(READ | WRITE | USER), shared: false, fixed: false, backend: false[m
+[m[37m[  6.162704 0:3 async_mem:297] [32mfind free area[m
+[m[37m[  6.162919 0:3 async_mem:302] [32mfound area [VA:0x632000, VA:0x634000)[m
+[m[37m[  6.163159 0:3 async_mem:144] [36mallocating [0x632000, 0x634000) to [0x632000, 0x634000) flag: MappingFlags(READ | WRITE | USER)[m
+[m[37m[  6.163610 0:3 syscall::syscall:69] [32m[syscall] id = 222,return 6496256[m
+[m[37m[  6.163949 0:3 async_mem::area:174] [36mpage index 1[m
+[m[37m[  6.164161 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8826000[m
+[m[37m[  6.164604 0:3 async_mem::area:174] [36mpage index 0[m
+[m[37m[  6.164872 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8827000[m
+[m[37m[  6.165946 0:3 async_mem::area:174] [36mpage index 1018[m
+[m[37m[  6.166195 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8828000[m
+[m[37m[  6.188376 0:3 syscall::syscall:20] [32m[syscall] id = MMAP, args = [0, 16384, 3, 34, 18446744073709551615, 0], entry[m
+[m[37m[  6.189727 0:3 syscall::syscall_mem::imp:52] [32mflags: MMAPFlags(MAP_PRIVATE | MAP_ANONYMOUS)[m
+[m[37m[  6.190451 0:3 async_mem:277] [32m[mmap] vaddr: [VA:0x0, VA:0x4000), MappingFlags(READ | WRITE | USER), shared: false, fixed: false, backend: false[m
+[m[37m[  6.191838 0:3 async_mem:297] [32mfind free area[m
+[m[37m[  6.192378 0:3 async_mem:302] [32mfound area [VA:0x634000, VA:0x638000)[m
+[m[37m[  6.193075 0:3 async_mem:144] [36mallocating [0x634000, 0x638000) to [0x634000, 0x638000) flag: MappingFlags(READ | WRITE | USER)[m
+[m[37m[  6.193953 0:3 syscall::syscall:69] [32m[syscall] id = 222,return 6504448[m
+[m[37m[  6.194728 0:3 async_mem::area:174] [36mpage index 3[m
+[m[37m[  6.195165 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8829000[m
+[m[37m[  6.195731 0:3 async_mem::area:174] [36mpage index 0[m
+[m[37m[  6.196140 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b882a000[m
+[m[37m[  6.196777 0:3 async_mem::area:174] [36mpage index 1030[m
+[m[37m[  6.197144 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b882b000[m
+[m[37m[  6.217981 0:3 syscall::syscall:42] [32m[syscall] id = CLOCK_GET_TIME, args = [1, 1073712336, 4096, 48, 6504848, 1], entry[m
+[m[37m[  6.218428 0:3 syscall::syscall:69] [32m[syscall] id = 113,return 0[m
+[m[37m[  6.218956 0:3 async_mem::area:174] [36mpage index 1038[m
+[m[37m[  6.219702 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b882c000[m
+[m[37m[  6.239841 0:3 async_mem::area:174] [36mpage index 382[m
+[m[37m[  6.240077 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b882d000[m
+[m[37m[  6.255338 0:3 async_mem::area:174] [36mpage index 383[m
+[m[37m[  6.255564 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b882e000[m
+[m[37m[  6.271338 0:3 async_mem::area:174] [36mpage index 1020[m
+[m[37m[  6.271597 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b882f000[m
+[m[37m[  6.290983 0:3 async_mem::area:174] [36mpage index 1005[m
+[m[37m[  6.291709 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8830000[m
+[m[37m[  6.311616 0:3 async_mem::area:174] [36mpage index 969[m
+[m[37m[  6.311983 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8831000[m
+[m[37m[  6.331189 0:3 async_mem::area:174] [36mpage index 1033[m
+[m[37m[  6.331640 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8832000[m
+[m[37m[  6.352429 0:3 async_mem::area:174] [36mpage index 1012[m
+[m[37m[  6.352962 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8833000[m
+[m[37m[  6.372409 0:3 async_mem::area:174] [36mpage index 1295[m
+[m[37m[  6.372791 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8834000[m
+[m[37m[  6.394065 0:3 async_mem::area:174] [36mpage index 1296[m
+[m[37m[  6.394323 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8835000[m
+[m[37m[  6.415803 0:3 async_mem::area:174] [36mpage index 210[m
+[m[37m[  6.416938 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8836000[m
+[m[37m[  6.433333 0:3 async_mem::area:174] [36mpage index 1007[m
+[m[37m[  6.433899 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8837000[m
+[m[37m[  6.454281 0:3 syscall::syscall:42] [32m[syscall] id = SIGPROCMASK, args = [1, 1073711968, 0, 8, 0, 12884901888], entry[m
+[m[37m[  6.454978 0:3 syscall::syscall:69] [32m[syscall] id = 135,return 0[m
+[m[37m[  6.455392 0:3 syscall::syscall:20] [32m[syscall] id = MEMBARRIER, args = [16, 0, 0, 8, 0, 67788808], entry[m
+[m[37m[  6.455967 0:3 syscall::syscall:69] [32m[syscall] id = 283,return 0[m
+[m[37m[  6.456287 0:3 syscall::syscall:20] [32m[syscall] id = MMAP, args = [0, 2109440, 0, 34, 18446744073709551615, 0], entry[m
+[m[37m[  6.456898 0:3 syscall::syscall_mem::imp:52] [32mflags: MMAPFlags(MAP_PRIVATE | MAP_ANONYMOUS)[m
+[m[37m[  6.457202 0:3 async_mem:277] [32m[mmap] vaddr: [VA:0x0, VA:0x203000), MappingFlags(USER), shared: false, fixed: false, backend: false[m
+[m[37m[  6.457796 0:3 async_mem:297] [32mfind free area[m
+[m[37m[  6.458193 0:3 async_mem:302] [32mfound area [VA:0x638000, VA:0x83b000)[m
+[m[37m[  6.458573 0:3 async_mem:144] [36mallocating [0x638000, 0x83b000) to [0x638000, 0x83b000) flag: MappingFlags(USER)[m
+[m[37m[  6.459161 0:3 syscall::syscall:69] [32m[syscall] id = 222,return 6520832[m
+[m[37m[  6.459590 0:3 syscall::syscall:20] [32m[syscall] id = MPROTECT, args = [6529024, 2101248, 3, 18446744073709547520, 2105343, 8634367], entry[m
+[m[37m[  6.461074 0:3 async_mem:347] [32m[mprotect] addr: [VA:0x63a000, VA:0x83b000), flags: MappingFlags(READ | WRITE | USER)[m
+[m[37m[  6.463693 0:3 syscall::syscall:69] [32m[syscall] id = 226,return 0[m
+[m[37m[  6.464550 0:3 async_mem::area:174] [36mpage index 512[m
+[m[37m[  6.464825 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8839000[m
+[m[37m[  6.465389 0:3 syscall::syscall:42] [32m[syscall] id = SIGPROCMASK, args = [0, 67765344, 1073711968, 8, 0, 0], entry[m
+[m[37m[  6.465930 0:3 syscall::syscall:69] [32m[syscall] id = 135,return 0[m
+[m[37m[  6.466217 0:3 syscall::syscall:42] [32m[syscall] id = CLONE, args = [8195840, 8628520, 8628624, 8628792, 67793268, 8628792], entry[m
+[m[37m[  6.467304 0:3 executor::executor:596] [36mnew task:Task(4, "chat_example")[m
+[m[37m[  6.468748 0:3 syscall::syscall:69] [32m[syscall] id = 220,return 4[m
+[m[37m[  6.469116 0:3 syscall::syscall:42] [32m[syscall] id = SIGPROCMASK, args = [2, 1073711968, 0, 8, 67793356, 0], entry[m
+[m[37m[  6.469816 0:3 syscall::syscall:69] [32m[syscall] id = 135,return 0[m
+[m[37m[  6.470197 0:3 async_mem::area:174] [36mpage index 166[m
+[m[37m[  6.470666 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b883a000[m
+[m[37m[  6.485138 0:3 async_mem::area:174] [36mpage index 167[m
+[m[37m[  6.485456 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b883b000[m
+[m[37m[  6.500391 0:3 async_mem::area:174] [36mpage index 1109[m
+[m[37m[  6.500646 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b883c000[m
+[m[37m[  6.520357 0:3 async_mem::area:174] [36mpage index 1031[m
+[m[37m[  6.520579 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b883d000[m
+[m[37m[  6.540639 0:3 async_mem::area:174] [36mpage index 233[m
+[m[37m[  6.540856 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b883e000[m
+[m[37m[  6.556579 0:3 async_mem::area:174] [36mpage index 1040[m
+[m[37m[  6.557059 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b883f000[m
+[m[37m[  6.580235 0:3 async_mem::area:174] [36mpage index 1128[m
+[m[37m[  6.581150 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8840000[m
+[m[37m[  6.604596 0:3 async_mem::area:174] [36mpage index 1043[m
+[m[37m[  6.604830 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8841000[m
+[m[37m[  6.624205 0:3 async_mem::area:174] [36mpage index 1037[m
+[m[37m[  6.624439 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8842000[m
+[m[37m[  6.644420 0:3 async_mem::area:174] [36mpage index 1049[m
+[m[37m[  6.644674 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8843000[m
+[m[37m[  6.665199 0:3 async_mem::area:174] [36mpage index 1045[m
+[m[37m[  6.665471 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8844000[m
+[m[37m[  6.686151 0:3 async_mem::area:174] [36mpage index 1044[m
+[m[37m[  6.686396 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8845000[m
+[m[37m[  6.705652 0:3 async_mem::area:174] [36mpage index 1039[m
+[m[37m[  6.705875 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8846000[m
+[m[37m[  6.725794 0:3 async_mem::area:174] [36mpage index 1036[m
+[m[37m[  6.726027 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8847000[m
+[m[37m[  6.745469 0:3 async_mem::area:174] [36mpage index 262[m
+[m[37m[  6.746439 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8848000[m
+[m[37m[  6.761139 0:3 syscall::syscall:20] [32m[syscall] id = MMAP, args = [0, 36864, 3, 34, 18446744073709551615, 0], entry[m
+[m[37m[  6.761728 0:3 syscall::syscall_mem::imp:52] [32mflags: MMAPFlags(MAP_PRIVATE | MAP_ANONYMOUS)[m
+[m[37m[  6.762148 0:3 async_mem:277] [32m[mmap] vaddr: [VA:0x0, VA:0x9000), MappingFlags(READ | WRITE | USER), shared: false, fixed: false, backend: false[m
+[m[37m[  6.762647 0:3 async_mem:297] [32mfind free area[m
+[m[37m[  6.763050 0:3 async_mem:302] [32mfound area [VA:0x83b000, VA:0x844000)[m
+[m[37m[  6.763350 0:3 async_mem:144] [36mallocating [0x83b000, 0x844000) to [0x83b000, 0x844000) flag: MappingFlags(READ | WRITE | USER)[m
+[m[37m[  6.763843 0:3 syscall::syscall:69] [32m[syscall] id = 222,return 8630272[m
+[m[37m[  6.764159 0:3 async_mem::area:174] [36mpage index 0[m
+[m[37m[  6.764393 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8849000[m
+[m[37m[  6.764892 0:3 async_mem::area:174] [36mpage index 8[m
+[m[37m[  6.765152 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b884a000[m
+[m[37m[  6.765750 0:3 async_mem::area:174] [36mpage index 1[m
+[m[37m[  6.765956 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b884b000[m
+[m[37m[  6.766425 0:3 async_mem::area:174] [36mpage index 2[m
+[m[37m[  6.766625 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b884c000[m
+[m[37m[  6.767094 0:3 async_mem::area:174] [36mpage index 3[m
+[m[37m[  6.767298 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b884d000[m
+[m[37m[  6.767815 0:3 async_mem::area:174] [36mpage index 4[m
+[m[37m[  6.768017 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b884e000[m
+[m[37m[  6.768498 0:3 async_mem::area:174] [36mpage index 5[m
+[m[37m[  6.768702 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b884f000[m
+[m[37m[  6.769256 0:3 async_mem::area:174] [36mpage index 6[m
+[m[37m[  6.769459 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8850000[m
+[m[37m[  6.769948 0:3 async_mem::area:174] [36mpage index 7[m
+[m[37m[  6.770144 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8851000[m
+[m[37m[  6.770684 0:3 async_mem::area:174] [36mpage index 560[m
+[m[37m[  6.770971 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8852000[m
+[m[37m[  6.788818 0:3 async_mem::area:174] [36mpage index 1034[m
+[m[37m[  6.789042 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8853000[m
+[m[37m[  6.808969 0:3 async_mem::area:174] [36mpage index 258[m
+[m[37m[  6.809227 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8854000[m
+[m[37m[  6.824367 0:3 async_mem::area:174] [36mpage index 259[m
+[m[37m[  6.824591 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8855000[m
+[m[37m[  6.839114 0:3 async_mem::area:174] [36mpage index 263[m
+[m[37m[  6.839331 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8856000[m
+[m[37m[  6.853840 0:3 async_mem::area:174] [36mpage index 386[m
+[m[37m[  6.854246 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8857000[m
+[m[37m[  6.869486 0:3 async_mem::area:174] [36mpage index 385[m
+[m[37m[  6.869741 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8858000[m
+[m[37m[  6.885281 0:3 syscall::syscall:42] [32m[syscall] id = GETRANDOM, args = [1, 0, 0, 67784488, 0, 0], entry[m
+[m[37m[  6.885846 0:3 async_mem:640] [36mallocating page at 0[m
+[m[37m[  6.886159 0:3 syscall::syscall:69] [32m[syscall] id = 278,return -14[m
+[m[37m[  6.886567 0:3 syscall::syscall:42] [32m[syscall] id = GETRANDOM, args = [1073688120, 32, 0, 0, 18446744073709547520, 0], entry[m
+[m[37m[  6.887002 0:3 async_mem:640] [36mallocating page at 3fff2000[m
+[m[37m[  6.887285 0:3 syscall::syscall:69] [32m[syscall] id = 278,return 32[m
+[m[37m[  6.887563 0:3 async_mem::area:174] [36mpage index 381[m
+[m[37m[  6.887783 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8859000[m
+[m[37m[  6.903360 0:3 async_mem::area:174] [36mpage index 952[m
+[m[37m[  6.903617 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b885a000[m
+[m[37m[  6.922262 0:3 async_mem::area:174] [36mpage index 953[m
+[m[37m[  6.922564 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b885b000[m
+[m[37m[  6.943164 0:3 async_mem::area:174] [36mpage index 954[m
+[m[37m[  6.943786 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b885c000[m
+[m[37m[  6.963826 0:3 async_mem::area:174] [36mpage index 955[m
+[m[37m[  6.964275 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b885d000[m
+[m[37m[  6.983119 0:3 async_mem::area:174] [36mpage index 956[m
+[m[37m[  6.983348 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b885e000[m
+[m[37m[  7.002600 0:3 async_mem::area:174] [36mpage index 363[m
+[m[37m[  7.002955 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b885f000[m
+[m[37m[  7.018684 0:3 async_mem::area:174] [36mpage index 365[m
+[m[37m[  7.018905 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8860000[m
+[m[37m[  7.034100 0:3 async_mem::area:174] [36mpage index 362[m
+[m[37m[  7.034331 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8861000[m
+[m[37m[  7.049453 0:3 async_mem::area:174] [36mpage index 1149[m
+[m[37m[  7.049670 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8862000[m
+[m[37m[  7.069882 0:3 async_mem::area:174] [36mpage index 1150[m
+[m[37m[  7.070134 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8863000[m
+[m[37m[  7.090579 0:3 async_mem::area:174] [36mpage index 1151[m
+[m[37m[  7.090895 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8864000[m
+[m[37m[  7.110761 0:3 async_mem::area:174] [36mpage index 1152[m
+[m[37m[  7.111020 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8865000[m
+[m[37m[  7.131207 0:3 async_mem::area:174] [36mpage index 1153[m
+[m[37m[  7.131425 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8866000[m
+[m[37m[  7.154195 0:3 async_mem::area:174] [36mpage index 1154[m
+[m[37m[  7.154926 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8867000[m
+[m[37m[  7.178251 0:3 async_mem::area:174] [36mpage index 1155[m
+[m[37m[  7.179086 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8868000[m
+[m[37m[  7.200498 0:3 async_mem::area:174] [36mpage index 1156[m
+[m[37m[  7.200769 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8869000[m
+[m[37m[  7.221178 0:3 async_mem::area:174] [36mpage index 364[m
+[m[37m[  7.221430 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b886a000[m
+[m[37m[  7.237886 0:3 async_mem::area:174] [36mpage index 387[m
+[m[37m[  7.238111 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b886b000[m
+[m[37m[  7.253557 0:3 async_mem::area:174] [36mpage index 234[m
+[m[37m[  7.253887 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b886c000[m
+[m[37m[  7.268420 0:3 async_mem::area:174] [36mpage index 158[m
+[m[37m[  7.268655 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b886d000[m
+[m[37m[  7.282508 0:3 syscall::syscall:42] [32m[syscall] id = GETRANDOM, args = [1073686040, 32, 0, 1024, 0, 0], entry[m
+[m[37m[  7.282867 0:3 async_mem:640] [36mallocating page at 3fff2000[m
+[m[37m[  7.283051 0:3 syscall::syscall:69] [32m[syscall] id = 278,return 32[m
+[m[37m[  7.283572 0:3 async_mem::area:174] [36mpage index 662[m
+[m[37m[  7.283827 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b886e000[m
+[m[37m[  7.301075 0:3 async_mem::area:174] [36mpage index 663[m
+[m[37m[  7.301289 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b886f000[m
+[m[37m[  7.318944 0:3 async_mem::area:174] [36mpage index 1118[m
+[m[37m[  7.319177 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8870000[m
+[m[37m[  7.339161 0:3 async_mem::area:174] [36mpage index 1050[m
+[m[37m[  7.339401 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8871000[m
+[m[37m[  7.359442 0:3 async_mem::area:174] [36mpage index 1159[m
+[m[37m[  7.359717 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8872000[m
+[m[37m[  7.379704 0:3 async_mem::area:174] [36mpage index 395[m
+[m[37m[  7.379924 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8873000[m
+[m[37m[  7.396516 0:3 async_mem::area:174] [36mpage index 235[m
+[m[37m[  7.396735 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8874000[m
+[m[37m[  7.411097 0:3 async_mem::area:174] [36mpage index 147[m
+[m[37m[  7.411351 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8875000[m
+[m[37m[  7.425106 0:3 async_mem::area:174] [36mpage index 425[m
+[m[37m[  7.425338 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8876000[m
+[m[37m[  7.441978 0:3 async_mem::area:174] [36mpage index 421[m
+[m[37m[  7.442218 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8877000[m
+[m[37m[  7.458648 0:3 async_mem::area:174] [36mpage index 960[m
+[m[37m[  7.458915 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8878000[m
+[m[37m[  7.478167 0:3 async_mem::area:174] [36mpage index 961[m
+[m[37m[  7.478607 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8879000[m
+[m[37m[  7.497918 0:3 async_mem::area:174] [36mpage index 1291[m
+[m[37m[  7.498376 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b887a000[m
+[m[37m[  7.519198 0:3 async_mem::area:174] [36mpage index 957[m
+[m[37m[  7.519507 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b887b000[m
+[m[37m[  7.540278 0:3 async_mem::area:174] [36mpage index 958[m
+[m[37m[  7.541248 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b887c000[m
+[m[37m[  7.564596 0:3 async_mem::area:174] [36mpage index 461[m
+[m[37m[  7.565652 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b887d000[m
+[m[37m[  7.585888 0:3 async_mem::area:174] [36mpage index 492[m
+[m[37m[  7.587193 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b887e000[m
+[m[37m[  7.605440 0:3 async_mem::area:174] [36mpage index 672[m
+[m[37m[  7.605842 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b887f000[m
+[m[37m[  7.624364 0:3 async_mem::area:174] [36mpage index 835[m
+[m[37m[  7.624838 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8880000[m
+[m[37m[  7.643936 0:3 async_mem::area:174] [36mpage index 910[m
+[m[37m[  7.644443 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8881000[m
+[m[37m[  7.664530 0:3 syscall::syscall:42] [32m[syscall] id = GETRANDOM, args = [1073682528, 32, 0, 3425830, 1073713328, 15], entry[m
+[m[37m[  7.665325 0:3 async_mem:640] [36mallocating page at 3fff1000[m
+[m[37m[  7.665662 0:3 syscall::syscall:69] [32m[syscall] id = 278,return 32[m
+[m[37m[  7.666151 0:3 async_mem::area:174] [36mpage index 834[m
+[m[37m[  7.666519 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8882000[m
+[m[37m[  7.689435 0:3 async_mem::area:174] [36mpage index 1103[m
+[m[37m[  7.689711 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8883000[m
+[m[37m[  7.710507 0:3 async_mem::area:174] [36mpage index 839[m
+[m[37m[  7.710797 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8884000[m
+[m[37m[  7.730100 0:3 async_mem::area:174] [36mpage index 826[m
+[m[37m[  7.731197 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8885000[m
+[m[37m[  7.750959 0:3 async_mem::area:174] [36mpage index 1301[m
+[m[37m[  7.751251 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8886000[m
+[m[37m[  7.773668 0:3 async_mem::area:174] [36mpage index 1101[m
+[m[37m[  7.773929 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8887000[m
+[m[37m[  7.794620 0:3 async_mem::area:174] [36mpage index 1100[m
+[m[37m[  7.794992 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8888000[m
+[m[37m[  7.816370 0:3 async_mem::area:174] [36mpage index 1102[m
+[m[37m[  7.816602 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8889000[m
+[m[37m[  7.837961 0:3 async_mem::area:174] [36mpage index 838[m
+[m[37m[  7.838325 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b888a000[m
+[m[37m[  7.857398 0:3 async_mem::area:174] [36mpage index 825[m
+[m[37m[  7.857712 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b888b000[m
+[m[37m[  7.878068 0:3 async_mem::area:174] [36mpage index 1283[m
+[m[37m[  7.878370 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b888c000[m
+[m[37m[  7.900630 0:3 async_mem::area:174] [36mpage index 837[m
+[m[37m[  7.900923 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b888d000[m
+[m[37m[  7.919603 0:3 async_mem::area:174] [36mpage index 832[m
+[m[37m[  7.919896 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b888e000[m
+[m[37m[  7.938859 0:3 async_mem::area:174] [36mpage index 828[m
+[m[37m[  7.939107 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b888f000[m
+[m[37m[  7.960691 0:3 async_mem::area:174] [36mpage index 1098[m
+[m[37m[  7.961639 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8890000[m
+[m[37m[  7.984523 0:3 async_mem::area:174] [36mpage index 840[m
+[m[37m[  7.985247 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8891000[m
+[m[37m[  8.005336 0:3 syscall::syscall:42] [32m[syscall] id = GETRANDOM, args = [1073680144, 32, 0, 4880619392074235528, 4880619392074235528, 1073681184], entry[m
+[m[37m[  8.006197 0:3 async_mem:640] [36mallocating page at 3fff0000[m
+[m[37m[  8.006489 0:3 syscall::syscall:69] [32m[syscall] id = 278,return 32[m
+[m[37m[  8.006859 0:3 async_mem::area:174] [36mpage index 836[m
+[m[37m[  8.007234 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8892000[m
+[m[37m[  8.026371 0:3 async_mem::area:174] [36mpage index 831[m
+[m[37m[  8.026741 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8893000[m
+[m[37m[  8.045919 0:3 async_mem::area:174] [36mpage index 1282[m
+[m[37m[  8.046416 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8894000[m
+[m[37m[  8.069404 0:3 async_mem::area:174] [36mpage index 668[m
+[m[37m[  8.069667 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8895000[m
+[m[37m[  8.087920 0:3 async_mem::area:174] [36mpage index 670[m
+[m[37m[  8.088223 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8896000[m
+[m[37m[  8.106462 0:3 async_mem::area:174] [36mpage index 515[m
+[m[37m[  8.107283 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8897000[m
+[m[37m[  8.124917 0:3 async_mem::area:174] [36mpage index 1177[m
+[m[37m[  8.125216 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8898000[m
+[m[37m[  8.146488 0:3 async_mem::area:174] [36mpage index 331[m
+[m[37m[  8.146826 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8899000[m
+[m[37m[  8.162732 0:3 async_mem::area:174] [36mpage index 159[m
+[m[37m[  8.162990 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b889a000[m
+[m[37m[  8.177578 0:3 async_mem::area:174] [36mpage index 1107[m
+[m[37m[  8.177871 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b889b000[m
+[m[37m[  8.198446 0:3 async_mem::area:174] [36mpage index 493[m
+[m[37m[  8.198842 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b889c000[m
+[m[37m[  8.215839 0:3 async_mem::area:174] [36mpage index 498[m
+[m[37m[  8.216157 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b889d000[m
+[m[37m[  8.233230 0:3 async_mem::area:174] [36mpage index 162[m
+[m[37m[  8.233512 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b889e000[m
+[m[37m[  8.248376 0:3 async_mem::area:174] [36mpage index 1161[m
+[m[37m[  8.248809 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b889f000[m
+[m[37m[  8.270368 0:3 async_mem::area:174] [36mpage index 1073[m
+[m[37m[  8.270771 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88a0000[m
+[m[37m[  8.292209 0:3 async_mem::area:174] [36mpage index 647[m
+[m[37m[  8.292718 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88a1000[m
+[m[37m[  8.312629 0:3 async_mem::area:174] [36mpage index 671[m
+[m[37m[  8.313197 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88a2000[m
+[m[37m[  8.334126 0:3 async_mem::area:174] [36mpage index 397[m
+[m[37m[  8.334519 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88a3000[m
+[m[37m[  8.352616 0:3 async_mem::area:174] [36mpage index 491[m
+[m[37m[  8.353243 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88a4000[m
+[m[37m[  8.369634 0:3 async_mem::area:174] [36mpage index 494[m
+[m[37m[  8.370041 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88a5000[m
+[m[37m[  8.390175 0:3 async_mem::area:174] [36mpage index 669[m
+[m[37m[  8.390490 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88a6000[m
+[m[37m[  8.410753 0:3 async_mem::area:174] [36mpage index 664[m
+[m[37m[  8.411355 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88a7000[m
+[m[37m[  8.430256 0:3 async_mem::area:174] [36mpage index 665[m
+[m[37m[  8.430578 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88a8000[m
+[m[37m[  8.448384 0:3 async_mem::area:174] [36mpage index 666[m
+[m[37m[  8.448681 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88a9000[m
+[m[37m[  8.466728 0:3 async_mem::area:174] [36mpage index 667[m
+[m[37m[  8.467181 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88aa000[m
+[m[37m[  8.486002 0:3 async_mem::area:174] [36mpage index 1[m
+[m[37m[  8.486250 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88ab000[m
+[m[37m[  8.487358 0:3 syscall::syscall:42] [32m[syscall] id = GETRANDOM, args = [1073682480, 32, 0, 1073682600, 31, 15], entry[m
+[m[37m[  8.488026 0:3 async_mem:640] [36mallocating page at 3fff1000[m
+[m[37m[  8.488516 0:3 syscall::syscall:69] [32m[syscall] id = 278,return 32[m
+[m[37m[  8.490755 0:3 async_mem::area:174] [36mpage index 495[m
+[m[37m[  8.491139 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88ac000[m
+[m[37m[  8.507996 0:3 async_mem::area:174] [36mpage index 462[m
+[m[37m[  8.508335 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88ad000[m
+[m[37m[  8.524210 0:3 async_mem::area:174] [36mpage index 909[m
+[m[37m[  8.524448 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88ae000[m
+[m[37m[  8.543730 0:3 syscall::syscall:42] [32m[syscall] id = GETRANDOM, args = [1073684368, 32, 0, 4880619392074235528, 4880619392074235528, 1073685408], entry[m
+[m[37m[  8.544579 0:3 async_mem:640] [36mallocating page at 3fff1000[m
+[m[37m[  8.544971 0:3 syscall::syscall:69] [32m[syscall] id = 278,return 32[m
+[m[37m[  8.545595 0:3 syscall::syscall:20] [32m[syscall] id = MMAP, args = [0, 32768, 3, 34, 18446744073709551615, 0], entry[m
+[m[37m[  8.546063 0:3 syscall::syscall_mem::imp:52] [32mflags: MMAPFlags(MAP_PRIVATE | MAP_ANONYMOUS)[m
+[m[37m[  8.546524 0:3 async_mem:277] [32m[mmap] vaddr: [VA:0x0, VA:0x8000), MappingFlags(READ | WRITE | USER), shared: false, fixed: false, backend: false[m
+[m[37m[  8.547004 0:3 async_mem:297] [32mfind free area[m
+[m[37m[  8.547258 0:3 async_mem:302] [32mfound area [VA:0x844000, VA:0x84c000)[m
+[m[37m[  8.547568 0:3 async_mem:144] [36mallocating [0x844000, 0x84c000) to [0x844000, 0x84c000) flag: MappingFlags(READ | WRITE | USER)[m
+[m[37m[  8.548246 0:3 syscall::syscall:69] [32m[syscall] id = 222,return 8667136[m
+[m[37m[  8.548560 0:3 async_mem::area:174] [36mpage index 7[m
+[m[37m[  8.548768 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88af000[m
+[m[37m[  8.549106 0:3 async_mem::area:174] [36mpage index 3[m
+[m[37m[  8.549319 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88b0000[m
+[m[37m[  8.550015 0:3 syscall::syscall:42] [32m[syscall] id = GETRANDOM, args = [1073682528, 32, 0, 3425830, 6508104, 15], entry[m
+[m[37m[  8.550625 0:3 async_mem:640] [36mallocating page at 3fff1000[m
+[m[37m[  8.550846 0:3 syscall::syscall:69] [32m[syscall] id = 278,return 32[m
+[m[37m[  8.551813 0:3 syscall::syscall:42] [32m[syscall] id = GETRANDOM, args = [1073680144, 32, 0, 4880619392074235528, 4880619392074235528, 1073681184], entry[m
+[m[37m[  8.552477 0:3 async_mem:640] [36mallocating page at 3fff0000[m
+[m[37m[  8.552817 0:3 syscall::syscall:69] [32m[syscall] id = 278,return 32[m
+[m[37m[  8.553634 0:3 syscall::syscall:42] [32m[syscall] id = GETRANDOM, args = [1073682480, 32, 0, 1073682600, 31, 15], entry[m
+[m[37m[  8.554132 0:3 async_mem:640] [36mallocating page at 3fff1000[m
+[m[37m[  8.554435 0:3 syscall::syscall:69] [32m[syscall] id = 278,return 32[m
+[m[37m[  8.555834 0:3 syscall::syscall:42] [32m[syscall] id = GETRANDOM, args = [1073684368, 32, 0, 4880619392074235528, 4880619392074235528, 1073685408], entry[m
+[m[37m[  8.557005 0:3 async_mem:640] [36mallocating page at 3fff1000[m
+[m[37m[  8.557331 0:3 syscall::syscall:69] [32m[syscall] id = 278,return 32[m
+[m[37m[  8.557733 0:3 syscall::syscall:20] [32m[syscall] id = MMAP, args = [0, 32768, 3, 34, 18446744073709551615, 0], entry[m
+[m[37m[  8.558461 0:3 syscall::syscall_mem::imp:52] [32mflags: MMAPFlags(MAP_PRIVATE | MAP_ANONYMOUS)[m
+[m[37m[  8.558836 0:3 async_mem:277] [32m[mmap] vaddr: [VA:0x0, VA:0x8000), MappingFlags(READ | WRITE | USER), shared: false, fixed: false, backend: false[m
+[m[37m[  8.559438 0:3 async_mem:297] [32mfind free area[m
+[m[37m[  8.559631 0:3 async_mem:302] [32mfound area [VA:0x84c000, VA:0x854000)[m
+[m[37m[  8.560209 0:3 async_mem:144] [36mallocating [0x84c000, 0x854000) to [0x84c000, 0x854000) flag: MappingFlags(READ | WRITE | USER)[m
+[m[37m[  8.561049 0:3 syscall::syscall:69] [32m[syscall] id = 222,return 8699904[m
+[m[37m[  8.561807 0:3 async_mem::area:174] [36mpage index 7[m
+[m[37m[  8.562302 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88b1000[m
+[m[37m[  8.562910 0:3 async_mem::area:174] [36mpage index 1[m
+[m[37m[  8.563424 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88b2000[m
+[m[37m[  8.564496 0:3 async_mem::area:174] [36mpage index 294[m
+[m[37m[  8.565008 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88b3000[m
+[m[37m[  8.580730 0:3 async_mem::area:174] [36mpage index 426[m
+[m[37m[  8.581007 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88b4000[m
+[m[37m[  8.596874 0:3 async_mem::area:174] [36mpage index 575[m
+[m[37m[  8.597156 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88b5000[m
+[m[37m[  8.613861 0:3 async_mem::area:174] [36mpage index 949[m
+[m[37m[  8.614086 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88b6000[m
+[m[37m[  8.632957 0:3 async_mem::area:174] [36mpage index 950[m
+[m[37m[  8.633178 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88b7000[m
+[m[37m[  8.652497 0:3 async_mem::area:174] [36mpage index 951[m
+[m[37m[  8.652727 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88b8000[m
+[m[37m[  8.672490 0:3 async_mem::area:174] [36mpage index 394[m
+[m[37m[  8.672720 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88b9000[m
+[m[37m[  8.688723 0:3 async_mem::area:174] [36mpage index 648[m
+[m[37m[  8.688971 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88ba000[m
+[m[37m[  8.706669 0:3 async_mem::area:174] [36mpage index 392[m
+[m[37m[  8.706914 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88bb000[m
+[m[37m[  8.722981 0:3 async_mem::area:174] [36mpage index 236[m
+[m[37m[  8.723312 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88bc000[m
+[m[37m[  8.739003 0:3 async_mem::area:174] [36mpage index 399[m
+[m[37m[  8.739799 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88bd000[m
+[m[37m[  8.756854 0:3 syscall::syscall:42] [32m[syscall] id = CLOCK_GET_TIME, args = [0, 1073670608, 2, 2, 67784392, 0], entry[m
+[m[37m[  8.757986 0:3 syscall::syscall:69] [32m[syscall] id = 113,return 0[m
+[m[37m[  8.758989 0:3 async_mem::area:174] [36mpage index 1104[m
+[m[37m[  8.759656 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88be000[m
+[m[37m[  8.780241 0:3 async_mem::area:174] [36mpage index 237[m
+[m[37m[  8.780482 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88bf000[m
+[m[37m[  8.794933 0:3 syscall::syscall:42] [32m[syscall] id = CLOCK_GET_TIME, args = [1, 1073670608, 0, 0, 67783960, 1], entry[m
+[m[37m[  8.795394 0:3 syscall::syscall:69] [32m[syscall] id = 113,return 0[m
+[m[37m[  8.795683 0:3 syscall::syscall:42] [32m[syscall] id = CLOCK_GET_TIME, args = [1, 1073670608, 0, 18446744073709551578, 67783960, 1], entry[m
+[m[37m[  8.796180 0:3 syscall::syscall:69] [32m[syscall] id = 113,return 0[m
+[m[37m[  8.796441 0:3 async_mem::area:174] [36mpage index 384[m
+[m[37m[  8.796681 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88c0000[m
+[m[37m[  8.811994 0:3 async_mem::area:174] [36mpage index 1157[m
+[m[37m[  8.812217 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88c1000[m
+[m[37m[  8.832388 0:3 syscall::syscall:20] [32m[syscall] id = MMAP, args = [0, 2109440, 0, 34, 18446744073709551615, 0], entry[m
+[m[37m[  8.833020 0:3 syscall::syscall_mem::imp:52] [32mflags: MMAPFlags(MAP_PRIVATE | MAP_ANONYMOUS)[m
+[m[37m[  8.833442 0:3 async_mem:277] [32m[mmap] vaddr: [VA:0x0, VA:0x203000), MappingFlags(USER), shared: false, fixed: false, backend: false[m
+[m[37m[  8.833941 0:3 async_mem:297] [32mfind free area[m
+[m[37m[  8.834134 0:3 async_mem:302] [32mfound area [VA:0x854000, VA:0xa57000)[m
+[m[37m[  8.834434 0:3 async_mem:144] [36mallocating [0x854000, 0xa57000) to [0x854000, 0xa57000) flag: MappingFlags(USER)[m
+[m[37m[  8.834862 0:3 syscall::syscall:69] [32m[syscall] id = 222,return 8732672[m
+[m[37m[  8.835349 0:3 syscall::syscall:20] [32m[syscall] id = MPROTECT, args = [8740864, 2101248, 3, 18446744073709547520, 2105343, 10846207], entry[m
+[m[37m[  8.835845 0:3 async_mem:347] [32m[mprotect] addr: [VA:0x856000, VA:0xa57000), flags: MappingFlags(READ | WRITE | USER)[m
+[m[37m[  8.836574 0:3 syscall::syscall:69] [32m[syscall] id = 226,return 0[m
+[m[37m[  8.837012 0:3 async_mem::area:174] [36mpage index 512[m
+[m[37m[  8.837258 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88c3000[m
+[m[37m[  8.837671 0:3 syscall::syscall:42] [32m[syscall] id = SIGPROCMASK, args = [0, 67765344, 1073669664, 8, 0, 0], entry[m
+[m[37m[  8.838379 0:3 syscall::syscall:69] [32m[syscall] id = 135,return 0[m
+[m[37m[  8.838637 0:3 syscall::syscall:42] [32m[syscall] id = CLONE, args = [8195840, 10840360, 10840464, 10840632, 67793268, 10840632], entry[m
+[m[37m[  8.839210 0:3 executor::executor:596] [36mnew task:Task(5, "chat_example")[m
+[m[37m[  8.839533 0:3 syscall::syscall:69] [32m[syscall] id = 220,return 5[m
+[m[37m[  8.839813 0:3 syscall::syscall:42] [32m[syscall] id = SIGPROCMASK, args = [2, 1073669664, 0, 8, 67793356, 0], entry[m
+[m[37m[  8.840157 0:3 syscall::syscall:69] [32m[syscall] id = 135,return 0[m
+[m[37m[  8.841177 0:3 async_mem::area:174] [36mpage index 559[m
+[m[37m[  8.841398 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88c4000[m
+[m[37m[  8.857739 0:3 syscall::syscall:10] [32m[syscall] id = SOCKET, args = [16, 524290, 0, 0, 0, 0], entry[m
+[m[37m[  8.858287 0:3 syscall::syscall_net::imp:26] [31m[socket()] Address Family not supported: 16[m
+[m[37m[  8.859584 0:3 syscall::syscall:69] [32m[syscall] id = 198,return -97[m
+[m[37m[  8.860551 0:3 async_mem::area:174] [36mpage index 410[m
+[m[37m[  8.860818 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88c5000[m
+[m[37m[  8.876651 0:3 async_mem::area:174] [36mpage index 409[m
+[m[37m[  8.877367 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88c6000[m
+[m[37m[  8.896555 0:3 async_mem::area:174] [36mpage index 408[m
+[m[37m[  8.896789 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88c7000[m
+[m[37m[  8.912550 0:3 async_mem::area:174] [36mpage index 402[m
+[m[37m[  8.912891 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88c8000[m
+[m[37m[  8.928534 0:3 async_mem::area:174] [36mpage index 238[m
+[m[37m[  8.928757 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88c9000[m
+[m[37m[  8.943198 0:3 async_mem::area:174] [36mpage index 231[m
+[m[37m[  8.943416 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88ca000[m
+[m[37m[  8.957835 0:3 async_mem::area:174] [36mpage index 1071[m
+[m[37m[  8.958074 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88cb000[m
+[m[37m[  8.977594 0:3 async_mem::area:174] [36mpage index 241[m
+[m[37m[  8.977877 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88cc000[m
+[m[37m[  8.992347 0:3 async_mem::area:174] [36mpage index 345[m
+[m[37m[  8.992586 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88cd000[m
+[m[37m[  9.007615 0:3 async_mem::area:174] [36mpage index 1067[m
+[m[37m[  9.007855 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88ce000[m
+[m[37m[  9.028240 0:3 async_mem::area:174] [36mpage index 240[m
+[m[37m[  9.028504 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88cf000[m
+[m[37m[  9.042950 0:3 async_mem::area:174] [36mpage index 250[m
+[m[37m[  9.043171 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88d0000[m
+[m[37m[  9.057398 0:3 async_mem::area:174] [36mpage index 219[m
+[m[37m[  9.057945 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88d1000[m
+[m[37m[  9.072521 0:3 async_mem::area:174] [36mpage index 216[m
+[m[37m[  9.072757 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88d2000[m
+[m[37m[  9.086981 0:3 async_mem::area:174] [36mpage index 217[m
+[m[37m[  9.087264 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88d3000[m
+[m[37m[  9.101330 0:3 async_mem::area:174] [36mpage index 323[m
+[m[37m[  9.101594 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88d4000[m
+[m[37m[  9.116486 0:3 async_mem::area:174] [36mpage index 242[m
+[m[37m[  9.116795 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88d5000[m
+[m[37m[  9.131427 0:3 async_mem::area:174] [36mpage index 243[m
+[m[37m[  9.131688 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88d6000[m
+[m[37m[  9.146139 0:3 async_mem::area:174] [36mpage index 346[m
+[m[37m[  9.146624 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88d7000[m
+[m[37m[  9.162132 0:3 async_mem::area:174] [36mpage index 463[m
+[m[37m[  9.162394 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88d8000[m
+[m[37m[  9.178267 0:3 async_mem::area:174] [36mpage index 907[m
+[m[37m[  9.178478 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88d9000[m
+[m[37m[  9.197241 0:3 async_mem::area:174] [36mpage index 0[m
+[m[37m[  9.197463 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88da000[m
+[m[37m[  9.198181 0:3 async_mem::area:174] [36mpage index 908[m
+[m[37m[  9.198511 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88db000[m
+[m[37m[  9.217614 0:3 async_mem::area:174] [36mpage index 562[m
+[m[37m[  9.218045 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88dc000[m
+[m[37m[  9.235460 0:3 async_mem::area:174] [36mpage index 349[m
+[m[37m[  9.235754 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88dd000[m
+[m[37m[  9.251013 0:3 async_mem::area:174] [36mpage index 260[m
+[m[37m[  9.251278 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88de000[m
+[m[37m[  9.265676 0:3 async_mem::area:174] [36mpage index 261[m
+[m[37m[  9.265967 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88df000[m
+[m[37m[  9.280351 0:3 async_mem::area:174] [36mpage index 292[m
+[m[37m[  9.280611 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88e0000[m
+[m[37m[  9.295524 0:3 async_mem::area:174] [36mpage index 293[m
+[m[37m[  9.295808 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88e1000[m
+[m[37m[  9.310832 0:3 async_mem::area:174] [36mpage index 151[m
+[m[37m[  9.311553 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88e2000[m
+[m[37m[  9.325817 0:3 async_mem::area:174] [36mpage index 561[m
+[m[37m[  9.326090 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88e3000[m
+[m[37m[  9.342697 0:3 syscall::syscall:42] [32m[syscall] id = CLOCK_GET_TIME, args = [1, 1073712720, 72340172821233664, 6148914689804861440, 0, 1], entry[m
+[m[37m[  9.343244 0:3 syscall::syscall:69] [32m[syscall] id = 113,return 0[m
+[m[37m[  9.343665 0:3 async_mem::area:174] [36mpage index 152[m
+[m[37m[  9.344019 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88e4000[m
+[m[37m[  9.358074 0:3 syscall::syscall:42] [32m[syscall] id = FUTEX, args = [6448808, 128, 1, 0, 1, 1], entry[m
+[m[37m[  9.358689 0:3 executor::futex:75] [32m[futex_wait] current task: TaskId(3), vaddr: VA:0x6266a8, flags: 0, val: 1, deadline: None[m
+[m[37m[  9.359536 0:3 axfutex::queues:17] [32mInitializing futex queues[m
+[m[37m[  9.360194 0:4 syscall::syscall:42] [32m[syscall] id = SIGPROCMASK, args = [2, 8628560, 0, 8, 67793268, 0], entry[m
+[m[37m[  9.360605 0:4 syscall::syscall:69] [32m[syscall] id = 135,return 0[m
+[m[37m[  9.361014 0:4 syscall::syscall:42] [32m[syscall] id = SIGALTSTACK, args = [0, 8628288, 8628336, 0, 2099544, 6529024], entry[m
+[m[37m[  9.361398 0:4 async_mem:640] [36mallocating page at 83a000[m
+[m[37m[  9.362279 0:4 syscall::syscall:69] [32m[syscall] id = 132,return 0[m
+[m[37m[  9.362635 0:4 syscall::syscall:20] [32m[syscall] id = MMAP, args = [0, 12288, 3, 131106, 18446744073709551615, 0], entry[m
+[m[37m[  9.363034 0:4 syscall::syscall_mem::imp:52] [32mflags: MMAPFlags(MAP_PRIVATE | MAP_ANONYMOUS | MAP_STACK)[m
+[m[37m[  9.363609 0:4 async_mem:277] [32m[mmap] vaddr: [VA:0x0, VA:0x3000), MappingFlags(READ | WRITE | USER), shared: false, fixed: false, backend: false[m
+[m[37m[  9.364121 0:4 async_mem:297] [32mfind free area[m
+[m[37m[  9.364317 0:4 async_mem:302] [32mfound area [VA:0xa57000, VA:0xa5a000)[m
+[m[37m[  9.364559 0:4 async_mem:144] [36mallocating [0xa57000, 0xa5a000) to [0xa57000, 0xa5a000) flag: MappingFlags(READ | WRITE | USER)[m
+[m[37m[  9.364953 0:4 syscall::syscall:69] [32m[syscall] id = 222,return 10842112[m
+[m[37m[  9.365403 0:4 syscall::syscall:20] [32m[syscall] id = MPROTECT, args = [10842112, 4096, 0, 18446744073709547520, 8191, 10850303], entry[m
+[m[37m[  9.366007 0:4 async_mem:347] [32m[mprotect] addr: [VA:0xa57000, VA:0xa58000), flags: MappingFlags(USER)[m
+[m[37m[  9.366488 0:4 syscall::syscall:69] [32m[syscall] id = 226,return 0[m
+[m[37m[  9.366955 0:4 syscall::syscall:42] [32m[syscall] id = SIGALTSTACK, args = [8628288, 0, 0, 8192, 2047, 0], entry[m
+[m[37m[  9.367472 0:4 async_mem:640] [36mallocating page at 83a000[m
+[m[37m[  9.367703 0:4 syscall::syscall:69] [32m[syscall] id = 132,return 0[m
+[m[37m[  9.368468 0:4 syscall::syscall:42] [32m[syscall] id = PRCTL, args = [15, 8628320, 0, 0, 0, 8628128], entry[m
+[m[37m[  9.369292 0:4 syscall::syscall:69] [32m[syscall] id = 167,return 0[m
+[m[37m[  9.369597 0:4 async_mem::area:174] [36mpage index 1023[m
+[m[37m[  9.369815 0:4 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88e5000[m
+[m[37m[  9.389123 0:4 async_mem::area:174] [36mpage index 1024[m
+[m[37m[  9.389395 0:4 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88e6000[m
+[m[37m[  9.408905 0:4 async_mem::area:174] [36mpage index 1013[m
+[m[37m[  9.409407 0:4 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88e7000[m
+[m[37m[  9.429688 0:4 syscall::syscall:42] [32m[syscall] id = GETRANDOM, args = [8627312, 16, 4, 0, 0, 0], entry[m
+[m[37m[  9.430210 0:4 async_mem:640] [36mallocating page at 83a000[m
+[m[37m[  9.430524 0:4 syscall::syscall:69] [32m[syscall] id = 278,return 16[m
+[m[37m[  9.431119 0:4 syscall::syscall:42] [32m[syscall] id = CLOCK_GET_TIME, args = [1, 8627432, 1, 17956643306905630027, 1, 1], entry[m
+[m[37m[  9.431706 0:4 syscall::syscall:69] [32m[syscall] id = 113,return 0[m
+[m[37m[  9.432054 0:4 async_mem::area:174] [36mpage index 1014[m
+[m[37m[  9.432550 0:4 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88e8000[m
+[m[37m[  9.453745 0:4 async_mem::area:174] [36mpage index 1010[m
+[m[37m[  9.454004 0:4 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88e9000[m
+[m[37m[  9.473728 0:4 syscall::syscall:42] [32m[syscall] id = CLOCK_GET_TIME, args = [1, 8627432, 1, 0, 0, 1], entry[m
+[m[37m[  9.474163 0:4 syscall::syscall:69] [32m[syscall] id = 113,return 0[m
+[m[37m[  9.474687 0:4 async_mem::area:174] [36mpage index 1022[m
+[m[37m[  9.474900 0:4 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88ea000[m
+[m[37m[  9.494245 0:4 async_mem::area:174] [36mpage index 1026[m
+[m[37m[  9.494476 0:4 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88eb000[m
+[m[37m[  9.513950 0:4 async_mem::area:174] [36mpage index 1017[m
+[m[37m[  9.514720 0:4 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88ec000[m
+[m[37m[  9.535109 0:4 async_mem::area:174] [36mpage index 1009[m
+[m[37m[  9.535453 0:4 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88ed000[m
+[m[37m[  9.556115 0:4 syscall::syscall:42] [32m[syscall] id = CLOCK_GET_TIME, args = [1, 8627848, 6448776, 0, 0, 1], entry[m
+[m[37m[  9.556617 0:4 syscall::syscall:69] [32m[syscall] id = 113,return 0[m
+[m[37m[  9.557071 0:4 syscall::syscall:42] [32m[syscall] id = FUTEX, args = [6448808, 129, 1, 2974059, 1000000000, 0], entry[m
+[m[37m[  9.557599 0:4 async_mem::area:174] [36mpage index 725[m
+[m[37m[  9.557819 0:4 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88ee000[m
+[m[37m[  9.575210 0:4 executor::futex:143] [32m[futex_wake] vaddr: VA:0x6266a8, flags: 0, nr_waken: 1[m
+[m[37m[  9.576074 0:4 executor::futex:158] [32mwake up task TaskId(3)[m
+[m[37m[  9.576624 0:4 syscall::syscall:69] [32m[syscall] id = 98,return 1[m
+[m[37m[  9.577019 0:4 async_mem::area:174] [36mpage index 557[m
+[m[37m[  9.577291 0:4 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88ef000[m
+[m[37m[  9.593536 0:4 syscall::syscall:30] [32m[syscall] id = CLOSE, args = [3, 0, 0, 0, 0, 0], entry[m
+[m[37m[  9.594022 0:4 syscall::syscall_fs::imp::io:473] [32mInto syscall_close. fd: 3[m
+[m[37m[  9.594328 0:4 syscall::syscall:69] [32m[syscall] id = 57,return 0[m
+[m[37m[  9.594574 0:4 syscall::syscall:30] [32m[syscall] id = CLOSE, args = [8, 0, 0, 0, 0, 0], entry[m
+[m[37m[  9.594859 0:4 syscall::syscall_fs::imp::io:473] [32mInto syscall_close. fd: 8[m
+[m[37m[  9.595082 0:4 syscall::syscall:69] [32m[syscall] id = 57,return 0[m
+[m[37m[  9.595532 0:4 syscall::syscall:30] [32m[syscall] id = CLOSE, args = [5, 0, 0, 0, 0, 0], entry[m
+[m[37m[  9.595875 0:4 syscall::syscall_fs::imp::io:473] [32mInto syscall_close. fd: 5[m
+[m[37m[  9.596422 0:4 syscall::syscall:69] [32m[syscall] id = 57,return 0[m
+[m[37m[  9.596743 0:4 syscall::syscall:30] [32m[syscall] id = CLOSE, args = [4, 0, 0, 0, 0, 0], entry[m
+[m[37m[  9.597256 0:4 syscall::syscall_fs::imp::io:473] [32mInto syscall_close. fd: 4[m
+[m[37m[  9.597590 0:4 syscall::syscall:69] [32m[syscall] id = 57,return 0[m
+[m[37m[  9.598015 0:4 syscall::syscall:42] [32m[syscall] id = SIGALTSTACK, args = [8628416, 0, 0, 1, 2, 0], entry[m
+[m[37m[  9.598394 0:4 async_mem:640] [36mallocating page at 83a000[m
+[m[37m[  9.598581 0:4 syscall::syscall:69] [32m[syscall] id = 132,return 0[m
+[m[37m[  9.598843 0:4 syscall::syscall:20] [32m[syscall] id = MUNMAP, args = [10842112, 12288, 0, 1, 2, 18446744073709547520], entry[m
+[m[37m[  9.599395 0:4 async_mem:317] [32m[munmap] [VA:0xa57000, VA:0xa5a000)[m
+[m[37m[  9.599780 0:4 async_mem:188] [32msplitting for [VA:0xa57000, VA:0xa5a000)[m
+[m[37m[  9.600157 0:4 async_mem:193] [32m  drop [VA:0xa57000, VA:0xa58000)[m
+[m[37m[  9.600483 0:4 async_mem:193] [32m  drop [VA:0xa58000, VA:0xa5a000)[m
+[m[37m[  9.600839 0:4 syscall::syscall:69] [32m[syscall] id = 215,return 0[m
+[m[37m[  9.601375 0:4 syscall::syscall:42] [32m[syscall] id = SIGPROCMASK, args = [0, 67765344, 8628312, 8, 8628752, 0], entry[m
+[m[37m[  9.601858 0:4 syscall::syscall:69] [32m[syscall] id = 135,return 0[m
+[m[37m[  9.602301 0:4 syscall::syscall:42] [32m[syscall] id = FUTEX, args = [8628632, 129, 1, 0, 2, 8628632], entry[m
+[m[37m[  9.602638 0:4 executor::futex:143] [32m[futex_wake] vaddr: VA:0x83a998, flags: 0, nr_waken: 1[m
+[m[37m[  9.602961 0:4 executor::futex:152] [32mhash_bucket is empty[m
+[m[37m[  9.603209 0:4 syscall::syscall:69] [32m[syscall] id = 98,return 0[m
+[m[37m[  9.603476 0:4 syscall::syscall:42] [32m[syscall] id = EXIT, args = [0, 2147483647, 18446744071562067969, 18446744071562067969, 18446744071562067969, 8628752], entry[m
+[m[37m[  9.604106 0:4 syscall::syscall_task::imp::task:61] [32mexit: exit_code = 0[m
+[m[37m[  9.604509 0:4 executor::api:89] [32mexit task id 4 with code _0_[m
+[m[37m[  9.604872 0:4 executor::futex:143] [32m[futex_wake] vaddr: VA:0x40a7174, flags: 0, nr_waken: 1[m
+[m[37m[  9.605215 0:4 executor::futex:152] [32mhash_bucket is empty[m
+[m[37m[  9.606371 0:4 syscall::syscall:69] [32m[syscall] id = 93,return 0[m
+[m[37m[  9.606758 0:4 trampoline:97] [36mtask exit: Task(4, "tokio-runtime-w"), exit_code=0[m
+[m[37m[  9.607388 0:4 taskctx::task:582] [36mtask drop: Task(4, "tokio-runtime-w")[m
+[m[37m[  9.607899 0:5 syscall::syscall:42] [32m[syscall] id = SIGPROCMASK, args = [2, 10840400, 0, 8, 67793268, 0], entry[m
+[m[37m[  9.608273 0:5 syscall::syscall:69] [32m[syscall] id = 135,return 0[m
+[m[37m[  9.608518 0:5 syscall::syscall:42] [32m[syscall] id = SIGALTSTACK, args = [0, 10840128, 10840176, 0, 2099544, 8740864], entry[m
+[m[37m[  9.609046 0:5 async_mem:640] [36mallocating page at a56000[m
+[m[37m[  9.609286 0:5 syscall::syscall:69] [32m[syscall] id = 132,return 0[m
+[m[37m[  9.609679 0:5 syscall::syscall:20] [32m[syscall] id = MMAP, args = [0, 12288, 3, 131106, 18446744073709551615, 0], entry[m
+[m[37m[  9.610173 0:5 syscall::syscall_mem::imp:52] [32mflags: MMAPFlags(MAP_PRIVATE | MAP_ANONYMOUS | MAP_STACK)[m
+[m[37m[  9.610510 0:5 async_mem:277] [32m[mmap] vaddr: [VA:0x0, VA:0x3000), MappingFlags(READ | WRITE | USER), shared: false, fixed: false, backend: false[m
+[m[37m[  9.611025 0:5 async_mem:297] [32mfind free area[m
+[m[37m[  9.611220 0:5 async_mem:302] [32mfound area [VA:0xa57000, VA:0xa5a000)[m
+[m[37m[  9.611458 0:5 async_mem:144] [36mallocating [0xa57000, 0xa5a000) to [0xa57000, 0xa5a000) flag: MappingFlags(READ | WRITE | USER)[m
+[m[37m[  9.611852 0:5 syscall::syscall:69] [32m[syscall] id = 222,return 10842112[m
+[m[37m[  9.612283 0:5 syscall::syscall:20] [32m[syscall] id = MPROTECT, args = [10842112, 4096, 0, 18446744073709547520, 8191, 10850303], entry[m
+[m[37m[  9.612781 0:5 async_mem:347] [32m[mprotect] addr: [VA:0xa57000, VA:0xa58000), flags: MappingFlags(USER)[m
+[m[37m[  9.613285 0:5 syscall::syscall:69] [32m[syscall] id = 226,return 0[m
+[m[37m[  9.613552 0:5 syscall::syscall:42] [32m[syscall] id = SIGALTSTACK, args = [10840128, 0, 0, 8192, 2047, 0], entry[m
+[m[37m[  9.613982 0:5 async_mem:640] [36mallocating page at a56000[m
+[m[37m[  9.614200 0:5 syscall::syscall:69] [32m[syscall] id = 132,return 0[m
+[m[37m[  9.614601 0:5 syscall::syscall:42] [32m[syscall] id = PRCTL, args = [15, 10840160, 0, 0, 0, 10839952], entry[m
+[m[37m[  9.614982 0:5 syscall::syscall:69] [32m[syscall] id = 167,return 0[m
+[m[37m[  9.615631 0:5 syscall::syscall:42] [32m[syscall] id = CLOCK_GET_TIME, args = [1, 10839720, 74784, 74784, 67785016, 1], entry[m
+[m[37m[  9.616059 0:5 syscall::syscall:69] [32m[syscall] id = 113,return 0[m
+[m[37m[  9.616343 0:5 syscall::syscall:42] [32m[syscall] id = FUTEX, args = [6520520, 137, 18446744073709551615, 0, 0, 18446744073709551615], entry[m
+[m[37m[  9.616889 0:5 executor::futex:75] [32m[futex_wait] current task: TaskId(5), vaddr: VA:0x637ec8, flags: 0, val: 4294967295, deadline: None[m
+[m[37m[  9.617562 0:3 syscall::syscall:69] [32m[syscall] id = 98,return 0[m
+[m[37m[  9.618098 0:3 syscall::syscall:20] [32m[syscall] id = MUNMAP, args = [6520832, 2109440, 0, 8628568, 6448640, 22], entry[m
+[m[37m[  9.618551 0:3 async_mem:317] [32m[munmap] [VA:0x638000, VA:0x83b000)[m
+[m[37m[  9.618910 0:3 async_mem:188] [32msplitting for [VA:0x638000, VA:0x83b000)[m
+[m[37m[  9.619217 0:3 async_mem:193] [32m  drop [VA:0x638000, VA:0x63a000)[m
+[m[37m[  9.619444 0:3 async_mem:193] [32m  drop [VA:0x63a000, VA:0x83b000)[m
+[m[37m[  9.619846 0:3 syscall::syscall:69] [32m[syscall] id = 215,return 0[m
+[m[37m[  9.620306 0:3 async_mem::area:174] [36mpage index 347[m
+[m[37m[  9.620546 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8839000[m
+[m[37m[  9.635803 0:3 async_mem::area:174] [36mpage index 218[m
+[m[37m[  9.636028 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88f0000[m
+[m[37m[  9.650433 0:3 async_mem::area:174] [36mpage index 470[m
+[m[37m[  9.650685 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88f1000[m
+[m[37m[  9.666738 0:3 async_mem::area:174] [36mpage index 342[m
+[m[37m[  9.667019 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88f2000[m
+[m[37m[  9.682382 0:3 async_mem::area:174] [36mpage index 1004[m
+[m[37m[  9.682676 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88f3000[m
+[m[37m[  9.701988 0:3 async_mem::area:174] [36mpage index 351[m
+[m[37m[  9.702209 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88f4000[m
+[m[37m[  9.719555 0:3 syscall::syscall:30] [32m[syscall] id = WRITE, args = [2, 4825848, 7, 0, 0, 0], entry[m
+[m[37m[  9.720875 0:3 syscall::syscall_fs::imp::io:105] [32m[write()] fd: 2, buf: 0x49a2f8, len: 7[m
+[m[37m[  9.721778 0:3 async_mem:640] [36mallocating page at 49a000[m
+[mError: [37m[  9.722672 0:3 syscall::syscall:69] [32m[syscall] id = 64,return 7[m
+[m[37m[  9.723097 0:3 async_mem::area:174] [36mpage index 1048[m
+[m[37m[  9.723409 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88f5000[m
+[m[37m[  9.745948 0:3 async_mem::area:174] [36mpage index 188[m
+[m[37m[  9.746589 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88f6000[m
+[m[37m[  9.763525 0:3 syscall::syscall:30] [32m[syscall] id = WRITE, args = [2, 4621876, 14, 0, 0, 0], entry[m
+[m[37m[  9.764075 0:3 syscall::syscall_fs::imp::io:105] [32m[write()] fd: 2, buf: 0x468634, len: 14[m
+[m[37m[  9.764454 0:3 async_mem:640] [36mallocating page at 468000[m
+[m[37m[  9.765117 0:3 async_mem::area:174] [36mpage index 1127[m
+[m[37m[  9.765731 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88f7000[m
+[mBehaviourError[37m[  9.789626 0:3 syscall::syscall:69] [32m[syscall] id = 64,return 14[m
+[m[37m[  9.790132 0:3 async_mem::area:174] [36mpage index 356[m
+[m[37m[  9.790997 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88f8000[m
+[m[37m[  9.809369 0:3 syscall::syscall:30] [32m[syscall] id = WRITE, args = [2, 5266796, 1, 0, 0, 0], entry[m
+[m[37m[  9.810721 0:3 syscall::syscall_fs::imp::io:105] [32m[write()] fd: 2, buf: 0x505d6c, len: 1[m
+[m[37m[  9.812029 0:3 async_mem:640] [36mallocating page at 505000[m
+[m[37m[  9.812875 0:3 async_mem::area:174] [36mpage index 1284[m
+[m[37m[  9.813626 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88f9000[m
+[m([37m[  9.837900 0:3 syscall::syscall:69] [32m[syscall] id = 64,return 1[m
+[m[37m[  9.838173 0:3 async_mem::area:174] [36mpage index 176[m
+[m[37m[  9.838374 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88fa000[m
+[m[37m[  9.852471 0:3 syscall::syscall:30] [32m[syscall] id = WRITE, args = [2, 5297338, 2, 0, 0, 0], entry[m
+[m[37m[  9.852908 0:3 syscall::syscall_fs::imp::io:105] [32m[write()] fd: 2, buf: 0x50d4ba, len: 2[m
+[m[37m[  9.853324 0:3 async_mem:640] [36mallocating page at 50d000[m
+[mOs[37m[  9.853598 0:3 syscall::syscall:69] [32m[syscall] id = 64,return 2[m
+[m[37m[  9.853921 0:3 async_mem::area:174] [36mpage index 353[m
+[m[37m[  9.854159 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88fb000[m
+[m[37m[  9.869097 0:3 syscall::syscall:30] [32m[syscall] id = WRITE, args = [2, 5267132, 3, 0, 0, 0], entry[m
+[m[37m[  9.869446 0:3 syscall::syscall_fs::imp::io:105] [32m[write()] fd: 2, buf: 0x505ebc, len: 3[m
+[m[37m[  9.869729 0:3 async_mem:640] [36mallocating page at 505000[m
+[m { [37m[  9.870065 0:3 syscall::syscall:69] [32m[syscall] id = 64,return 3[m
+[m[37m[  9.870322 0:3 syscall::syscall:30] [32m[syscall] id = WRITE, args = [2, 4645664, 4, 0, 0, 0], entry[m
+[m[37m[  9.870669 0:3 syscall::syscall_fs::imp::io:105] [32m[write()] fd: 2, buf: 0x46e320, len: 4[m
+[m[37m[  9.871008 0:3 async_mem:640] [36mallocating page at 46e000[m
+[m[37m[  9.871216 0:3 async_mem::area:174] [36mpage index 1133[m
+[m[37m[  9.871439 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88fc000[m
+[mcode[37m[  9.891211 0:3 syscall::syscall:69] [32m[syscall] id = 64,return 4[m
+[m[37m[  9.891474 0:3 syscall::syscall:30] [32m[syscall] id = WRITE, args = [2, 5297395, 2, 0, 0, 0], entry[m
+[m[37m[  9.891788 0:3 syscall::syscall_fs::imp::io:105] [32m[write()] fd: 2, buf: 0x50d4f3, len: 2[m
+[m[37m[  9.892028 0:3 async_mem:640] [36mallocating page at 50d000[m
+[m: [37m[  9.892237 0:3 syscall::syscall:69] [32m[syscall] id = 64,return 2[m
+[m[37m[  9.892634 0:3 async_mem::area:174] [36mpage index 360[m
+[m[37m[  9.892856 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88fd000[m
+[m[37m[  9.907760 0:3 async_mem::area:174] [36mpage index 1136[m
+[m[37m[  9.907989 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88fe000[m
+[m[37m[  9.928166 0:3 syscall::syscall:30] [32m[syscall] id = WRITE, args = [2, 1073739726, 2, 0, 0, 0], entry[m
+[m[37m[  9.928708 0:3 syscall::syscall_fs::imp::io:105] [32m[write()] fd: 2, buf: 0x3ffff7ce, len: 2[m
+[m[37m[  9.928978 0:3 async_mem:640] [36mallocating page at 3ffff000[m
+[m97[37m[  9.929257 0:3 syscall::syscall:69] [32m[syscall] id = 64,return 2[m
+[m[37m[  9.929516 0:3 async_mem::area:174] [36mpage index 1125[m
+[m[37m[  9.929722 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b88ff000[m
+[m[37m[  9.949333 0:3 syscall::syscall:30] [32m[syscall] id = WRITE, args = [2, 5267093, 2, 0, 0, 0], entry[m
+[m[37m[  9.949702 0:3 syscall::syscall_fs::imp::io:105] [32m[write()] fd: 2, buf: 0x505e95, len: 2[m
+[m[37m[  9.950077 0:3 async_mem:640] [36mallocating page at 505000[m
+[m, [37m[  9.950387 0:3 syscall::syscall:69] [32m[syscall] id = 64,return 2[m
+[m[37m[  9.950641 0:3 syscall::syscall:30] [32m[syscall] id = WRITE, args = [2, 4645736, 4, 0, 0, 0], entry[m
+[m[37m[  9.951042 0:3 syscall::syscall_fs::imp::io:105] [32m[write()] fd: 2, buf: 0x46e368, len: 4[m
+[m[37m[  9.951324 0:3 async_mem:640] [36mallocating page at 46e000[m
+[mkind[37m[  9.951592 0:3 syscall::syscall:69] [32m[syscall] id = 64,return 4[m
+[m[37m[  9.951824 0:3 syscall::syscall:30] [32m[syscall] id = WRITE, args = [2, 5297395, 2, 0, 0, 0], entry[m
+[m[37m[  9.952093 0:3 syscall::syscall_fs::imp::io:105] [32m[write()] fd: 2, buf: 0x50d4f3, len: 2[m
+[m[37m[  9.952401 0:3 async_mem:640] [36mallocating page at 50d000[m
+[m: [37m[  9.952641 0:3 syscall::syscall:69] [32m[syscall] id = 64,return 2[m
+[m[37m[  9.952939 0:3 syscall::syscall:30] [32m[syscall] id = WRITE, args = [2, 5298962, 13, 0, 0, 0], entry[m
+[m[37m[  9.953260 0:3 syscall::syscall_fs::imp::io:105] [32m[write()] fd: 2, buf: 0x50db12, len: 13[m
+[m[37m[  9.953549 0:3 async_mem:640] [36mallocating page at 50d000[m
+[mUncategorized[37m[  9.953811 0:3 syscall::syscall:69] [32m[syscall] id = 64,return 13[m
+[m[37m[  9.954226 0:3 async_mem::area:174] [36mpage index 358[m
+[m[37m[  9.954511 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8900000[m
+[m[37m[  9.969731 0:3 syscall::syscall:30] [32m[syscall] id = WRITE, args = [2, 5267093, 2, 0, 0, 0], entry[m
+[m[37m[  9.970061 0:3 syscall::syscall_fs::imp::io:105] [32m[write()] fd: 2, buf: 0x505e95, len: 2[m
+[m[37m[  9.970383 0:3 async_mem:640] [36mallocating page at 505000[m
+[m, [37m[  9.970661 0:3 syscall::syscall:69] [32m[syscall] id = 64,return 2[m
+[m[37m[  9.970909 0:3 syscall::syscall:30] [32m[syscall] id = WRITE, args = [2, 5318496, 7, 0, 0, 0], entry[m
+[m[37m[  9.971217 0:3 syscall::syscall_fs::imp::io:105] [32m[write()] fd: 2, buf: 0x512760, len: 7[m
+[m[37m[  9.971499 0:3 async_mem:640] [36mallocating page at 512000[m
+[m[37m[  9.971735 0:3 async_mem::area:174] [36mpage index 1297[m
+[m[37m[  9.971940 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8901000[m
+[mmessage[37m[  9.993000 0:3 syscall::syscall:69] [32m[syscall] id = 64,return 7[m
+[m[37m[  9.993241 0:3 syscall::syscall:30] [32m[syscall] id = WRITE, args = [2, 5297395, 2, 0, 0, 0], entry[m
+[m[37m[  9.993670 0:3 syscall::syscall_fs::imp::io:105] [32m[write()] fd: 2, buf: 0x50d4f3, len: 2[m
+[m[37m[  9.993982 0:3 async_mem:640] [36mallocating page at 50d000[m
+[m: [37m[  9.994220 0:3 syscall::syscall:69] [32m[syscall] id = 64,return 2[m
+[m[37m[  9.994492 0:3 syscall::syscall:30] [32m[syscall] id = WRITE, args = [2, 1073739524, 1, 0, 0, 0], entry[m
+[m[37m[  9.994844 0:3 syscall::syscall_fs::imp::io:105] [32m[write()] fd: 2, buf: 0x3ffff704, len: 1[m
+[m[37m[  9.995155 0:3 async_mem:640] [36mallocating page at 3ffff000[m
+[m"[37m[  9.995455 0:3 syscall::syscall:69] [32m[syscall] id = 64,return 1[m
+[m[37m[  9.995798 0:3 async_mem::area:174] [36mpage index 357[m
+[m[37m[  9.996010 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8902000[m
+[m[37m[ 10.011532 0:3 syscall::syscall:30] [32m[syscall] id = WRITE, args = [2, 67779712, 40, 0, 0, 0], entry[m
+[m[37m[ 10.011914 0:3 syscall::syscall_fs::imp::io:105] [32m[write()] fd: 2, buf: 0x40a3c80, len: 40[m
+[m[37m[ 10.012235 0:3 async_mem:640] [36mallocating page at 40a3000[m
+[mAddress family not supported by protocol[37m[ 10.012579 0:3 syscall::syscall:69] [32m[syscall] id = 64,return 40[m
+[m[37m[ 10.012822 0:3 syscall::syscall:30] [32m[syscall] id = WRITE, args = [2, 1073739524, 1, 0, 0, 0], entry[m
+[m[37m[ 10.013159 0:3 syscall::syscall_fs::imp::io:105] [32m[write()] fd: 2, buf: 0x3ffff704, len: 1[m
+[m[37m[ 10.013466 0:3 async_mem:640] [36mallocating page at 3ffff000[m
+[m"[37m[ 10.013685 0:3 syscall::syscall:69] [32m[syscall] id = 64,return 1[m
+[m[37m[ 10.013924 0:3 syscall::syscall:30] [32m[syscall] id = WRITE, args = [2, 5292744, 2, 0, 0, 0], entry[m
+[m[37m[ 10.014211 0:3 syscall::syscall_fs::imp::io:105] [32m[write()] fd: 2, buf: 0x50c2c8, len: 2[m
+[m[37m[ 10.014477 0:3 async_mem:640] [36mallocating page at 50c000[m
+[m }[37m[ 10.014783 0:3 syscall::syscall:69] [32m[syscall] id = 64,return 2[m
+[m[37m[ 10.015042 0:3 syscall::syscall:30] [32m[syscall] id = WRITE, args = [2, 5324994, 1, 0, 0, 0], entry[m
+[m[37m[ 10.015418 0:3 syscall::syscall_fs::imp::io:105] [32m[write()] fd: 2, buf: 0x5140c2, len: 1[m
+[m[37m[ 10.015684 0:3 async_mem:640] [36mallocating page at 514000[m
+[m[37m[ 10.015879 0:3 async_mem::area:174] [36mpage index 1299[m
+[m[37m[ 10.016091 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8903000[m
+[m)[37m[ 10.037158 0:3 syscall::syscall:69] [32m[syscall] id = 64,return 1[m
+[m[37m[ 10.037476 0:3 syscall::syscall:30] [32m[syscall] id = WRITE, args = [2, 5318683, 1, 0, 0, 0], entry[m
+[m[37m[ 10.037809 0:3 syscall::syscall_fs::imp::io:105] [32m[write()] fd: 2, buf: 0x51281b, len: 1[m
+[m[37m[ 10.038143 0:3 async_mem:640] [36mallocating page at 512000[m
+[m
+[37m[ 10.038389 0:3 syscall::syscall:69] [32m[syscall] id = 64,return 1[m
+[m[37m[ 10.038689 0:3 async_mem::area:174] [36mpage index 180[m
+[m[37m[ 10.038917 0:3 async_mem::area:179] [36mnew phys page virtual (offset) address VA:0xffffffc0b8904000[m
+[m[37m[ 10.053134 0:3 syscall::syscall:42] [32m[syscall] id = SIGALTSTACK, args = [1073740584, 0, 1, 0, 2, 0], entry[m
+[m[37m[ 10.053511 0:3 async_mem:640] [36mallocating page at 3ffff000[m
+[m[37m[ 10.053711 0:3 syscall::syscall:69] [32m[syscall] id = 132,return 0[m
+[m[37m[ 10.053940 0:3 syscall::syscall:20] [32m[syscall] id = MUNMAP, args = [6451200, 12288, 0, 0, 2, 18446744073709547520], entry[m
+[m[37m[ 10.054322 0:3 async_mem:317] [32m[munmap] [VA:0x627000, VA:0x62a000)[m
+[m[37m[ 10.054648 0:3 async_mem:188] [32msplitting for [VA:0x627000, VA:0x62a000)[m
+[m[37m[ 10.054898 0:3 async_mem:193] [32m  drop [VA:0x627000, VA:0x628000)[m
+[m[37m[ 10.055115 0:3 async_mem:193] [32m  drop [VA:0x628000, VA:0x62a000)[m
+[m[37m[ 10.055519 0:3 syscall::syscall:69] [32m[syscall] id = 215,return 0[m
+[m[37m[ 10.056669 0:3 syscall::syscall:42] [32m[syscall] id = EXIT_GROUP, args = [1, 0, 0, 0, 0, 1], entry[m
+[m[37m[ 10.057363 0:3 syscall::syscall_task::imp::task:61] [32mexit: exit_code = 1[m
+[m[37m[ 10.057666 0:3 executor::api:89] [32mexit task id 3 with code _1_[m
+[m[37m[ 10.057884 0:3 executor::futex:143] [32m[futex_wake] vaddr: VA:0x40a7174, flags: 0, nr_waken: 1[m
+[m[37m[ 10.058203 0:3 executor::futex:152] [32mhash_bucket is empty[m
+[m[37m[ 10.059065 0:5 syscall::syscall:69] [32m[syscall] id = 98,return -4[m
+[m[37m[ 10.059422 0:5 executor::signal:177] [32mcpu: 0, task: 5, handler signal: 9[m
+[m[37m[ 10.059815 0:5 executor::signal:123] [33mTerminate process: 2[m
+[m[37m[ 10.060312 0:5 executor::api:89] [32mexit task id 5 with code _-1_[m
+[m[37m[ 10.060544 0:5 executor::futex:143] [32m[futex_wake] vaddr: VA:0x40a7174, flags: 0, nr_waken: 1[m
+[m[37m[ 10.060918 0:5 executor::futex:152] [32mhash_bucket is empty[m
+[m[37m[ 10.061243 0:5 trampoline:97] [36mtask exit: Task(5, "futures-timer"), exit_code=-1[m
+[m[37m[ 10.061553 0:5 taskctx::task:582] [36mtask drop: Task(5, "futures-timer")[m
+[m[37m[ 10.063029 0:3 syscall::syscall:69] [32m[syscall] id = 94,return 1[m
+[m[37m[ 10.063466 0:3 trampoline:97] [36mtask exit: Task(3, "/chat_example"), exit_code=1[m
+[mtask count 1
+[37m[ 10.064454 0:1 taskctx::task:582] [36mtask drop: Task(3, "/chat_example")[m
+[m[37m[ 10.064994 0:1 trampoline:97] [36mtask exit: Task(1, "main"), exit_code=0[m
+[m[37m[ 10.065303 0:1 axhal::platform::riscv64_qemu_virt::misc:3] [32mShutting down...[m
+[m
