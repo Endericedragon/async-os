@@ -35,6 +35,7 @@ pub enum Domain {
     AF_UNIX = 1,
     AF_INET = 2,
     //AF_INET6 = 10,
+    AF_NETLINK = 16,
 }
 
 #[derive(TryFromPrimitive, PartialEq, Eq, Copy, Clone, Debug)]
@@ -977,8 +978,11 @@ pub unsafe fn socket_address_from(addr: *const u8, socket: &Socket) -> SocketAdd
 
             let addr = IpAddr::v4(a[0], a[1], a[2], a[3]);
             SocketAddr { addr, port }
-        } // TODO: support ipv6
-          // Domain::AF_INET6 => {}
+        }
+        // TODO: support ipv6
+        // Domain::AF_INET6 => {}
+        // TODO: support NETLINK
+        Domain::AF_NETLINK => unimplemented!(),
     }
 }
 /// Only support INET (ipv4)

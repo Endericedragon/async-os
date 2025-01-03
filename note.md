@@ -399,10 +399,25 @@ mydebug: build
 
 我们知道这个`Mutex`来自`modules/sync/src/mutex.rs`，我们的阅读就从这里开始吧。
 
-## 增添功能
-
-### 新建模块async_std::collections
+## 增添async_std::collections
 
 注意到当前操作系统没有提供容器数据结构，仅有`alloc::vec::Vec`，因此有必要增添`async_std::collections`来提供常用的容器数据结构。
 
 本次功能增添一共新增两个容器：`HashMap`和`BinaryHeap`。前者直接通过引入`hashbrown`库实现，后者由笔者手动编写实现。
+
+## 移植libp2p-core
+
+根据拓扑排序结果，可知想要移植 `libp2p-core` 库需要先行完成如下库的移植工作：
+
+- misc/futures-bounded
+- identity
+- transports/pnet
+- swarm-derive
+- misc/multistream-select
+- misc/quick-protobuf-codec
+- misc/quickcheck-ext
+- misc/rw-stream-sink
+
+### 移植futures-bounded
+
+笔者以前就尝试移植过该库，只不过该库的测试需要futures和tokio等复杂依赖，因此一直未能进行测试。实际上，AsyncOS内部高度异步化，理论上完全有条件进行该测试。因此，正在将原测试移植到AsyncOS上，作为apps中的某个程序运行，以此证明移植的正确性。现在遇到的问题是，`futures::oneshot` 急需替代品。

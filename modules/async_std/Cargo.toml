@@ -4,19 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-
 thread = ["trampoline/thread"]
-
 monolithic = ["feat/monolithic", "multitask", "alloc", "fs", "net"]
-
 img = ["feat/img"]
-
 # Multicore
 smp = ["feat/smp"]
-
 # Interrupts
 irq = ["aos_api/irq", "feat/irq"]
-
 # Memory
 alloc = ["aos_api/alloc", "feat/alloc"]
 alloc-tlsf = ["feat/alloc-tlsf"]
@@ -24,35 +18,29 @@ alloc-slab = ["feat/alloc-slab"]
 alloc-buddy = ["feat/alloc-buddy"]
 # paging = ["feat/paging"]
 # tls = ["feat/tls"]
-
 # Multi-threading and scheduler
 multitask = ["aos_api/multitask", "feat/multitask"]
 sched_fifo = ["feat/sched_fifo"]
 sched_rr = ["feat/sched_rr"]
 sched_cfs = ["feat/sched_cfs"]
 sched_taic = ["feat/sched_taic"]
-
 # File system
 fs = ["aos_api/fs", "feat/fs"]
 # myfs = ["aos_api/myfs", "feat/myfs"]
 fatfs = ["feat/fatfs"]
 # lwext4_rust = ["feat/lwext4_rust", "fs"]
-
 # Networking
 net = ["aos_api/net", "feat/net"]
 dns = []
-
 # Display
 display = []
 # display = ["aos_api/display", "feat/display"]
-
 # # Device drivers
 # bus-mmio = ["feat/bus-mmio"]
 # bus-pci = ["feat/bus-pci"]
 # driver-ramdisk = ["axfeat/driver-ramdisk"]
 # driver-ixgbe = ["feat/driver-ixgbe"]
 # driver-bcm2835-sdhci = ["feat/driver-bcm2835-sdhci"]
-
 # Logging
 log-level-off = ["feat/log-level-off"]
 log-level-error = ["feat/log-level-error"]
@@ -61,15 +49,12 @@ log-level-info = ["feat/log-level-info"]
 log-level-debug = ["feat/log-level-debug"]
 log-level-trace = ["feat/log-level-trace"]
 
-
 [dependencies]
 axlog = { git = "https://github.com/Starry-OS/axlog.git" }
 pin-project-lite = "0.2.14"
 lazy_init = { git = "https://github.com/Starry-OS/lazy_init.git" }
-
 axerrno = { git = "https://github.com/Starry-OS/axerrno.git" }
 spinlock = { git = "https://github.com/Starry-OS/spinlock.git" }
-
 arch_boot = { path = "../arch_boot" }
 feat = { path = "../feat", package = "feat" }
 aos_api = { path = "../aos_api" }
@@ -78,3 +63,4 @@ async_io = { path = "../async_io" }
 sync = { path = "../sync" }
 axhal = { path = "../axhal" }
 trampoline = { path = "../trampoline" }
+hashbrown = "0.14"

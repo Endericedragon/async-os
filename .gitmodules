@@ -8,3 +8,6 @@
 [submodule "modules/ak_futures-timer"]
 	path = modules/ak_futures-timer
 	url = git@github.com:Endericedragon/ak_futures-timer.git
+[submodule "modules/ak_futures-bounded"]
+	path = modules/ak_futures-bounded
+	url = git@github.com:Endericedragon/ak_futures-bounded.git

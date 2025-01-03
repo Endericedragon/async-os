@@ -50,6 +50,7 @@ members = [
     # My additions
     "user_apps/chat_example",
     "modules/ak_futures-timer",
+    "modules/ak_futures-bounded",
     "apps/akm",
 ]
 resolver = "2"

@@ -23,3 +23,5 @@ pub mod net;
 mod macros;
 
 pub use async_utils::async_main;
+
+pub mod collections;
