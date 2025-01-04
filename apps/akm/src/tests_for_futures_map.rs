@@ -1,8 +1,10 @@
 use ak_futures_bounded::{FuturesMap, PushError};
 use ak_futures_timer::Delay;
-use core::future::{pending, poll_fn, ready};
-use core::task::Context;
+use core::future::{pending, poll_fn, ready, Future};
+use core::pin::Pin;
+use core::task::{Context, Poll};
 use core::time::Duration;
+use futures_channel::oneshot;
 use futures_util::task::noop_waker_ref;
 
 pub fn cannot_push_more_than_capacity_tasks() {
@@ -72,4 +74,65 @@ pub async fn replaced_pending_future_is_polled() {
 
     assert_eq!(id, "ID1");
     assert_eq!(res.unwrap().unwrap(), 4);
+}
+
+pub async fn backpressure() {
+    const DELAY: Duration = Duration::from_millis(100);
+    const NUM_FUTURES: u32 = 10;
+
+    let start = async_std::time::Instant::now();
+    Task::new(DELAY, NUM_FUTURES, 1).await;
+    let duration = start.elapsed();
+
+    assert!(duration >= DELAY * NUM_FUTURES);
+}
+
+struct Task {
+    future: Duration,
+    num_futures: usize,
+    num_processed: usize,
+    inner: FuturesMap<u8, ()>,
+}
+
+impl Task {
+    fn new(future: Duration, num_futures: u32, capacity: usize) -> Self {
+        Self {
+            future,
+            num_futures: num_futures as usize,
+            num_processed: 0,
+            inner: FuturesMap::new(Duration::from_secs(60), capacity),
+        }
+    }
+}
+
+impl Future for Task {
+    type Output = ();
+
+    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+        let this = self.get_mut();
+
+        while this.num_processed < this.num_futures {
+            if let Poll::Ready((_, result)) = this.inner.poll_unpin(cx) {
+                if result.is_err() {
+                    panic!("Timeout is great than future delay")
+                }
+
+                this.num_processed += 1;
+                continue;
+            }
+
+            if let Poll::Ready(()) = this.inner.poll_ready_unpin(cx) {
+                // We push the constant future's ID to prove that user can use the same ID
+                // if the future was finished
+                let maybe_future = this.inner.try_push(1u8, Delay::new(this.future));
+                assert!(maybe_future.is_ok(), "we polled for readiness");
+
+                continue;
+            }
+
+            return Poll::Pending;
+        }
+
+        Poll::Ready(())
+    }
 }

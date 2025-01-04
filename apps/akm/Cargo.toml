@@ -13,3 +13,6 @@ ak_futures-bounded = { path = "../../modules/ak_futures-bounded" }
 futures-util = { version = "0.3.30", default-features = false, features = [
     "alloc"
 ] }
+futures-channel = { version = "0.3", default-features = false, features = [
+    "alloc"
+] }

@@ -12,10 +12,10 @@ mod tests_for_futures_map;
 async fn main() -> isize {
     println!("Testing ak_futures-timer...");
 
-    let delay = ak_futures_timer::Delay::new(async_std::time::Duration::from_secs(2));
+    let delay = ak_futures_timer::Delay::new(async_std::time::Duration::from_secs(1));
     delay.await;
 
-    println!("Timer finished after 2 seconds!");
+    println!("Timer finished after 1 seconds!");
 
     println!("Testing ak_futures-bounded...");
 
@@ -23,8 +23,9 @@ async fn main() -> isize {
     tests_for_futures_map::cannot_push_the_same_id_few_times();
     tests_for_futures_map::futures_timeout().await;
     tests_for_futures_map::resources_of_removed_future_are_cleaned_up();
+    tests_for_futures_map::replaced_pending_future_is_polled().await;
+    tests_for_futures_map::backpressure().await;
 
     println!("All tests passed!");
     0
 }
-
