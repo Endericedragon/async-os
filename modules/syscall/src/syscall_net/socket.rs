@@ -14,8 +14,8 @@ use core::{
 use executor::current_task;
 
 use async_net::{
-    add_membership, from_core_sockaddr, into_core_sockaddr, poll_interfaces, IpAddr, SocketAddr,
-    TcpSocket, UdpSocket,
+    add_membership, from_core_sockaddr, into_core_sockaddr, poll_interfaces, IpAddr, IpEndpoint,
+    SocketAddr, TcpSocket, UdpSocket,
 };
 use axlog::{error, warn};
 use num_enum::TryFromPrimitive;
@@ -577,6 +577,7 @@ impl Socket {
             SocketInner::Udp(s) => s.local_addr(),
         }
         .map(from_core_sockaddr)
+        .map(|x| SocketAddr::IpPortPair(x))
     }
 
     /// Return peer address.
@@ -586,13 +587,17 @@ impl Socket {
             SocketInner::Udp(s) => s.peer_addr(),
         }
         .map(from_core_sockaddr)
+        .map(|x| SocketAddr::IpPortPair(x))
     }
 
     /// Bind the socket to the given address.
     pub async fn bind(&self, addr: SocketAddr) -> AxResult {
-        match &self.inner {
-            SocketInner::Tcp(s) => s.bind(into_core_sockaddr(addr)).await,
-            SocketInner::Udp(s) => s.bind(into_core_sockaddr(addr)).await,
+        match addr {
+            SocketAddr::IpPortPair(addr) => match &self.inner {
+                SocketInner::Tcp(s) => s.bind(into_core_sockaddr(addr)).await,
+                SocketInner::Udp(s) => s.bind(into_core_sockaddr(addr)).await,
+            },
+            SocketAddr::NetlinkEndpoint => Ok(()),
         }
     }
 
@@ -640,15 +645,18 @@ impl Socket {
                 recv_buf_size: AtomicU64::new(64 * 1024),
                 congestion: Mutex::new(String::from("reno")),
             },
-            from_core_sockaddr(addr),
+            SocketAddr::IpPortPair(from_core_sockaddr(addr)),
         ))
     }
 
     /// Connect to the given address.
     pub async fn connect(&self, addr: SocketAddr) -> AxResult {
-        match &self.inner {
-            SocketInner::Tcp(s) => s.connect(into_core_sockaddr(addr)).await,
-            SocketInner::Udp(s) => s.connect(into_core_sockaddr(addr)).await,
+        match addr {
+            SocketAddr::IpPortPair(addr) => match &self.inner {
+                SocketInner::Tcp(s) => s.connect(into_core_sockaddr(addr)).await,
+                SocketInner::Udp(s) => s.connect(into_core_sockaddr(addr)).await,
+            },
+            SocketAddr::NetlinkEndpoint => Ok(()),
         }
     }
 
@@ -670,7 +678,7 @@ impl Socket {
             SocketInner::Udp(s) => {
                 // udp socket not bound
                 if s.local_addr().is_err() {
-                    s.bind(into_core_sockaddr(SocketAddr::new(
+                    s.bind(into_core_sockaddr(IpEndpoint::new(
                         IpAddr::v4(0, 0, 0, 0),
                         0,
                     )))
@@ -678,7 +686,12 @@ impl Socket {
                     .unwrap();
                 }
                 match addr {
-                    Some(addr) => s.send_to(buf, into_core_sockaddr(addr)).await,
+                    Some(addr) => match addr {
+                        SocketAddr::IpPortPair(addr) => {
+                            s.send_to(buf, into_core_sockaddr(addr)).await
+                        }
+                        SocketAddr::NetlinkEndpoint => (Ok(0)),
+                    },
                     None => {
                         // not connected and no target is given
                         if s.peer_addr().is_err() {
@@ -708,7 +721,10 @@ impl Socket {
             let ans = self.buffer.as_ref().unwrap().read(buf).await?;
             return Ok((
                 ans,
-                SocketAddr::new(IpAddr::Ipv4(async_net::Ipv4Addr::new(127, 0, 0, 1)), 0),
+                SocketAddr::IpPortPair(IpEndpoint::new(
+                    IpAddr::Ipv4(async_net::Ipv4Addr::new(127, 0, 0, 1)),
+                    0,
+                )),
             ));
         }
         // warn!("recv_from on socket {:?}", self.socket_type);
@@ -721,16 +737,19 @@ impl Socket {
                     None => s.recv(buf).await,
                 }
                 .map(|len| (len, from_core_sockaddr(addr)))
+                .map(|x| (x.0, SocketAddr::IpPortPair(x.1)))
             }
             SocketInner::Udp(s) => match self.get_recv_timeout().await {
                 Some(time) => s
                     .recv_from_timeout(buf, time.turn_to_ticks())
                     .await
-                    .map(|(val, addr)| (val, from_core_sockaddr(addr))),
+                    .map(|(val, addr)| (val, from_core_sockaddr(addr)))
+                    .map(|x| (x.0, SocketAddr::IpPortPair(x.1))),
                 None => s
                     .recv_from(buf)
                     .await
-                    .map(|(val, addr)| (val, from_core_sockaddr(addr))),
+                    .map(|(val, addr)| (val, from_core_sockaddr(addr)))
+                    .map(|x| (x.0, SocketAddr::IpPortPair(x.1))),
             },
         }
     }
@@ -968,6 +987,7 @@ impl FileIO for Socket {
 /// Turn a socket address buffer into a SocketAddr
 ///
 /// Only support INET (ipv4)
+/// used in syscall_(connect|bind|sendto)
 pub unsafe fn socket_address_from(addr: *const u8, socket: &Socket) -> SocketAddr {
     let addr = addr as *const u16;
     match socket.domain {
@@ -977,12 +997,12 @@ pub unsafe fn socket_address_from(addr: *const u8, socket: &Socket) -> SocketAdd
             let a = (*(addr.add(2) as *const u32)).to_le_bytes();
 
             let addr = IpAddr::v4(a[0], a[1], a[2], a[3]);
-            SocketAddr { addr, port }
+            SocketAddr::IpPortPair(IpEndpoint::new(addr, port))
         }
         // TODO: support ipv6
         // Domain::AF_INET6 => {}
         // TODO: support NETLINK
-        Domain::AF_NETLINK => unimplemented!(),
+        Domain::AF_NETLINK => SocketAddr::NetlinkEndpoint,
     }
 }
 /// Only support INET (ipv4)
@@ -999,35 +1019,42 @@ pub unsafe fn socket_address_to(
     mut buf_len: usize,
     buf_len_addr: *mut u32,
 ) -> AxResult {
-    *buf_len_addr = core::mem::size_of::<LibcSocketAddr>() as u32;
-    // 写入 AF_INET
-    if buf_len == 0 {
-        return Ok(());
-    }
-    let domain = (Domain::AF_INET as u16).to_ne_bytes();
-    let write_len = buf_len.min(2);
-    copy_nonoverlapping(domain.as_ptr(), buf, write_len);
-    let buf = buf.add(write_len);
-    buf_len -= write_len;
+    match addr {
+        SocketAddr::IpPortPair(addr) => {
+            *buf_len_addr = core::mem::size_of::<LibcSocketAddr>() as u32;
+            // 写入 AF_INET
+            if buf_len == 0 {
+                return Ok(());
+            }
+            let domain = (Domain::AF_INET as u16).to_ne_bytes();
+            let write_len = buf_len.min(2);
+            copy_nonoverlapping(domain.as_ptr(), buf, write_len);
+            let buf = buf.add(write_len);
+            buf_len -= write_len;
 
-    // 写入 port
-    if buf_len == 0 {
-        return Ok(());
-    }
-    let port = &addr.port.to_be_bytes();
-    let write_len = buf_len.min(2);
-    copy_nonoverlapping(port.as_ptr(), buf, write_len);
-    let buf = buf.add(write_len);
-    buf_len -= write_len;
+            // 写入 port
+            if buf_len == 0 {
+                return Ok(());
+            }
+            let port = &addr.port.to_be_bytes();
+            let write_len = buf_len.min(2);
+            copy_nonoverlapping(port.as_ptr(), buf, write_len);
+            let buf = buf.add(write_len);
+            buf_len -= write_len;
 
-    // 写入 address, only support ipv4
-    axlog::warn!("Only support ipv4");
-    if buf_len == 0 {
-        return Ok(());
-    }
-    let address = &addr.addr.as_bytes();
-    let write_len = buf_len.min(4);
-    copy_nonoverlapping(address.as_ptr(), buf, write_len);
+            // 写入 address, only support ipv4
+            axlog::warn!("Only support ipv4");
+            if buf_len == 0 {
+                return Ok(());
+            }
+            let address = &addr.addr.as_bytes();
+            let write_len = buf_len.min(4);
+            copy_nonoverlapping(address.as_ptr(), buf, write_len);
 
-    Ok(())
+            Ok(())
+        }
+        SocketAddr::NetlinkEndpoint => {
+            unimplemented!()
+        }
+    }
 }

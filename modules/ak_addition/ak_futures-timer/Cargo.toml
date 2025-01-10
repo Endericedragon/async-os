@@ -1,0 +1,17 @@
+[package]
+name = "ak_futures-timer"
+version = "3.0.3"
+authors = ["Alex Crichton <alex@alexcrichton.com>"]
+edition = "2018"
+license = "MIT/Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/Endericedragon/ak_futures-timer"
+homepage = "https://github.com/async-rs/futures-timer"
+documentation = "https://docs.rs/futures-timer"
+description = """
+Timeouts for futures.
+"""
+
+[dependencies]
+syscall = { path = "../../syscall" }
+async_std = { path = "../../async_std" }

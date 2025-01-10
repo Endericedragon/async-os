@@ -5,9 +5,9 @@
 [submodule "vdso/cops"]
 	path = vdso/cops
 	url = https://github.com/AsyncModules/cops.git
-[submodule "modules/ak_futures-timer"]
-	path = modules/ak_futures-timer
+[submodule "modules/ak_addition/ak_futures-timer"]
+	path = modules/ak_addition/ak_futures-timer
 	url = git@github.com:Endericedragon/ak_futures-timer.git
-[submodule "modules/ak_futures-bounded"]
-	path = modules/ak_futures-bounded
+[submodule "modules/ak_addition/ak_futures-bounded"]
+	path = modules/ak_addition/ak_futures-bounded
 	url = git@github.com:Endericedragon/ak_futures-bounded.git

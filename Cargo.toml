@@ -48,9 +48,14 @@ members = [
     "user_apps/syscall_test",
     "user_apps/batch_syscall",
     # My additions
+    # 用户态应用程序
     "user_apps/chat_example",
-    "modules/ak_futures-timer",
-    "modules/ak_futures-bounded",
+    # 内核模块
+    "modules/ak_addition/ak_futures-timer",
+    "modules/ak_addition/ak_futures-bounded",
+    "modules/ak_addition/ak_asn1_der",
+    "modules/ak_addition/ak_libp2p-identity",
+    # 宏内核应用程序
     "apps/akm",
 ]
 resolver = "2"

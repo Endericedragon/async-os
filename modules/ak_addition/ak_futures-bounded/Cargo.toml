@@ -1,0 +1,22 @@
+[package]
+name = "ak_futures-bounded"
+version = "0.2.4"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/thomaseizinger/rust-futures-bounded"
+keywords = ["futures", "async", "backpressure"]
+categories = ["data-structures", "asynchronous"]
+description = "Utilities for bounding futures in size and time."
+publish = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[dependencies]
+async_std = { path = "../../async_std" }
+futures-util = { version = "0.3.30", default-features = false, features = [
+    "alloc"
+] }
+futures-timer = { path = "../ak_futures-timer", package = "ak_futures-timer" }
+
+[dev-dependencies]
+tokio = { version = "1.35.1", features = ["macros", "rt", "sync"] }
+futures = "0.3.30"
