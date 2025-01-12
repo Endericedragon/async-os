@@ -15,7 +15,7 @@ use executor::current_task;
 
 use async_net::{
     add_membership, from_core_sockaddr, into_core_sockaddr, poll_interfaces, IpAddr, IpEndpoint,
-    SocketAddr, TcpSocket, UdpSocket,
+    NetlinkEndpoint, SocketAddr, TcpSocket, UdpSocket,
 };
 use axlog::{error, warn};
 use num_enum::TryFromPrimitive;
@@ -25,6 +25,7 @@ use crate::{
     syscall_fs::ctype::pipe::{make_pipe, Pipe},
     LibcSocketAddr, SyscallError, SyscallResult, TimeVal,
 };
+use crate::{LibcSockAddrIn, LibcSockAddrNl};
 
 pub const SOCKET_TYPE_MASK: usize = 0xFF;
 
@@ -445,6 +446,7 @@ impl Ipv6Option {
 pub struct Socket {
     domain: Domain,
     socket_type: SocketType,
+    protocol: Option<usize>,
 
     /// Type of the socket protocol used
     pub inner: SocketInner,
@@ -521,7 +523,7 @@ impl Socket {
     }
 
     /// Create a new socket with the given domain and socket type.
-    pub async fn new(domain: Domain, socket_type: SocketType) -> Self {
+    pub async fn new(domain: Domain, socket_type: SocketType, protocol: Option<usize>) -> Self {
         let inner = match socket_type {
             SocketType::SOCK_STREAM | SocketType::SOCK_SEQPACKET => {
                 SocketInner::Tcp(TcpSocket::new())
@@ -535,6 +537,7 @@ impl Socket {
         Self {
             domain,
             socket_type,
+            protocol,
             inner,
             close_exec: AtomicBool::new(false),
             buffer: None,
@@ -597,7 +600,10 @@ impl Socket {
                 SocketInner::Tcp(s) => s.bind(into_core_sockaddr(addr)).await,
                 SocketInner::Udp(s) => s.bind(into_core_sockaddr(addr)).await,
             },
-            SocketAddr::NetlinkEndpoint => Ok(()),
+            SocketAddr::NetlinkEndpoint(addr) => {
+                info!("Unsupported netlink endpoint bind...");
+                Ok(())
+            }
         }
     }
 
@@ -636,6 +642,7 @@ impl Socket {
             Self {
                 domain: self.domain.clone(),
                 socket_type: self.socket_type.clone(),
+                protocol: self.protocol.clone(),
                 inner: SocketInner::Tcp(new_socket),
                 close_exec: AtomicBool::new(false),
                 buffer: None,
@@ -656,7 +663,10 @@ impl Socket {
                 SocketInner::Tcp(s) => s.connect(into_core_sockaddr(addr)).await,
                 SocketInner::Udp(s) => s.connect(into_core_sockaddr(addr)).await,
             },
-            SocketAddr::NetlinkEndpoint => Ok(()),
+            SocketAddr::NetlinkEndpoint(addr) => {
+                info!("Unsupported netlink endpoint connect...");
+                Ok(())
+            }
         }
     }
 
@@ -676,6 +686,7 @@ impl Socket {
         }
         match &self.inner {
             SocketInner::Udp(s) => {
+                info!("[sendto()] sending a udp packet...");
                 // udp socket not bound
                 if s.local_addr().is_err() {
                     s.bind(into_core_sockaddr(IpEndpoint::new(
@@ -690,7 +701,10 @@ impl Socket {
                         SocketAddr::IpPortPair(addr) => {
                             s.send_to(buf, into_core_sockaddr(addr)).await
                         }
-                        SocketAddr::NetlinkEndpoint => (Ok(0)),
+                        SocketAddr::NetlinkEndpoint(addr) => {
+                            info!("Unsupported netlink endpoint sendto...");
+                            Ok(0)
+                        }
                     },
                     None => {
                         // not connected and no target is given
@@ -703,6 +717,7 @@ impl Socket {
                 }
             }
             SocketInner::Tcp(s) => {
+                info!("[sendto()] sending a tcp packet...");
                 if s.is_closed() {
                     // The local socket has been closed.
                     return Err(AxError::ConnectionReset);
@@ -989,20 +1004,48 @@ impl FileIO for Socket {
 /// Only support INET (ipv4)
 /// used in syscall_(connect|bind|sendto)
 pub unsafe fn socket_address_from(addr: *const u8, socket: &Socket) -> SocketAddr {
-    let addr = addr as *const u16;
     match socket.domain {
         Domain::AF_UNIX => unimplemented!(),
         Domain::AF_INET => {
-            let port = u16::from_be(*addr.add(1));
-            let a = (*(addr.add(2) as *const u32)).to_le_bytes();
+            /*
+            pub struct sockaddr_in {
+                pub sin_family: u16,
+                pub sin_port: u16,
+                pub sin_addr: crate::in_addr, // a struct with a member of u32
+                pub sin_zero: [u8; 8],
+            }
+             */
+            let sock_addr_in = LibcSockAddrIn::from(addr);
+            let port = sock_addr_in.sin_port;
+            let a = sock_addr_in.sin_addr.to_ipv4_format();
 
-            let addr = IpAddr::v4(a[0], a[1], a[2], a[3]);
-            SocketAddr::IpPortPair(IpEndpoint::new(addr, port))
+            // let addr = addr as *const u16;
+            // let port = u16::from_be(*addr.add(1));
+            // let a = (*(addr.add(2) as *const u32)).to_le_bytes();
+
+            let ipv4_addr = IpAddr::v4(a[0], a[1], a[2], a[3]);
+            SocketAddr::new_ip_port_pair(IpEndpoint::new(ipv4_addr, port))
         }
         // TODO: support ipv6
         // Domain::AF_INET6 => {}
         // TODO: support NETLINK
-        Domain::AF_NETLINK => SocketAddr::NetlinkEndpoint,
+        Domain::AF_NETLINK => {
+            info!("Unsupported netlink endpoint socket_address_from...");
+            /*
+            pub struct sockaddr_nl {
+                pub nl_family: u16,
+                nl_pad: u16,
+                pub nl_pid: u32,
+                pub nl_groups: u32,
+            }
+             */
+            let sock_addr_nl = LibcSockAddrNl::from(addr);
+            info!("sock_addr_nl: {:#?}", sock_addr_nl);
+            info!("protocol: {:?}", socket.protocol);
+            // 通过观察protocol，发现两次对NETLINK的bind操作所对应的协议族都是0，即：#define NETLINK_ROUTE		0
+            // 也就是说，我们只需实现路由表的功能就行了
+            SocketAddr::default_netlink_endpoint()
+        }
     }
 }
 /// Only support INET (ipv4)
@@ -1053,7 +1096,7 @@ pub unsafe fn socket_address_to(
 
             Ok(())
         }
-        SocketAddr::NetlinkEndpoint => {
+        SocketAddr::NetlinkEndpoint(addr) => {
             unimplemented!()
         }
     }

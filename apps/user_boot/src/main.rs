@@ -89,8 +89,8 @@ fn get_args(command_line: &[u8]) -> Vec<String> {
 
 #[allow(dead_code)]
 const BUSYBOX_TESTCASES: &[&str] = &[
-    // "hello_world",
-    "chat_example",
+    "hello_world",
+    // "chat_example",
     // "busybox sh busybox_testcode.sh",
     // "busybox sh lua_testcode.sh",
     // "libctest_testcode.sh",

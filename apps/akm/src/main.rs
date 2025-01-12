@@ -1,24 +1,32 @@
 #![no_std]
 #![no_main]
 
+use async_std::prelude::{Read, Write};
+
 #[macro_use]
 extern crate async_std;
-
-// use libp2p_identity::{Keypair, PeerId};
 
 #[async_std::async_main]
 async fn main() -> isize {
     println!("Greetings!");
-    // println!("Testing...");
 
-    // let keypair = Keypair::generate_ed25519();
-    // let peer_id = keypair.public().to_peer_id();
-    // println!("Original PeerId: {:?}", peer_id);
-    // let peer_id_bytes = peer_id.to_bytes();
+    let listener = async_std::net::TcpListener::bind("0.0.0.0:7878")
+        .await
+        .expect("Failed to bind!");
+    async_std::println!("Listening on 0.0.0.0:7878");
 
-    // let restored_peer_id = PeerId::from_bytes(&peer_id_bytes).unwrap();
-    // println!("Restored PeerId: {:?}", restored_peer_id);
+    loop {
+        let (mut tcp_stream, socket_addr) = listener.accept().await.expect("Failed to accept!");
+        let mut buf = [0u8; 1024];
+        async_std::println!("Received connection from {}...", socket_addr);
+        tcp_stream.read(&mut buf).await.expect("Failed to read!");
+        async_std::println!("Received: {}", alloc::string::String::from_utf8_lossy(&buf));
+        let response = "HTTP/1.1 200 OK\r\nContent-Length: 5\r\n\r\nhello";
+        tcp_stream
+            .write_all(response.as_bytes())
+            .await
+            .expect("Failed to write!");
+    }
 
-    // println!("All tests passed!");
     0
 }

@@ -42,10 +42,25 @@ pub use smoltcp::wire::{
     IpAddress as IpAddr, IpEndpoint, Ipv4Address as Ipv4Addr, Ipv6Address as Ipv6Addr,
 };
 
+mod ctypes;
+pub use ctypes::sockaddr_nl as NetlinkEndpoint;
+
 #[derive(Debug, Clone, Copy)]
 pub enum SocketAddr {
     IpPortPair(IpEndpoint),
-    NetlinkEndpoint,
+    // NetLink方面，参考了https://github.com/rust-netlink/netlink-sys/blob/main/src/addr.rs的设计
+    NetlinkEndpoint(NetlinkEndpoint),
+}
+
+impl SocketAddr {
+    pub fn new_ip_port_pair(x: IpEndpoint) -> Self {
+        Self::IpPortPair(x)
+    }
+
+    pub fn default_netlink_endpoint() -> Self {
+        let addr: NetlinkEndpoint = unsafe { core::mem::zeroed() };
+        Self::NetlinkEndpoint(addr)
+    }
 }
 
 use axdriver::{prelude::*, AxDeviceContainer};

@@ -21,7 +21,7 @@ pub const SOCKET_TYPE_MASK: usize = 0xFF;
 pub async fn syscall_socket(args: [usize; 6]) -> SyscallResult {
     let domain = args[0];
     let s_type = args[1];
-    let _protocol = args[2];
+    let protocol = args[2];
     let Ok(domain) = Domain::try_from(domain) else {
         error!("[socket()] Address Family not supported: {domain}");
         // return ErrorNo::EAFNOSUPPORT as isize;
@@ -31,7 +31,7 @@ pub async fn syscall_socket(args: [usize; 6]) -> SyscallResult {
         // return ErrorNo::EINVAL as isize;
         return Err(SyscallError::EINVAL);
     };
-    let socket = Socket::new(domain, socket_type).await;
+    let socket = Socket::new(domain, socket_type, Some(protocol)).await;
     socket.set_nonblocking((s_type & SOCK_NONBLOCK) != 0);
     socket.set_close_on_exec((s_type & SOCK_CLOEXEC) != 0).await;
     let curr = current_executor().await;
@@ -356,7 +356,11 @@ pub async fn syscall_sendto(args: [usize; 6]) -> SyscallResult {
             }
         }
     } else {
-        None
+        if let Ok(content) = socket.peer_name() {
+            Some(content)
+        } else {
+            None
+        }
     };
     match socket.sendto(buf, addr).await {
         Ok(len) => {
@@ -682,8 +686,8 @@ pub async fn syscall_socketpair(args: [usize; 6]) -> SyscallResult {
 /// return sockerpair read write
 pub async fn make_socketpair(socket_type: usize) -> (Arc<Socket>, Arc<Socket>) {
     let s_type = SocketType::try_from(socket_type & SOCKET_TYPE_MASK).unwrap();
-    let mut fd1 = Socket::new(Domain::AF_UNIX, s_type).await;
-    let mut fd2 = Socket::new(Domain::AF_UNIX, s_type).await;
+    let mut fd1 = Socket::new(Domain::AF_UNIX, s_type, None).await;
+    let mut fd2 = Socket::new(Domain::AF_UNIX, s_type, None).await;
     let mut pipe_flag = OpenFlags::empty();
     if socket_type & SOCK_NONBLOCK != 0 {
         pipe_flag |= OpenFlags::NON_BLOCK;

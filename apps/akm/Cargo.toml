@@ -6,7 +6,8 @@ edition = "2021"
 [dependencies]
 async_std = { path = "../../modules/async_std", features = [
     "irq",
-    "multitask"
+    "multitask",
+    "net"
 ] }
 # libp2p-identity = { path = "../../modules/ak_addition/ak_libp2p-identity", features = [
 #     "peerid",

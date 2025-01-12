@@ -367,14 +367,26 @@ impl Executor {
     /// 查询当前任务是否存在未决信号
     pub async fn have_signals(&self) -> Option<usize> {
         let current_task = current_task();
-        self.signal_modules
-            .lock()
-            .await
-            .get(&current_task.id().as_u64())
-            .unwrap()
-            .signal_set
-            .find_signal()
-            .map_or_else(|| current_task.check_pending_signal(), Some)
+        if let Some(rua) = {
+            self.signal_modules
+                .lock()
+                .await
+                .get(&current_task.id().as_u64())
+        } {
+            rua.signal_set
+                .find_signal()
+                .map_or_else(|| current_task.check_pending_signal(), Some)
+        } else {
+            None
+        }
+        // self.signal_modules
+        //     .lock()
+        //     .await
+        //     .get(&current_task.id().as_u64())
+        //     .unwrap()
+        //     .signal_set
+        //     .find_signal()
+        //     .map_or_else(|| current_task.check_pending_signal(), Some)
     }
 
     /// Judge whether the signal request the interrupted syscall to restart

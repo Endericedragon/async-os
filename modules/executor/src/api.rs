@@ -44,15 +44,26 @@ pub fn current_task() -> CurrentTask {
 }
 
 pub async fn current_executor() -> Arc<Executor> {
-    let current_task = current_task();
-    let current_process = Arc::clone(
+    if let Some(executor) = {
+        let current_task = current_task();
         PID2PC
             .lock()
             .await
             .get(&current_task.get_process_id())
-            .unwrap(),
-    );
-    current_process
+    } {
+        Arc::clone(executor)
+    } else {
+        Arc::clone(&*KERNEL_EXECUTOR)
+    }
+    // let current_task = current_task();
+    // let current_process = Arc::clone(
+    //     PID2PC
+    //         .lock()
+    //         .await
+    //         .get(&current_task.get_process_id())
+    //         .unwrap(),
+    // );
+    // current_process
 }
 
 /// Spawns a new task with the given parameters.
