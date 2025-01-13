@@ -53,8 +53,12 @@ pub enum SocketAddr {
 }
 
 impl SocketAddr {
-    pub fn new_ip_port_pair(x: IpEndpoint) -> Self {
-        Self::IpPortPair(x)
+    pub fn new_ip_port_pair(ip_port_pair: IpEndpoint) -> Self {
+        Self::IpPortPair(ip_port_pair)
+    }
+
+    pub fn new_netlink_endpoint(netlink_endpoint: NetlinkEndpoint) -> Self {
+        Self::NetlinkEndpoint(netlink_endpoint)
     }
 
     pub fn default_netlink_endpoint() -> Self {

@@ -471,7 +471,7 @@ pub struct LibcSocketAddr {
 #[derive(Clone, Copy, Debug)]
 pub struct LibcSockAddrNl {
     pub nl_family: u16,
-    nl_pad: u16,
+    pub nl_pad: u16,
     pub nl_pid: u32,
     pub nl_groups: u32,
 }
@@ -486,8 +486,13 @@ impl From<*const u8> for LibcSockAddrNl {
     }
     */
     fn from(value: *const u8) -> Self {
-        let ptr_with_type = value as *const LibcSockAddrNl;
-        unsafe { *ptr_with_type }
+        let val = value as *const u16;
+        Self {
+            nl_family: u16::from_le(unsafe { *val }),
+            nl_pad: u16::from_le(unsafe { *(val.add(1)) }),
+            nl_pid: u32::from_le(unsafe { *(val.add(2) as *const u32) }),
+            nl_groups: u32::from_le(unsafe { *(val.add(4) as *const u32) }),
+        }
     }
 }
 

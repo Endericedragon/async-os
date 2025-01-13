@@ -1004,6 +1004,7 @@ impl FileIO for Socket {
 /// Only support INET (ipv4)
 /// used in syscall_(connect|bind|sendto)
 pub unsafe fn socket_address_from(addr: *const u8, socket: &Socket) -> SocketAddr {
+    // socket.sendto();
     match socket.domain {
         Domain::AF_UNIX => unimplemented!(),
         Domain::AF_INET => {
@@ -1044,7 +1045,12 @@ pub unsafe fn socket_address_from(addr: *const u8, socket: &Socket) -> SocketAdd
             info!("protocol: {:?}", socket.protocol);
             // 通过观察protocol，发现两次对NETLINK的bind操作所对应的协议族都是0，即：#define NETLINK_ROUTE		0
             // 也就是说，我们只需实现路由表的功能就行了
-            SocketAddr::default_netlink_endpoint()
+            SocketAddr::new_netlink_endpoint(NetlinkEndpoint {
+                nl_family: sock_addr_nl.nl_family,
+                nl_pad: sock_addr_nl.nl_pad,
+                nl_pid: sock_addr_nl.nl_pid,
+                nl_groups: sock_addr_nl.nl_groups,
+            })
         }
     }
 }

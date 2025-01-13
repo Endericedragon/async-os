@@ -53,8 +53,6 @@ members = [
     # 内核模块
     "modules/ak_addition/ak_futures-timer",
     "modules/ak_addition/ak_futures-bounded",
-    "modules/ak_addition/ak_asn1_der",
-    "modules/ak_addition/ak_libp2p-identity",
     # 宏内核应用程序
     "apps/akm",
 ]

@@ -9,35 +9,11 @@ async_std = { path = "../../modules/async_std", features = [
     "multitask",
     "net"
 ] }
-# libp2p-identity = { path = "../../modules/ak_addition/ak_libp2p-identity", features = [
-#     "peerid",
-#     "ed25519",
-#     "rand"
-# ] }
+multihash = { path = "../../modules/ak_addition/ak_multihash", default-features = false, features = [
+    "alloc"
+] }
+bs58 = { path = "../../modules/ak_addition/ak_bs58", default-features = false, features = [
+    "alloc"
+] }
 # ak_futures-timer = { path = "../../modules/ak_addition/ak_futures-timer" }
 # ak_futures-bounded = { path = "../../modules/ak_addition/ak_futures-bounded" }
-# futures-util = { version = "0.3.30", default-features = false, features = [
-#     "alloc"
-# ] }
-# futures-channel = { version = "0.3", default-features = false, features = [
-#     "alloc"
-# ] }
-# # prepare for libp2p-identity
-# asn1_der = { path = "../../modules/ak_addition/ak_asn1_der", default-features = false, features = [
-#     "native_types"
-# ] }
-# bs58 = { version = "0.5.0", default-features = false, features = ["alloc"] }
-# ed25519-dalek = { version = "2.1", default-features = false }
-# fastrand = { version = "2.3.0", default-features = false }
-# hkdf = "0.12.3"
-# libsecp256k1 = { version = "0.7.0", default-features = false, features = [
-#     "hmac",
-#     "static-context"
-# ] }
-# tracing = { version = "0.1.37", default-features = false } #
-# multihash = { version = "0.19.1", default-features = false } #
-# p256 = { version = "0.13", default-features = false, features = [
-#     "ecdsa",
-#     "pem"
-# ] }
-# quick-protobuf = { version = "0.8.1", default-features = false }
