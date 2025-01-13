@@ -31,13 +31,15 @@ use sync::Mutex;
 // use sync::Mutex;
 // use core::{future::poll_fn, sync::atomic::AtomicI32};
 // use core::time::Duration;
+#[cfg(feature = "sched_taic")]
+use crate::LQS;
 use crate::{
     syscall_fs::{
         ctype::pidfd::{new_pidfd, PidFd},
         imp::solve_path,
     },
-    CloneArgs, RLimit, SyscallError, SyscallResult, TimeSecs, WaitFlags, LQS, RLIMIT_AS,
-    RLIMIT_NOFILE, RLIMIT_STACK,
+    CloneArgs, RLimit, SyscallError, SyscallResult, TimeSecs, WaitFlags, RLIMIT_AS, RLIMIT_NOFILE,
+    RLIMIT_STACK,
 };
 use axlog::info;
 // use axtask::TaskId;

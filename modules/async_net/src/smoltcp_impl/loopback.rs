@@ -27,7 +27,7 @@ async fn snoop_tcp_from_ip<'a>(
     buffer: &[u8],
     sockets: &mut SocketSet<'a>,
 ) -> Result<(), smoltcp::wire::Error> {
-    use crate::SocketAddr;
+    use crate::IpEndpoint;
     use smoltcp::wire::{IpProtocol, Ipv4Packet, TcpPacket};
 
     let ipv4_packet = Ipv4Packet::new_checked(buffer)?;
