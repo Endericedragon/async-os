@@ -8,8 +8,7 @@ use heapless::mpmc::MpMcQueue;
 use taic_driver::{LocalQueue, Taic};
 type SyscallItemQueue = MpMcQueue<SyscallItem, 8>;
 
-// const TAIC_BASE: usize = axconfig::PHYS_VIRT_OFFSET + axconfig::MMIO_REGIONS[1].0;
-const TAIC_BASE: usize = axconfig::PHYS_VIRT_OFFSET + 0; // a worksround to avoid empty list
+const TAIC_BASE: usize = axconfig::PHYS_VIRT_OFFSET + axconfig::MMIO_REGIONS[1].0;
 const LQ_NUM: usize = 2;
 const TAIC: Taic = Taic::new(TAIC_BASE, LQ_NUM);
 use sync::Mutex;
@@ -120,7 +119,7 @@ pub async fn syscall_init_async_batch(_waker: usize, res_ptr: usize) -> SyscallR
     use executor::KERNEL_SCHEDULER;
     let handler = Arc::into_raw(ktask) as *const _ as usize;
     let pid = current_executor.pid() as usize;
-    // KERNEL_SCHEDULER.lock().register_receiver(1, pid, handler);
+    KERNEL_SCHEDULER.lock().register_receiver(1, pid, handler);
 
     // 注册用户态任务为发送方
     let lqs = LQS.lock().await;

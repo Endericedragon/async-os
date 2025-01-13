@@ -34,8 +34,7 @@ impl<T> Deref for TAICTask<T> {
 unsafe impl<T> Sync for TAICTask<T> {}
 unsafe impl<T> Send for TAICTask<T> {}
 
-// const TAIC_BASE: usize = axconfig::PHYS_VIRT_OFFSET + axconfig::MMIO_REGIONS[1].0;
-const TAIC_BASE: usize = axconfig::PHYS_VIRT_OFFSET + 0; // a worksround to avoid empty list
+const TAIC_BASE: usize = axconfig::PHYS_VIRT_OFFSET + axconfig::MMIO_REGIONS[1].0;
 const LQ_NUM: usize = 2;
 const TAIC: Taic = Taic::new(TAIC_BASE, LQ_NUM);
 

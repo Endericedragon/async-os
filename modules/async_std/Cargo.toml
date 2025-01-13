@@ -5,7 +5,9 @@ edition = "2021"
 
 [features]
 thread = ["trampoline/thread"]
-monolithic = ["feat/monolithic", "multitask", "alloc", "fs", "net"]
+
+monolithic = ["feat/monolithic", "multitask", "alloc", "fs", "net_monolithic"]
+
 img = ["feat/img"]
 # Multicore
 smp = ["feat/smp"]
@@ -31,7 +33,9 @@ fatfs = ["feat/fatfs"]
 # lwext4_rust = ["feat/lwext4_rust", "fs"]
 # Networking
 net = ["aos_api/net", "feat/net"]
+net_monolithic = ["aos_api/net", "feat/net_monolithic"]
 dns = []
+
 # Display
 display = []
 # display = ["aos_api/display", "feat/display"]

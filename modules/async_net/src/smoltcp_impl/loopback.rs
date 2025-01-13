@@ -4,7 +4,7 @@ use alloc::{boxed::Box, collections::VecDeque, vec, vec::Vec};
 use smoltcp::{
     iface::SocketSet,
     phy::{Device, DeviceCapabilities, Medium},
-    time::Instant, wire::IpEndpoint,
+    time::Instant,
 };
 
 use crate::net_impl::LISTEN_TABLE;
@@ -27,7 +27,7 @@ async fn snoop_tcp_from_ip<'a>(
     buffer: &[u8],
     sockets: &mut SocketSet<'a>,
 ) -> Result<(), smoltcp::wire::Error> {
-    // use crate::SocketAddr;
+    use crate::SocketAddr;
     use smoltcp::wire::{IpProtocol, Ipv4Packet, TcpPacket};
 
     let ipv4_packet = Ipv4Packet::new_checked(buffer)?;
