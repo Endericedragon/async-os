@@ -15,5 +15,8 @@ multihash = { path = "../../modules/ak_addition/ak_multihash", default-features 
 bs58 = { path = "../../modules/ak_addition/ak_bs58", default-features = false, features = [
     "alloc"
 ] }
+fastrand = { path = "../../modules/ak_addition/ak_fastrand", default-features = false, features = [
+    "alloc"
+] }
 # ak_futures-timer = { path = "../../modules/ak_addition/ak_futures-timer" }
 # ak_futures-bounded = { path = "../../modules/ak_addition/ak_futures-bounded" }

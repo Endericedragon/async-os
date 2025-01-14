@@ -31,6 +31,18 @@ impl Error {
             kind: Kind::Varint(decode::Error::Overflow),
         }
     }
+
+    /// 将错误转化为在内核中更容易标识的isize类型。规定：
+    /// - -1：Io error
+    /// - -2：Invalid multihash size
+    /// - -3：Invalid varint
+    pub const fn to_num(&self) -> isize {
+        match self.kind {
+            Kind::Io(_) => -1,
+            Kind::InvalidSize(_) => -2,
+            Kind::Varint(_) => -3,
+        }
+    }
 }
 
 impl core::fmt::Display for Error {

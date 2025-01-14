@@ -12,6 +12,7 @@ extern crate axlog;
 mod ctypes;
 use ctypes::*;
 mod syscall;
+mod syscall_customize;
 mod syscall_fs;
 mod syscall_mem;
 mod syscall_net;

@@ -1,5 +1,6 @@
 use alloc::string::String;
 use async_std::collections::Vec;
+use async_std::time::Instant;
 use core::fmt;
 
 /// Local type-alias for multihash.
@@ -55,16 +56,19 @@ impl PeerId {
         }
     }
 
-    // /// Generates a random peer ID from a cryptographically secure PRNG.
-    // ///
-    // /// This is useful for randomly walking on a DHT, or for testing purposes.
+    /// Generates a random peer ID from a cryptographically secure PRNG.
+    ///
+    /// This is useful for randomly walking on a DHT, or for testing purposes.
     // #[cfg(feature = "rand")]
-    // pub fn random() -> PeerId {
-    //     let peer_id = rand::thread_rng().gen::<[u8; 32]>();
-    //     PeerId {
-    //         multihash: Multihash::wrap(0x0, &peer_id).expect("The digest size is never too large"),
-    //     }
-    // }
+    pub fn random() -> PeerId {
+        let mut rng = fastrand::Rng::with_seed(Instant::now().elapsed().as_secs());
+        let mut peer_id = [0u8; 32];
+        rng.fill(&mut peer_id);
+        PeerId {
+            multihash: Multihash::wrap(MULTIHASH_IDENTITY_CODE, &peer_id)
+                .expect("The digest size is never too large"),
+        }
+    }
 
     /// Returns a raw bytes representation of this `PeerId`.
     pub fn to_bytes(self) -> Vec<u8> {

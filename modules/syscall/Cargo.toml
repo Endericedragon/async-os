@@ -3,25 +3,18 @@ name = "syscall"
 version = "0.1.0"
 edition = "2021"
 
-
 [features]
 # default = ["monolithic"]
-
 # monolithic = ["axfeat/monolithic", "irq", "paging", "fs", "multitask", "net"]
 # monolithic = ["feat/monolithic", "irq", "paging", "fs", "multitask"]
-
 # Interrupts
 irq = []
-
 # Memory
 paging = []
-
 # # Multi-threading and scheduler
 # multitask = ["feat/multitask"]
-
 # # Fs
 # fs = ["feat/fs"]
-
 ip = ["async_net/ip"]
 net = ["ip", "async_net/monolithic"]
 sched_taic = []
@@ -40,7 +33,6 @@ numeric-enum-macro = { git = "https://github.com/mexus/numeric-enum-macro" }
 bitflags = "2.6"
 rand = { version = "0.8.5", default-features = false, features = ["small_rng"] }
 num_enum = { version = "0.5.11", default-features = false }
-
 async_fs = { path = "../async_fs" }
 axhal = { path = "../axhal" }
 executor = { path = "../executor" }
@@ -48,10 +40,13 @@ sync = { path = "../sync", package = "sync" }
 async_mem = { path = "../async_mem" }
 async_io = { path = "../async_io" }
 async_net = { path = "../async_net" }
-
 taic-driver = { git = "https://github.com/taic-repo/taic-driver.git" }
 heapless = "0.8.0"
 syscalls = { version = "0.6", default-features = false }
+# my additions
+multihash = { path = "../../modules/ak_addition/ak_multihash", default-features = false, features = [
+    "alloc"
+] }
 
 [target.'cfg(any(target_arch = "riscv32", target_arch = "riscv64"))'.dependencies]
 riscv = "0.11"
