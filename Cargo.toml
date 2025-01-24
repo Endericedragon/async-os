@@ -52,6 +52,7 @@ members = [
     # 用户态应用程序
     "user_apps/chat_example",
     # 内核模块
+    "modules/public_types",
     "modules/ak_addition/ak_futures-timer",
     "modules/ak_addition/ak_futures-bounded",
     # 宏内核应用程序

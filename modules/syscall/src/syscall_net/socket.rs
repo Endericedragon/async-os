@@ -23,9 +23,9 @@ use sync::Mutex;
 
 use crate::{
     syscall_fs::ctype::pipe::{make_pipe, Pipe},
-    LibcSocketAddr, SyscallError, SyscallResult, TimeVal,
+    SyscallError, SyscallResult, TimeVal,
 };
-use crate::{LibcSockAddrIn, LibcSockAddrNl};
+use public_types::{LibcSockAddrIn, LibcSockAddrNl, LibcSocketAddr};
 
 pub const SOCKET_TYPE_MASK: usize = 0xFF;
 
@@ -1081,14 +1081,9 @@ pub unsafe fn socket_address_from(addr: *const u8, socket: &Socket) -> SocketAdd
             let sock_addr_nl = LibcSockAddrNl::from(addr);
             info!("sock_addr_nl: {:#?}", sock_addr_nl);
             info!("protocol: {:?}", socket.protocol);
-            // 通过观察protocol，发现两次对NETLINK的bind操作所对应的协议族都是0，即：#define NETLINK_ROUTE		0
+            // 通过观察protocol，发现两次对NETLINK的bind操作所对应的协议族都是0，即：#define NETLINK_ROUTE 0
             // 也就是说，我们只需实现路由表的功能就行了
-            SocketAddr::new_netlink_endpoint(NetlinkEndpoint {
-                nl_family: sock_addr_nl.nl_family,
-                nl_pad: sock_addr_nl.nl_pad,
-                nl_pid: sock_addr_nl.nl_pid,
-                nl_groups: sock_addr_nl.nl_groups,
-            })
+            SocketAddr::new_netlink_endpoint(sock_addr_nl)
         }
     }
 }

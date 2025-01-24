@@ -43,8 +43,7 @@ pub use smoltcp::wire::{
 };
 pub use smoltcp_impl::NetlinkSocket;
 
-mod ctypes;
-pub use ctypes::sockaddr_nl as NetlinkEndpoint;
+pub use public_types::LibcSockAddrNl as NetlinkEndpoint;
 
 #[derive(Debug, Clone, Copy)]
 pub enum SocketAddr {

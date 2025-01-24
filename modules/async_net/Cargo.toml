@@ -15,12 +15,9 @@ keywords = ["Starry"]
 
 [features]
 monolithic = []
-
 smoltcp = []
-
 # 启用ip协议与否
 ip = []
-
 default = ["smoltcp"]
 
 [dependencies]
@@ -43,6 +40,8 @@ async_utils = { path = "../async_utils" }
 executor = { path = "../executor" }
 sync = { path = "../sync" }
 taskctx = { path = "../taskctx" }
+# My addition
+public_types = { path = "../public_types" }
 
 [dependencies.smoltcp]
 git = "https://github.com/rcore-os/smoltcp.git"
@@ -50,7 +49,7 @@ rev = "8bf9a9a"
 default-features = false
 features = [
   "alloc",
-  "log",             # no std
+  "log", # no std
   "medium-ethernet",
   "medium-ip",
   "proto-ipv4",
@@ -64,4 +63,5 @@ features = [
   # "fragmentation-buffer-size-65536", "proto-ipv4-fragmentation",
   # "reassembly-buffer-size-65536", "reassembly-buffer-count-32",
   # "assembler-max-segment-count-32",
+
 ]
