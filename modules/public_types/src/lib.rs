@@ -2,6 +2,10 @@
 //! 在该模块中，它们被进行了重命名以符合Rust推荐的命名规范，例如 `socketaddr_nl` => `LibcSockAddrNl` 。
 //! 除此之外，该模块还支持从 `*const u8` 中恢复这些结构体。
 
+#![no_std]
+
+use core::convert::From;
+
 /// Structure describing a generic socket address in libc.
 #[allow(unused)]
 #[repr(C)]

@@ -25,6 +25,7 @@ struct netlink_sock {
 ```
  */
 #[allow(dead_code)]
+#[derive(Debug)]
 pub struct NetlinkSocket {
     pid: u32,
     dst_pid: u32,
@@ -33,6 +34,7 @@ pub struct NetlinkSocket {
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
 enum NetlinkState {
     Unconnected,
     Connecting,

@@ -534,7 +534,7 @@ impl Socket {
 
     /// Create a new socket with the given domain and socket type.
     pub async fn new(domain: Domain, socket_type: SocketType, protocol: Option<usize>) -> Self {
-        let inner = if domain != Domain::AF_NETLINK {
+        let inner = if domain == Domain::AF_NETLINK {
             SocketInner::Netlink(NetlinkSocket::default())
         } else {
             match socket_type {
@@ -618,7 +618,10 @@ impl Socket {
             SocketAddr::IpPortPair(addr) => match &self.inner {
                 SocketInner::Tcp(s) => s.bind(into_core_sockaddr(addr)).await,
                 SocketInner::Udp(s) => s.bind(into_core_sockaddr(addr)).await,
-                SocketInner::Netlink(_) => panic!("Netlink bind has not been implemented yet!"),
+                SocketInner::Netlink(s) => {
+                    info!("Got a netlink socket {:#?}", s);
+                    panic!("Netlink bind has not been implemented yet!")
+                }
             },
             SocketAddr::NetlinkEndpoint(addr) => {
                 // todo: bind netlink endpoint
@@ -1069,9 +1072,8 @@ pub unsafe fn socket_address_from(addr: *const u8, socket: &Socket) -> SocketAdd
         // Domain::AF_INET6 => {}
         // TODO: support NETLINK
         Domain::AF_NETLINK => {
-            info!("Unsupported netlink endpoint socket_address_from...");
             /*
-            pub struct sockaddr_nl {
+            pub struct LibcSockAddrNl {
                 pub nl_family: u16,
                 nl_pad: u16,
                 pub nl_pid: u32,
@@ -1079,8 +1081,8 @@ pub unsafe fn socket_address_from(addr: *const u8, socket: &Socket) -> SocketAdd
             }
              */
             let sock_addr_nl = LibcSockAddrNl::from(addr);
-            info!("sock_addr_nl: {:#?}", sock_addr_nl);
-            info!("protocol: {:?}", socket.protocol);
+            // info!("sock_addr_nl: {:#?}", sock_addr_nl);
+            // info!("protocol: {:?}", socket.protocol);
             // 通过观察protocol，发现两次对NETLINK的bind操作所对应的协议族都是0，即：#define NETLINK_ROUTE 0
             // 也就是说，我们只需实现路由表的功能就行了
             SocketAddr::new_netlink_endpoint(sock_addr_nl)
