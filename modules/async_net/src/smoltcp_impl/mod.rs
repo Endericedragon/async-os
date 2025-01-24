@@ -3,6 +3,7 @@ mod bench;
 mod dns;
 mod listen_table;
 
+mod netlink;
 mod tcp;
 mod udp;
 use alloc::boxed::Box;
@@ -26,6 +27,7 @@ use sync::Mutex;
 use self::listen_table::ListenTable;
 
 pub use self::dns::dns_query;
+pub use self::netlink::NetlinkSocket;
 pub use self::tcp::TcpSocket;
 pub use self::udp::UdpSocket;
 pub use addr::{from_core_sockaddr, into_core_sockaddr};

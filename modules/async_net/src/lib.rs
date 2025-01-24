@@ -41,6 +41,7 @@ pub use smoltcp::time::Duration;
 pub use smoltcp::wire::{
     IpAddress as IpAddr, IpEndpoint, Ipv4Address as Ipv4Addr, Ipv6Address as Ipv6Addr,
 };
+pub use smoltcp_impl::NetlinkSocket;
 
 mod ctypes;
 pub use ctypes::sockaddr_nl as NetlinkEndpoint;

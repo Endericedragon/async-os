@@ -15,7 +15,7 @@ use executor::current_task;
 
 use async_net::{
     add_membership, from_core_sockaddr, into_core_sockaddr, poll_interfaces, IpAddr, IpEndpoint,
-    NetlinkEndpoint, SocketAddr, TcpSocket, UdpSocket,
+    NetlinkEndpoint, NetlinkSocket, SocketAddr, TcpSocket, UdpSocket,
 };
 use axlog::{error, warn};
 use num_enum::TryFromPrimitive;
@@ -221,6 +221,7 @@ impl SocketOption {
                         })
                         .await
                     }
+                    SocketInner::Netlink(_) => (),
                 };
 
                 socket.set_recv_buf_size(opt_value as u64);
@@ -316,6 +317,7 @@ impl SocketOption {
                             0
                         },
                     }).await,
+                    SocketInner::Netlink(_) => 0,
                 };
 
                 unsafe {
@@ -470,6 +472,8 @@ pub enum SocketInner {
     Tcp(TcpSocket),
     /// UDP socket
     Udp(UdpSocket),
+    // NETLINK socket
+    Netlink(NetlinkSocket),
 }
 
 impl Socket {
@@ -480,6 +484,11 @@ impl Socket {
         match &self.inner {
             SocketInner::Tcp(s) => s.is_reuse_addr(),
             SocketInner::Udp(s) => s.is_reuse_addr(),
+            _ =>
+            /* Netlink */
+            {
+                false
+            }
         }
     }
 
@@ -505,6 +514,7 @@ impl Socket {
         match &self.inner {
             SocketInner::Tcp(s) => s.set_reuse_addr(flag),
             SocketInner::Udp(s) => s.set_reuse_addr(flag),
+            SocketInner::Netlink(_) => (),
         }
     }
 
@@ -524,14 +534,18 @@ impl Socket {
 
     /// Create a new socket with the given domain and socket type.
     pub async fn new(domain: Domain, socket_type: SocketType, protocol: Option<usize>) -> Self {
-        let inner = match socket_type {
-            SocketType::SOCK_STREAM | SocketType::SOCK_SEQPACKET => {
-                SocketInner::Tcp(TcpSocket::new())
-            }
-            SocketType::SOCK_DGRAM => SocketInner::Udp(UdpSocket::new().await),
-            _ => {
-                error!("unimplemented SocketType: {:?}", socket_type);
-                unimplemented!();
+        let inner = if domain != Domain::AF_NETLINK {
+            SocketInner::Netlink(NetlinkSocket::default())
+        } else {
+            match socket_type {
+                SocketType::SOCK_STREAM | SocketType::SOCK_SEQPACKET => {
+                    SocketInner::Tcp(TcpSocket::new())
+                }
+                SocketType::SOCK_DGRAM => SocketInner::Udp(UdpSocket::new().await),
+                _ => {
+                    error!("unimplemented SocketType: {:?}", socket_type);
+                    unimplemented!();
+                }
             }
         };
         Self {
@@ -554,6 +568,7 @@ impl Socket {
         match &self.inner {
             SocketInner::Tcp(s) => s.set_nonblocking(nonblocking),
             SocketInner::Udp(s) => s.set_nonblocking(nonblocking),
+            SocketInner::Netlink(_) => (),
         }
     }
 
@@ -562,6 +577,7 @@ impl Socket {
         match &self.inner {
             SocketInner::Tcp(s) => s.is_nonblocking(),
             SocketInner::Udp(s) => s.is_nonblocking(),
+            SocketInner::Netlink(_) => false,
         }
     }
 
@@ -570,6 +586,7 @@ impl Socket {
         match &self.inner {
             SocketInner::Tcp(s) => s.is_connected(),
             SocketInner::Udp(s) => s.with_socket(|s| s.is_open()).await,
+            SocketInner::Netlink(_) => false,
         }
     }
 
@@ -578,6 +595,7 @@ impl Socket {
         match &self.inner {
             SocketInner::Tcp(s) => s.local_addr(),
             SocketInner::Udp(s) => s.local_addr(),
+            SocketInner::Netlink(_) => panic!("Netlink name has not been implemented yet!"),
         }
         .map(from_core_sockaddr)
         .map(|x| SocketAddr::IpPortPair(x))
@@ -588,6 +606,7 @@ impl Socket {
         match &self.inner {
             SocketInner::Tcp(s) => s.peer_addr(),
             SocketInner::Udp(s) => s.peer_addr(),
+            SocketInner::Netlink(_) => panic!("Netlink peer name has not been implemented yet!"),
         }
         .map(from_core_sockaddr)
         .map(|x| SocketAddr::IpPortPair(x))
@@ -599,8 +618,10 @@ impl Socket {
             SocketAddr::IpPortPair(addr) => match &self.inner {
                 SocketInner::Tcp(s) => s.bind(into_core_sockaddr(addr)).await,
                 SocketInner::Udp(s) => s.bind(into_core_sockaddr(addr)).await,
+                SocketInner::Netlink(_) => panic!("Netlink bind has not been implemented yet!"),
             },
             SocketAddr::NetlinkEndpoint(addr) => {
+                // todo: bind netlink endpoint
                 info!("Unsupported netlink endpoint bind...");
                 Ok(())
             }
@@ -621,6 +642,7 @@ impl Socket {
         match &self.inner {
             SocketInner::Tcp(s) => s.listen().await,
             SocketInner::Udp(_) => Err(AxError::Unsupported),
+            SocketInner::Netlink(_) => panic!("Netlink listen has not been implemented yet!"),
         }
     }
 
@@ -635,6 +657,7 @@ impl Socket {
         let new_socket = match &self.inner {
             SocketInner::Tcp(s) => s.accept().await?,
             SocketInner::Udp(_) => Err(AxError::Unsupported)?,
+            SocketInner::Netlink(_) => Err(AxError::Unsupported)?,
         };
         let addr = new_socket.peer_addr()?;
 
@@ -662,6 +685,7 @@ impl Socket {
             SocketAddr::IpPortPair(addr) => match &self.inner {
                 SocketInner::Tcp(s) => s.connect(into_core_sockaddr(addr)).await,
                 SocketInner::Udp(s) => s.connect(into_core_sockaddr(addr)).await,
+                SocketInner::Netlink(_) => panic!("Netlink connect has not been implemented yet!"),
             },
             SocketAddr::NetlinkEndpoint(addr) => {
                 info!("Unsupported netlink endpoint connect...");
@@ -676,6 +700,7 @@ impl Socket {
         match &self.inner {
             SocketInner::Tcp(s) => s.local_addr().is_ok(),
             SocketInner::Udp(s) => s.local_addr().is_ok(),
+            SocketInner::Netlink(_) => panic!("Netlink bound has not been implemented yet!"),
         }
     }
     #[allow(unused)]
@@ -727,6 +752,10 @@ impl Socket {
                 // }
                 s.send(buf).await
             }
+            SocketInner::Netlink(_) => {
+                info!("Unsupported netlink sendto...");
+                Ok(0)
+            }
         }
     }
 
@@ -766,6 +795,9 @@ impl Socket {
                     .map(|(val, addr)| (val, from_core_sockaddr(addr)))
                     .map(|x| (x.0, SocketAddr::IpPortPair(x.1))),
             },
+            SocketInner::Netlink(_) => {
+                panic!("Unsupported netlink recv_from...");
+            }
         }
     }
 
@@ -778,6 +810,7 @@ impl Socket {
             SocketInner::Tcp(s) => {
                 s.close().await;
             }
+            SocketInner::Netlink(_) => (),
         };
     }
 
@@ -795,6 +828,7 @@ impl Socket {
                 })
                 .await
             }
+            SocketInner::Netlink(_) => (),
         }
     }
 }
@@ -823,6 +857,7 @@ impl FileIO for Socket {
             match &self.inner {
                 SocketInner::Tcp(s) => s.recv(buf).await,
                 SocketInner::Udp(s) => s.recv(buf).await,
+                SocketInner::Netlink(_) => panic!("Netlink read has not been implemented yet!"),
             }
         })
         .as_mut()
@@ -844,6 +879,7 @@ impl FileIO for Socket {
             match &self.inner {
                 SocketInner::Tcp(s) => s.send(buf).await,
                 SocketInner::Udp(s) => s.send(buf).await,
+                SocketInner::Netlink(_) => panic!("Netlink write has not been implemented yet!"),
             }
         })
         .as_mut()
@@ -886,6 +922,7 @@ impl FileIO for Socket {
             match &self.inner {
                 SocketInner::Tcp(s) => s.poll().await.map_or(false, |p| p.readable),
                 SocketInner::Udp(s) => s.poll().await.map_or(false, |p| p.readable),
+                SocketInner::Netlink(_) => false,
             }
         })
         .as_mut()
@@ -911,6 +948,7 @@ impl FileIO for Socket {
             match &self.inner {
                 SocketInner::Tcp(s) => s.poll().await.map_or(false, |p| p.writable),
                 SocketInner::Udp(s) => s.poll().await.map_or(false, |p| p.writable),
+                SocketInner::Netlink(_) => false,
             }
         })
         .as_mut()

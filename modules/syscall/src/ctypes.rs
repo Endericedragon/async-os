@@ -486,6 +486,7 @@ impl From<*const u8> for LibcSockAddrNl {
     }
     */
     fn from(value: *const u8) -> Self {
+        //? 存疑：Linux中是直接返回了 (struct sockaddr_nl*)value 的
         let val = value as *const u16;
         Self {
             nl_family: u16::from_le(unsafe { *val }),

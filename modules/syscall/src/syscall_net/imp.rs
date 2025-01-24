@@ -19,6 +19,7 @@ pub const SOCKET_TYPE_MASK: usize = 0xFF;
 /// * `s_type` - usize
 /// * `protocol` - usize
 pub async fn syscall_socket(args: [usize; 6]) -> SyscallResult {
+    // domain 对应 Linux 中的地址族，例如 AF_INET 等
     let domain = args[0];
     let s_type = args[1];
     let protocol = args[2];
@@ -31,9 +32,13 @@ pub async fn syscall_socket(args: [usize; 6]) -> SyscallResult {
         // return ErrorNo::EINVAL as isize;
         return Err(SyscallError::EINVAL);
     };
+
+    // 对应到 Linux 中的 sock_create / __sock_create 函数
     let socket = Socket::new(domain, socket_type, Some(protocol)).await;
     socket.set_nonblocking((s_type & SOCK_NONBLOCK) != 0);
     socket.set_close_on_exec((s_type & SOCK_CLOEXEC) != 0).await;
+
+    // 对应到 Linux 中的 sock_map_fd 函数
     let curr = current_executor().await;
     let mut fd_table = curr.fd_manager.fd_table.lock().await;
     let Ok(fd) = curr.alloc_fd(&mut fd_table) else {
