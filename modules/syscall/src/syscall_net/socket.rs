@@ -1,7 +1,7 @@
 extern crate alloc;
 use alloc::string::String;
 use alloc::{sync::Arc, vec::Vec};
-use async_fs::api::AsyncFileIO;
+use async_fs::api::{AsAny, AsyncFileIO};
 use async_fs::api::{FileIO, FileIOType, OpenFlags};
 use async_io::{AsyncRead, AsyncWrite};
 use axerrno::{AxError, AxResult};
@@ -465,7 +465,7 @@ pub struct Socket {
     recv_buf_size: AtomicU64,
     congestion: Mutex<String>,
 }
-
+use core::cell::RefCell;
 /// The transport protocol used by the socket
 pub enum SocketInner {
     /// TCP socket
@@ -618,15 +618,19 @@ impl Socket {
             SocketAddr::IpPortPair(addr) => match &self.inner {
                 SocketInner::Tcp(s) => s.bind(into_core_sockaddr(addr)).await,
                 SocketInner::Udp(s) => s.bind(into_core_sockaddr(addr)).await,
-                SocketInner::Netlink(s) => {
-                    info!("Got a netlink socket {:#?}", s);
-                    panic!("Netlink bind has not been implemented yet!")
-                }
+                _ => panic!("SocketInner of Netlink should not be in IpPortPair!"),
             },
             SocketAddr::NetlinkEndpoint(addr) => {
                 // todo: bind netlink endpoint
                 info!("Unsupported netlink endpoint bind...");
-                Ok(())
+                match &self.inner {
+                    SocketInner::Netlink(s) => {
+                        info!("Got a netlink socket {:#?}", s);
+                        s.bind(addr);
+                        Ok(())
+                    }
+                    _ => panic!("Only SocketInner of Netlink should be in NetlinkEndpoint!"),
+                }
             }
         }
     }

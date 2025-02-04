@@ -56,6 +56,6 @@ members = [
     "modules/ak_addition/ak_futures-timer",
     "modules/ak_addition/ak_futures-bounded",
     # 宏内核应用程序
-    "apps/akm",
+    "apps/akm", "modules/async_collections",
 ]
 resolver = "2"

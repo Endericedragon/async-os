@@ -1,6 +1,7 @@
 use super::vec::Vec;
 
 #[allow(unused)]
+#[derive(Debug)]
 pub struct VecDeque<T> {
     inner: Vec<Option<T>>,
     front: usize,

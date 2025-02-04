@@ -5,9 +5,7 @@ edition = "2021"
 
 [features]
 thread = ["trampoline/thread"]
-
 monolithic = ["feat/monolithic", "multitask", "alloc", "fs", "net_monolithic"]
-
 img = ["feat/img"]
 # Multicore
 smp = ["feat/smp"]
@@ -35,7 +33,6 @@ fatfs = ["feat/fatfs"]
 net = ["aos_api/net", "feat/net"]
 net_monolithic = ["aos_api/net", "feat/net_monolithic"]
 dns = []
-
 # Display
 display = []
 # display = ["aos_api/display", "feat/display"]
@@ -68,3 +65,5 @@ sync = { path = "../sync" }
 axhal = { path = "../axhal" }
 trampoline = { path = "../trampoline" }
 hashbrown = "0.14"
+# My addition
+async_collections = { path = "../async_collections" }

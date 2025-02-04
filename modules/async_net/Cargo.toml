@@ -42,6 +42,7 @@ sync = { path = "../sync" }
 taskctx = { path = "../taskctx" }
 # My addition
 public_types = { path = "../public_types" }
+async_collections = { path = "../async_collections" }
 
 [dependencies.smoltcp]
 git = "https://github.com/rcore-os/smoltcp.git"

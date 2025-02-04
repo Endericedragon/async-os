@@ -74,7 +74,6 @@ pub async fn syscall_bind(args: [usize; 6]) -> SyscallResult {
     let addr = unsafe { socket_address_from(addr, socket) };
 
     info!("[bind()] binding socket {} to {:?}", fd, addr);
-
     Ok(socket.bind(addr).await.map_or(-1, |_| 0))
 }
 

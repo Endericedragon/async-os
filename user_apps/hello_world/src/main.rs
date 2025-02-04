@@ -8,12 +8,12 @@ use core::arch::asm;
 const MULTIHASH_IDENTITY_CODE: u64 = 0;
 const MULTIHASH_SHA256_CODE: u64 = 0x12;
 
-type Multihash = multihash::Multihash<64>;
+// type Multihash = multihash::Multihash<64>;
 
 fn main() {
     greeting_through_syscall();
 
-    multihash_test();
+    // multihash_test();
 
     let listener = TcpListener::bind(("0.0.0.0", 7878)).expect("Failed to bind!");
 
@@ -71,26 +71,26 @@ fn greeting_through_syscall() {
     }
 }
 
-fn multihash_test() {
-    let mut emulated_key = [0u8; 64];
-    let mut rng = fastrand::Rng::with_seed(20250114);
-    rng.fill(&mut emulated_key);
+// fn multihash_test() {
+//     let mut emulated_key = [0u8; 64];
+//     let mut rng = fastrand::Rng::with_seed(20250114);
+//     rng.fill(&mut emulated_key);
 
-    let hash1 = Multihash::wrap(MULTIHASH_IDENTITY_CODE, &emulated_key).unwrap();
-    let hash2 = Multihash::wrap_with_syscall(MULTIHASH_SHA256_CODE, &emulated_key).unwrap();
+//     let hash1 = Multihash::wrap(MULTIHASH_IDENTITY_CODE, &emulated_key).unwrap();
+//     let hash2 = Multihash::wrap_with_syscall(MULTIHASH_SHA256_CODE, &emulated_key).unwrap();
 
-    // unsafe {
-    //     let mut hash2_mut_ptr = &mut hash2 as *mut Multihash;
-    //     asm!(
-    //         "ecall",
-    //         in("a7") 10000,
-    //         in("a0") MULTIHASH_IDENTITY_CODE,
-    //         in("a1") (&emulated_key as *const u8),
-    //         in("a2") emulated_key.len(),
-    //         in("a3") hash2_mut_ptr,
-    //     );
-    // }
+//     // unsafe {
+//     //     let mut hash2_mut_ptr = &mut hash2 as *mut Multihash;
+//     //     asm!(
+//     //         "ecall",
+//     //         in("a7") 10000,
+//     //         in("a0") MULTIHASH_IDENTITY_CODE,
+//     //         in("a1") (&emulated_key as *const u8),
+//     //         in("a2") emulated_key.len(),
+//     //         in("a3") hash2_mut_ptr,
+//     //     );
+//     // }
 
-    println!("hash1 = {:?}", hash1);
-    println!("hash2 = {:?}", hash2);
-}
+//     println!("hash1 = {:?}", hash1);
+//     println!("hash2 = {:?}", hash2);
+// }

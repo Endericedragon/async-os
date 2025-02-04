@@ -12,7 +12,13 @@ macro_rules! vec {
         $( temp_vec.push($sth); )+
 
         temp_vec
-    }}
+    }};
+
+    ($init_value:expr ;  $size:expr) => {{
+        let mut res = Vec::with_capacity($size);
+        res.resize_with($size, || $init_value);
+        res
+    }};
 }
 
 #[cfg(test)]
