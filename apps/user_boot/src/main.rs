@@ -91,6 +91,7 @@ fn get_args(command_line: &[u8]) -> Vec<String> {
 const BUSYBOX_TESTCASES: &[&str] = &[
     // "hello_world",
     "chat_example",
+    // "simple_web_server",
     // "busybox sh busybox_testcode.sh",
     // "busybox sh lua_testcode.sh",
     // "libctest_testcode.sh",

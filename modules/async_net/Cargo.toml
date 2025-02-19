@@ -43,6 +43,8 @@ taskctx = { path = "../taskctx" }
 # My addition
 public_types = { path = "../public_types" }
 async_collections = { path = "../async_collections" }
+bytes = { version = "1", default-features = false }
+unsigned-varint = { version = "0.8.0", default-features = false }
 
 [dependencies.smoltcp]
 git = "https://github.com/rcore-os/smoltcp.git"

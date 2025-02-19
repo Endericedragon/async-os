@@ -47,6 +47,9 @@ pub use buf_writer::BufWriter;
 pub use cursor::Cursor;
 pub use stream::*;
 
+mod io_error;
+pub use io_error::IoError;
+
 /// I/O poll results.
 #[derive(Debug, Default, Clone, Copy)]
 pub struct PollState {
