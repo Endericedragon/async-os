@@ -59,3 +59,16 @@ impl<T> VecDeque<T> {
         res
     }
 }
+
+#[macro_export]
+macro_rules! vec_deque {
+    () => {{
+        VecDeque::new()
+    }};
+
+    ($($x:expr),+) => {{
+        let mut res = crate::vec_deque::VecDeque::new();
+        $(res.push_back($x);)+
+        res
+    }}
+}

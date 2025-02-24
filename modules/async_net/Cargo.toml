@@ -45,6 +45,8 @@ public_types = { path = "../public_types" }
 async_collections = { path = "../async_collections" }
 bytes = { version = "1", default-features = false }
 unsigned-varint = { version = "0.8.0", default-features = false }
+pin-project = "1.1.3"
+futures = { version = "0.3", default-features = false }
 
 [dependencies.smoltcp]
 git = "https://github.com/rcore-os/smoltcp.git"
@@ -68,3 +70,5 @@ features = [
   # "assembler-max-segment-count-32",
 
 ]
+
+[dev-dependencies]

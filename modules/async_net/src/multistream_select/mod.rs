@@ -1,7 +1,10 @@
 extern crate alloc;
 
+mod dialer_select;
 mod message_io;
+mod negotiated;
 mod protocol;
+pub use dialer_select::dialer_select;
 
 /// Supported multistream-select versions.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]

@@ -1,9 +1,11 @@
-use bytes::Bytes;
+use bytes::{BufMut, Bytes, BytesMut};
 use core::error::Error;
 use core::fmt;
-// use std::io;
 
-use alloc::{borrow::ToOwned, string::{String, ToString}};
+use alloc::{
+    borrow::ToOwned,
+    string::{String, ToString},
+};
 use async_collections::vec::Vec;
 
 use super::Version;
@@ -104,6 +106,105 @@ pub(crate) enum Message {
     NotAvailable,
 }
 
+impl Message {
+    /// Encodes a `Message` into its byte representation.
+    fn encode(&self, dest: &mut BytesMut) -> Result<(), ProtocolError> {
+        match self {
+            Message::Header(HeaderLine::V1) => {
+                dest.reserve(MSG_MULTISTREAM_1_0.len());
+                dest.put(MSG_MULTISTREAM_1_0);
+                Ok(())
+            }
+            Message::Protocol(p) => {
+                let len = p.as_ref().len() + 1; // + 1 for \n
+                dest.reserve(len);
+                dest.put(p.0.as_ref());
+                dest.put_u8(b'\n');
+                Ok(())
+            }
+            Message::ListProtocols => {
+                dest.reserve(MSG_LS.len());
+                dest.put(MSG_LS);
+                Ok(())
+            }
+            Message::Protocols(ps) => {
+                let mut buf = unsigned_varint::encode::usize_buffer();
+                let mut encoded: Vec<u8> = Vec::with_capacity(ps.len());
+                for p in ps {
+                    encoded.extend(unsigned_varint::encode::usize(p.as_ref().len() + 1, &mut buf)); // +1 for '\n'
+                    encoded.extend_from_slice(p.0.as_ref());
+                    encoded.push(b'\n')
+                }
+                encoded.push(b'\n');
+                dest.reserve(encoded.len());
+                dest.put(encoded.as_ref());
+                Ok(())
+            }
+            Message::NotAvailable => {
+                dest.reserve(MSG_PROTOCOL_NA.len());
+                dest.put(MSG_PROTOCOL_NA);
+                Ok(())
+            }
+        }
+    }
+
+    /// Decodes a `Message` from its byte representation.
+    fn decode(mut msg: Bytes) -> Result<Message, ProtocolError> {
+        if msg == MSG_MULTISTREAM_1_0 {
+            return Ok(Message::Header(HeaderLine::V1));
+        }
+
+        if msg == MSG_PROTOCOL_NA {
+            return Ok(Message::NotAvailable);
+        }
+
+        if msg == MSG_LS {
+            return Ok(Message::ListProtocols);
+        }
+
+        // If it starts with a `/`, ends with a line feed without any
+        // other line feeds in-between, it must be a protocol name.
+        if msg.first() == Some(&b'/')
+            && msg.last() == Some(&b'\n')
+            && !msg[..msg.len() - 1].contains(&b'\n')
+        {
+            let p = Protocol::try_from(msg.split_to(msg.len() - 1))?;
+            return Ok(Message::Protocol(p));
+        }
+
+        // At this point, it must be an `ls` response, i.e. one or more
+        // length-prefixed, newline-delimited protocol names.
+        let mut protocols = Vec::new();
+        let mut remaining: &[u8] = &msg;
+        loop {
+            // A well-formed message must be terminated with a newline.
+            if remaining == [b'\n'] {
+                break;
+            } else if protocols.len() == MAX_PROTOCOLS {
+                return Err(ProtocolError::TooManyProtocols);
+            }
+
+            // Decode the length of the next protocol name and check that
+            // it ends with a line feed.
+            let (len, tail) = unsigned_varint::decode::usize(remaining)?;
+            if len == 0 || len > tail.len() || tail[len - 1] != b'\n' {
+                return Err(ProtocolError::InvalidMessage);
+            }
+
+            // Parse the protocol name.
+            let p = Protocol::try_from(Bytes::copy_from_slice(&tail[..len - 1]))?;
+            protocols.push(p);
+
+            // Skip ahead to the next protocol.
+            remaining = &tail[len..];
+        }
+
+        Ok(Message::Protocols(protocols))
+    }
+}
+
+// todo: MessageIO没法直接移植到这儿，需要进一步探索
+
 /// A protocol error.
 #[derive(Debug)]
 pub enum ProtocolError {
@@ -140,7 +241,10 @@ impl From<ProtocolError> for async_io::IoError {
 impl From<unsigned_varint::decode::Error> for ProtocolError {
     fn from(err: unsigned_varint::decode::Error) -> ProtocolError {
         // Self::from(io::Error::new(io::ErrorKind::InvalidData, err.to_string()))
-        Self::from(async_io::IoError::new(async_io::Error::InvalidData, err.to_string()))
+        Self::from(async_io::IoError::new(
+            async_io::Error::InvalidData,
+            err.to_string(),
+        ))
     }
 }
 
