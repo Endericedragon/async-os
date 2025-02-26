@@ -58,6 +58,6 @@ members = [
     # 宏内核应用程序
     "apps/akm",
     "modules/async_collections",
-    "user_apps/simple_web_server",
+    "user_apps/simple_web_server"
 ]
 resolver = "2"

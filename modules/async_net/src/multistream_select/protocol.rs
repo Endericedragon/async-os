@@ -108,7 +108,7 @@ pub(crate) enum Message {
 
 impl Message {
     /// Encodes a `Message` into its byte representation.
-    fn encode(&self, dest: &mut BytesMut) -> Result<(), ProtocolError> {
+    pub fn encode(&self, dest: &mut BytesMut) -> Result<(), ProtocolError> {
         match self {
             Message::Header(HeaderLine::V1) => {
                 dest.reserve(MSG_MULTISTREAM_1_0.len());
@@ -149,7 +149,7 @@ impl Message {
     }
 
     /// Decodes a `Message` from its byte representation.
-    fn decode(mut msg: Bytes) -> Result<Message, ProtocolError> {
+    pub fn decode(mut msg: Bytes) -> Result<Message, ProtocolError> {
         if msg == MSG_MULTISTREAM_1_0 {
             return Ok(Message::Header(HeaderLine::V1));
         }
@@ -202,8 +202,6 @@ impl Message {
         Ok(Message::Protocols(protocols))
     }
 }
-
-// todo: MessageIO没法直接移植到这儿，需要进一步探索
 
 /// A protocol error.
 #[derive(Debug)]

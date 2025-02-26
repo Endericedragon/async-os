@@ -8,7 +8,18 @@ pub use hashbrown::{HashMap, HashSet};
 pub mod vec;
 pub use vec::Vec;
 // Could use `async_std::collections::BinaryHeap` outsides. Great!
-pub mod binary_heap;
-pub mod vec_deque;
-pub use binary_heap::BinaryHeap;
-pub use vec_deque::VecDeque;
+pub use alloc::collections::BinaryHeap;
+pub use alloc::collections::VecDeque;
+
+#[macro_export]
+macro_rules! vec_deque {
+    () => {{
+        VecDeque::new()
+    }};
+
+    ($($x:expr),+) => {{
+        let mut res = VecDeque::new();
+        $(res.push_back($x);)+
+        res
+    }}
+}
