@@ -1,6 +1,8 @@
 use alloc::boxed::Box;
+use alloc::string::ToString;
 use alloc::sync::Arc;
 use bytes::BytesMut;
+use core::fmt::Debug;
 use core::future::Future;
 use core::result::Result;
 use core::task::{Context, Poll};
@@ -12,6 +14,14 @@ use super::protocol::{Message, ProtocolError};
 
 pub struct MessageIO {
     socket: Arc<TcpSocket>,
+}
+
+impl Debug for MessageIO {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("MessageIO")
+            .field("socket", &("TcpSocket {...}".to_string()))
+            .finish()
+    }
 }
 
 impl MessageIO {

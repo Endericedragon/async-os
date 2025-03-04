@@ -2,27 +2,27 @@ use core::future::Future;
 use core::pin::Pin;
 use core::task::{Context, Poll};
 
-use async_collections::Vec;
+use async_collections::VecDeque;
 use async_io::{AsyncRead, AsyncWrite};
 
 use crate::TcpSocket;
 
 use super::message_io::MessageIO;
 use super::negotiated::NegotiationError;
-use super::protocol::{HeaderLine, Message};
+use super::protocol::{HeaderLine, Message, Protocol};
 use super::Version;
 use alloc::string::String;
 
 pub async fn dialer_select<R>(
     async_rwer: TcpSocket,
-    protocols: Vec<String>,
+    protocols: VecDeque<String>,
     version: Version,
 ) -> DialerSelectFuture
 where
     R: AsyncRead + AsyncWrite,
 {
     DialerSelectFuture {
-        protocols: protocols.into_iter(),
+        protocols,
         version,
         state: State::SendHeader {
             io: MessageIO::new(async_rwer),
@@ -35,7 +35,8 @@ where
 #[pin_project::pin_project]
 pub struct DialerSelectFuture {
     // TODO: It would be nice if eventually N = I::Item = Protocol.
-    protocols: alloc::vec::IntoIter<String>,
+    // protocols: alloc::vec::IntoIter<String>,
+    protocols: VecDeque<String>,
     state: State,
     version: Version,
 }
@@ -79,7 +80,39 @@ impl Future for DialerSelectFuture {
                     // proposal in one go for efficiency.
                     *this.state = State::SendProtocol { io, protocol };
                 }
-                State::SendProtocol { io, protocol } => todo!(),
+                State::SendProtocol { io, protocol } => {
+                    match Pin::new(&mut io).poll_ready(cx)? {
+                        Poll::Ready(()) => {}
+                        Poll::Pending => {
+                            *this.state = State::SendProtocol { io, protocol };
+                            return Poll::Pending;
+                        }
+                    }
+
+                    let p = Protocol::try_from(protocol.as_ref())?;
+                    if let Err(err) = Pin::new(&mut io).start_send(Message::Protocol(p.clone())) {
+                        return Poll::Ready(Err(From::from(err)));
+                    }
+                    tracing::debug!(protocol=%p, "Dialer: Proposed protocol");
+
+                    if this.protocols.front().is_some() {
+                        *this.state = State::FlushProtocol { io, protocol }
+                    } else {
+                        match this.version {
+                            Version::V1 => *this.state = State::FlushProtocol { io, protocol },
+                            // This is the only effect that `V1Lazy` has compared to `V1`:
+                            // Optimistically settling on the only protocol that
+                            // the dialer supports for this negotiation. Notably,
+                            // the dialer expects a regular `V1` response.
+                            Version::V1Lazy => {
+                                tracing::debug!(protocol=%p, "Dialer: Expecting proposed protocol");
+                                let hl = HeaderLine::from(Version::V1Lazy);
+                                let io = Negotiated::expecting(io.into_reader(), p, Some(hl));
+                                return Poll::Ready(Ok((protocol, io)));
+                            }
+                        }
+                    }
+                }
                 State::FlushProtocol { io, protocol } => todo!(),
                 State::AwaitProtocol { io, protocol } => todo!(),
                 State::Done => todo!(),

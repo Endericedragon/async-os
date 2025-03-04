@@ -9,17 +9,6 @@ pub mod vec;
 pub use vec::Vec;
 // Could use `async_std::collections::BinaryHeap` outsides. Great!
 pub use alloc::collections::BinaryHeap;
-pub use alloc::collections::VecDeque;
 
-#[macro_export]
-macro_rules! vec_deque {
-    () => {{
-        VecDeque::new()
-    }};
-
-    ($($x:expr),+) => {{
-        let mut res = VecDeque::new();
-        $(res.push_back($x);)+
-        res
-    }}
-}
+mod vec_deque;
+pub use vec_deque::VecDeque;
