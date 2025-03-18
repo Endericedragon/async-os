@@ -1,6 +1,6 @@
 use core::arch::asm;
 
-// type Multihash = multihash::Multihash<64>;
+mod ms_client;
 
 fn main() {
     greeting_through_syscall();

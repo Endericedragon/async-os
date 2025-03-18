@@ -9,15 +9,15 @@ async_std = { path = "../../modules/async_std", features = [
     "multitask",
     "net"
 ] }
-multihash = { path = "../../modules/ak_addition/ak_multihash", default-features = false, features = [
-    "alloc"
-] }
-bs58 = { path = "../../modules/ak_addition/ak_bs58", default-features = false, features = [
-    "alloc"
-] }
-fastrand = { path = "../../modules/ak_addition/ak_fastrand", default-features = false, features = [
-    "alloc"
-] }
+# multihash = { path = "../../modules/ak_addition/ak_multihash", default-features = false, features = [
+#     "alloc"
+# ] }
+# bs58 = { path = "../../modules/ak_addition/ak_bs58", default-features = false, features = [
+#     "alloc"
+# ] }
+# fastrand = { path = "../../modules/ak_addition/ak_fastrand", default-features = false, features = [
+#     "alloc"
+# ] }
 async_net = { path = "../../modules/async_net" }
 async_collections = { path = "../../modules/async_collections" }
 # ak_futures-timer = { path = "../../modules/ak_addition/ak_futures-timer" }

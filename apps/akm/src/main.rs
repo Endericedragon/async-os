@@ -1,56 +1,35 @@
 #![no_std]
 #![no_main]
 
-use async_std::prelude::{Read, Write};
-
 #[macro_use]
 extern crate async_std;
 extern crate async_net;
 
-use async_collections::{vec, Vec};
-
-mod peer_id_emulate;
-
-use alloc::string::ToString;
-use async_net::multistream_select::{dialer_select, Version};
-use async_net::TcpSocket;
+use alloc::string::String;
+use async_collections::Vec;
+use async_std::net::{SocketAddr, TcpStream};
 
 #[async_std::async_main]
 async fn main() -> isize {
-    println!("Greetings!");
-
-    // let mut tcp_socket = TcpSocket::new();
-    // // tcp_socket.connect("127.0.0.1:7878").await;
-    // dialer_select(
-    //     tcp_socket,
-    //     vec!["p1".to_string(), "proto2".to_string()],
-    //     Version::V1,
-    // )
-    // .await
-    // .await
-    // .expect("Failed to select protocol!");
-
     0
 }
 
-async fn web_server() {
-    let ip_port_pair = "0.0.0.0:7878";
+struct Negotiator {
+    protos: Vec<String>,
+    stream: Option<TcpStream>,
+}
 
-    let listener = async_std::net::TcpListener::bind(ip_port_pair)
-        .await
-        .expect("Failed to bind!");
-    println!("Listening on {}...", ip_port_pair);
-
-    loop {
-        let (mut tcp_stream, socket_addr) = listener.accept().await.expect("Failed to accept!");
-        let mut buf = [0u8; 1024];
-        println!("Received connection from {}...", socket_addr);
-        tcp_stream.read(&mut buf).await.expect("Failed to read!");
-        println!("Received: {}", alloc::string::String::from_utf8_lossy(&buf));
-        let response = "HTTP/1.1 200 OK\r\nContent-Length: 5\r\n\r\nhello";
-        tcp_stream
-            .write_all(response.as_bytes())
-            .await
-            .expect("Failed to write!");
+impl Negotiator {
+    pub fn new() -> Self {
+        Self {
+            protos: Vec::new(),
+            stream: None,
+        }
     }
+
+    pub fn add_proto(&mut self, proto_name: String) {
+        self.protos.push(proto_name);
+    }
+
+    pub fn dial(&mut self, sock_addr: SocketAddr) {}
 }
