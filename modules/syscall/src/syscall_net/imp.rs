@@ -52,6 +52,15 @@ pub async fn syscall_socket(args: [usize; 6]) -> SyscallResult {
     Ok(fd as isize)
 }
 
+/// #Args:
+/// * `addr` - [u8; 4] 代表IP地址
+/// * `port` - u16 代表端口号
+/// * `protocols` - *const *const u8 代表协议列表
+/// * `protocols_len` - usize 代表协议列表长度
+pub async fn syscall_multistream_select_dialer(args: [usize; 6]) -> SyscallResult {
+    todo!()
+}
+
 /// # Arguments
 /// * `fd` - usize
 /// * `addr` - *const u8

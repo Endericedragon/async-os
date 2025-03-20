@@ -441,19 +441,102 @@ pub unsafe fn socket_address_from(addr: *const u8, socket: &Socket) -> SocketAdd
 
 注意到当前操作系统没有提供容器数据结构，仅有 `alloc::vec::Vec`，因此有必要增添 `async_std::collections`来提供常用的容器数据结构。
 
-本次功能增添一共新增两个容器：`HashMap`和 `BinaryHeap`。前者直接通过引入 `hashbrown`库实现，后者由笔者手动编写实现。
+本次功能增添一共新增两个容器：`HashMap`和 `BinaryHeap`。前者直接通过引入 `hashbrown`库实现，后者由`alloc::collections`提供。
 
-## 移植libp2p-core
+## multistream-select的接口设计
 
-根据拓扑排序结果，可知想要移植 `libp2p-core` 库需要先行完成如下库的移植工作：
+在第五章中，我们的目标是把 [multistream-select](https://github.com/multiformats/multistream-select) 协议给移植到内核态中，并且在用户态写测试程序，让内核作为dialer去和远程主机协商一个协议，并用这个协议通信。
 
-* [x] misc/futures-bounded
-* [ ] identity
-* [ ] transports/pnet
-* [ ] swarm-derive
-* [ ] misc/multistream-select
-* [ ] misc/quick-protobuf-codec
-* [ ] misc/quickcheck-ext
-* [ ] misc/rw-stream-sink
+为实现上述目标，需要给 AsyncOS 设计合适的接口，并划分用户态、内核态（及其中的各个模块）分别都要实现什么东西。
 
-解决了identity需要的asn1\_der和bs58，剩下的明天再搞
+### 用户态设想的实现
+
+在用户态，笔者想实现的效果如下：
+
+```rust
+use multistream_select::Negotiator;
+
+let negotiator = Negotiator::new();
+negotiator.add_protocol("/echo/1.0");
+if negotiator.dial([127, 0, 0, 1], 42666) {
+    // 成功连接到远程主机，proto为"/echo/1.0"，fd为连接的文件描述符
+    negotiator.send(fd, b"hello", 5, 0);
+} else {
+    eprintln!("Failed to negotiate with remote server!");
+}
+```
+
+由此引出了用户态的 `multistream_select` 模块的接口设计：
+
+```rust
+pub struct Negotiator {
+    protocols: Vec<String>,
+    selected_proto: Option<String>,
+    remote_fd: Option<usize>,
+}
+
+impl Negotiator {
+    /// 简单的初始化
+    pub fn new() -> Self;
+    /// 给自身添加一个协议，表示自身支持该协议
+    pub fn add_protocol(&mut self, proto: &str);
+    /// 尝试与远程主机建立连接，返回bool值指示协商是否成功
+    pub fn dial(&mut self, addr: [u8; 4], port: u16) -> bool {
+        let mut fd: isize;
+        let mut proto_idx: isize;
+        unsafe {
+            asm!(
+                "ecall",
+                inlateout("a7") SYS_MULTISTREAM_SELECT_DIALER => fd, // 暂定42666
+                inlateout("a0") addr.as_ptr() => proto_idx,
+                in("a1") port,
+                in("a2") self.protocols.as_ptr(),
+                in("a3") self.protocols.len(),
+            )
+        }
+        if fd >= 0 {
+            self.selected_proto = Some(self.protocols[proto_idx as usize].clone());
+            self.remote_fd = Some(fd as usize);
+            true
+        } else {
+            false
+        }
+    }
+    /// 使用协商好的数据，向远程主机发送数据，返回已发送的字节数
+    pub fn send(&self, buf: &[u8]) -> isize {
+        if let Some(remote_fd) = self.remote_fd {
+            unsafe {
+                libc::send(
+                    remote_fd as i32,
+                    buf.as_ptr() as *const c_void,
+                    buf.len(),
+                    0,
+                ) as isize
+            }
+        } else {
+            -1
+        }
+    }
+    /// 使用协商好的数据，从远程主机接收数据，返回已接收的字节数
+    pub fn recv(&self, buf: &mut [u8]) -> isize {
+        if let Some(remote_fd) = self.remote_fd {
+            unsafe {
+                libc::recv(
+                    remote_fd as i32,
+                    buf.as_mut_ptr() as *mut c_void,
+                    buf.len(),
+                    0,
+                )
+            }
+        } else {
+            -1
+        }
+    }
+}
+```
+
+## 内核态设想的实现
+
+modules/syscall/src/syscall_net/imp.rs
+
+套一层，先 syscall_socket ，再用syscall就行啦

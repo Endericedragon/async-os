@@ -32,6 +32,7 @@ pub async fn net_syscall(
         SOCKETPAIR => syscall_socketpair(args).await,
         ACCEPT4 => syscall_accept4(args).await,
         SHUTDOWN => syscall_shutdown(args).await,
+        MULTISTREAM_SELECT_DIALER => syscall_multistream_select_dialer(args).await,
         #[allow(unused)]
         _ => {
             panic!("Invalid Syscall Id: {:?}!", syscall_id);
