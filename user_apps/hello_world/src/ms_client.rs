@@ -1,42 +1,84 @@
 use core::arch::asm;
-use std::net::SocketAddr;
+use parity_scale_codec::{Decode, Encode};
+use std::ffi::c_void;
 
-const SYS_MULTISTREAM_SELECT_DIAL: usize = 42666;
+const MULTISTREAM_SELECT_DIALER: usize = 42666;
 
-struct Negotiator {
-    protos: Vec<String>,
+#[derive(Encode, Decode)]
+struct ProtocolList(Vec<String>);
+
+pub struct Negotiator {
+    protocols: ProtocolList,
+    selected_proto: Option<String>,
+    remote_fd: Option<usize>,
 }
 
 impl Negotiator {
+    /// 简单的初始化
     pub fn new() -> Self {
-        Self { protos: vec![] }
-    }
-
-    pub fn add_protocol(&mut self, protocol: String) {
-        self.protos.push(protocol);
-    }
-
-    pub fn dial(&mut self, addr: SocketAddr) {
-        unsafe {
-            // asm!(
-            //     "ecall",
-            //     in("a7") SYS_WRITE,
-            //     in("a0") rua,
-            //     in("a1") message.as_ptr(),
-            //     in("a2") len,
-            // );
-            // syscall_multistream_select_dial(num_proto: usize, protos: Vec<String>) -> usize(fd)
-            asm!(
-                "ecall",
-                in("a7") SYS_MULTISTREAM_SELECT_DIAL,
-            );
+        Self {
+            protocols: ProtocolList(Vec::new()),
+            selected_proto: None,
+            remote_fd: None,
         }
     }
-}
+    /// 给自身添加一个协议，表示自身支持该协议
+    pub fn add_protocol(&mut self, proto: &str) {
+        self.protocols.0.push(proto.to_string());
+    }
+    /// 尝试与远程主机建立连接，返回bool值指示协商是否成功
+    pub fn dial(&mut self, addr: [u8; 4], port: u16) -> bool {
+        // todo 实现这个系统调用
+        let mut fd: isize;
+        let mut proto_idx: isize;
+        let encoded_protocol_list = self.protocols.encode();
+        unsafe {
+            asm!(
+                "ecall",
+                inlateout("a7") MULTISTREAM_SELECT_DIALER => fd, // 暂定42666
+                inlateout("a0") addr.as_ptr() => proto_idx,
+                in("a1") port,
+                in("a2") encoded_protocol_list.as_ptr(),
+                in("a3") encoded_protocol_list.len(),
+            )
+        }
+        if fd >= 0 {
+            self.selected_proto = Some(self.protocols.0[proto_idx as usize].clone());
+            self.remote_fd = Some(fd as usize);
+            true
+        } else {
+            false
+        }
+    }
+    /// 使用协商好的数据，向远程主机发送数据，返回已发送的字节数
+    pub fn send(&self, buf: &[u8]) -> isize {
+        if let Some(remote_fd) = self.remote_fd {
+            unsafe {
+                libc::send(
+                    remote_fd as i32,
+                    buf.as_ptr() as *const c_void,
+                    buf.len(),
+                    0,
+                ) as isize
+            }
+        } else {
+            -1
+        }
+    }
 
-fn try_negotiate() {
-    let mut negotiator = Negotiator::new();
-    negotiator.add_protocol("p1".to_string());
-    negotiator.add_protocol("proto2".to_string());
-    negotiator.dial(SocketAddr::from(([127, 0, 0, 1], 42666)))
+    /// 使用协商好的数据，从远程主机接收数据，返回已接收的字节数
+    pub fn recv(&self, buf: &mut [u8]) -> isize {
+        if let Some(remote_fd) = self.remote_fd {
+            unsafe {
+                libc::recv(
+                    remote_fd as i32,
+                    buf.as_mut_ptr() as *mut c_void,
+                    buf.len(),
+                    0,
+                )
+            }
+        } else {
+            -1
+        }
+    }
 }
