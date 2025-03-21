@@ -28,7 +28,7 @@ pub enum NetSyscallId {
     SHUTDOWN = 210,
     ACCEPT4 = 242,
     // multistream-select
-    MULTISTREAM_SELECT_DIALER = 42667,
+    MULTISTREAM_SELECT_DIALER = 42666,
 }
 }
 

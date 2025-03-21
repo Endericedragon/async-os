@@ -7,6 +7,6 @@ edition = "2021"
 libc = "0.2.171"
 # multihash = "0.19.3"
 # multihash = { path = "../../../ak_multihash_user", package = "ak_multihash_user" }
-parity-scale-codec = { version = "=3.6.3", default-features = false, features = [
+parity-scale-codec = { version = "3.7", default-features = false, features = [
     "derive"
 ] }

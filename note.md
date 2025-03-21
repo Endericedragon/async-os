@@ -466,72 +466,38 @@ if negotiator.dial([127, 0, 0, 1], 42666) {
 }
 ```
 
-由此引出了用户态的 `multistream_select` 模块的接口设计：
+由此引出了用户态的 `multistream_select` 模块的接口设计。首先设计所需的结构体：
 
 ```rust
+use parity_scale_codec::{Decode, Encode};
+
+#[derive(Encode, Decode)]
+struct ProtocolList(Vec<String>);
+
 pub struct Negotiator {
-    protocols: Vec<String>,
+    protocols: ProtocolList,
     selected_proto: Option<String>,
     remote_fd: Option<usize>,
 }
+```
 
+这里之所以需要使用 `ProtocolList` 包装 `Vec<String>` ，是因为我们希望通过 parity-scale-codec 将使用 `send()` 系统调用发送的信息编码为 `Vec<u8>`（因为 `send()` 系统调用只能发送 `*const c_void` 形式的数据）。
+
+随后就是 `Negotiator` 需要实现的方法，这里仅给出函数签名。
+
+```rust
 impl Negotiator {
     /// 简单的初始化
     pub fn new() -> Self;
     /// 给自身添加一个协议，表示自身支持该协议
     pub fn add_protocol(&mut self, proto: &str);
-    /// 尝试与远程主机建立连接，返回bool值指示协商是否成功
-    pub fn dial(&mut self, addr: [u8; 4], port: u16) -> bool {
-        let mut fd: isize;
-        let mut proto_idx: isize;
-        unsafe {
-            asm!(
-                "ecall",
-                inlateout("a7") SYS_MULTISTREAM_SELECT_DIALER => fd, // 暂定42666
-                inlateout("a0") addr.as_ptr() => proto_idx,
-                in("a1") port,
-                in("a2") self.protocols.as_ptr(),
-                in("a3") self.protocols.len(),
-            )
-        }
-        if fd >= 0 {
-            self.selected_proto = Some(self.protocols[proto_idx as usize].clone());
-            self.remote_fd = Some(fd as usize);
-            true
-        } else {
-            false
-        }
-    }
+    /// 尝试与远程主机建立连接并协商后续协议
+    /// 返回bool值指示协商是否成功
+    pub fn dial(&mut self, addr: [u8; 4], port: u16) -> bool;
     /// 使用协商好的数据，向远程主机发送数据，返回已发送的字节数
-    pub fn send(&self, buf: &[u8]) -> isize {
-        if let Some(remote_fd) = self.remote_fd {
-            unsafe {
-                libc::send(
-                    remote_fd as i32,
-                    buf.as_ptr() as *const c_void,
-                    buf.len(),
-                    0,
-                ) as isize
-            }
-        } else {
-            -1
-        }
-    }
+    pub fn send(&self, buf: &[u8]) -> isize;
     /// 使用协商好的数据，从远程主机接收数据，返回已接收的字节数
-    pub fn recv(&self, buf: &mut [u8]) -> isize {
-        if let Some(remote_fd) = self.remote_fd {
-            unsafe {
-                libc::recv(
-                    remote_fd as i32,
-                    buf.as_mut_ptr() as *mut c_void,
-                    buf.len(),
-                    0,
-                )
-            }
-        } else {
-            -1
-        }
-    }
+    pub fn recv(&self, buf: &mut [u8]) -> isize;
 }
 ```
 

@@ -1,16 +1,22 @@
 //! 相关系统调用的具体实现
 extern crate alloc;
 use super::socket::*;
-use core::slice::{from_raw_parts, from_raw_parts_mut};
+use core::{error, slice::{from_raw_parts, from_raw_parts_mut}};
 
+use super::common_types::NegotiationSession;
 use crate::{syscall_fs::ctype::pipe::make_pipe, SyscallError, SyscallResult};
 use alloc::sync::Arc;
+use async_collections::Vec;
 use async_fs::api::{AsyncFileIO, OpenFlags};
+use async_net::IpEndpoint;
 use axerrno::AxError;
 use axlog::{debug, error, info, warn};
 
 use executor::current_executor;
 use num_enum::TryFromPrimitive;
+use parity_scale_codec::{Decode, Encode};
+
+use super::multistream_select;
 
 pub const SOCKET_TYPE_MASK: usize = 0xFF;
 
@@ -52,13 +58,56 @@ pub async fn syscall_socket(args: [usize; 6]) -> SyscallResult {
     Ok(fd as isize)
 }
 
-/// #Args:
-/// * `addr` - [u8; 4] 代表IP地址
-/// * `port` - u16 代表端口号
-/// * `protocols` - *const *const u8 代表协议列表
-/// * `protocols_len` - usize 代表协议列表长度
+/// Args:
+/// args[0] length of the next arg
+/// args[1] `negotiation_sess` - Vec<u8> parity-scale-codec编码的NegotiationSession
 pub async fn syscall_multistream_select_dialer(args: [usize; 6]) -> SyscallResult {
-    todo!()
+    let length = args[0];
+    let ns_bytes = args[1] as *mut u8;
+    let mut ns_vec_u8 = Vec::<u8>::new();
+    for i in 0..length {
+        ns_vec_u8.push(unsafe { ns_bytes.add(i).read_volatile() });
+    }
+    let mut ns = NegotiationSession::decode(&mut &ns_vec_u8[..]).unwrap();
+
+    // 创建Socket
+    let socket = Socket::new(Domain::AF_INET, SocketType::SOCK_STREAM, None).await;
+
+    // connect
+    let addr = async_net::SocketAddr::IpPortPair(IpEndpoint::new(
+        async_net::IpAddr::v4(ns.addr[0], ns.addr[1], ns.addr[2], ns.addr[3]),
+        ns.port,
+    ));
+    error!("Connecting...");
+    match socket.connect(addr).await {
+        Ok(_) => (),
+        Err(AxError::WouldBlock) => return Err(SyscallError::EINPROGRESS),
+        Err(AxError::Interrupted) => return Err(SyscallError::EINTR),
+        Err(AxError::AlreadyExists) => return Err(SyscallError::EISCONN),
+        Err(_) => return Err(SyscallError::ECONNREFUSED),
+    }
+    info!("[multistream_select_dialer()] connected");
+
+    // 开始协商
+    let proto_idx = multistream_select::dial(&socket, &ns.protocols).await;
+
+    // 操作完了以后再塞进fd表中
+    let curr = current_executor().await;
+    let mut fd_table = curr.fd_manager.fd_table.lock().await;
+    let Ok(fd) = curr.alloc_fd(&mut fd_table) else {
+        return Err(SyscallError::EMFILE);
+    };
+    fd_table[fd] = Some(Arc::new(socket));
+
+    ns.result = (fd as i64, proto_idx as u64);
+    let encoded_ns = ns.encode();
+    for i in 0..encoded_ns.len() {
+        unsafe {
+            ns_bytes.add(i).write_volatile(encoded_ns[i]);
+        }
+    }
+
+    Ok(0)
 }
 
 /// # Arguments

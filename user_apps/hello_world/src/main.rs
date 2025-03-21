@@ -7,14 +7,18 @@ fn main() {
 
     let mut negotiator = ms_client::Negotiator::new();
     negotiator.add_protocol("/nika/1.0");
-    negotiator.add_protocol("/echo/2.0");
+    negotiator.add_protocol("/akusta/2.0");
     negotiator.add_protocol("/echo/1.0");
-    if negotiator.dial([127, 0, 0, 1], 42666) {
+    if negotiator.dial([10, 0, 2, 2], 42666) {
         // 成功连接到远程主机，proto为"/echo/1.0"，fd为连接的文件描述符
-        let mut buf = [0u8; 1024];
-        negotiator.send(b"hello");
-        negotiator.recv(&mut buf);
-        println!("Received: {}", String::from_utf8_lossy(&buf));
+        println!(
+            "Negotiation successful! {:?}",
+            negotiator.selected_proto_idx
+        );
+        // let mut buf = [0u8; 1024];
+        // negotiator.send(b"hello");
+        // negotiator.recv(&mut buf);
+        // println!("Received: {}", String::from_utf8_lossy(&buf));
     } else {
         eprintln!("Failed to negotiate with remote server!");
     }

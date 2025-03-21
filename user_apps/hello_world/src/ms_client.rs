@@ -4,53 +4,65 @@ use std::ffi::c_void;
 
 const MULTISTREAM_SELECT_DIALER: usize = 42666;
 
-#[derive(Encode, Decode)]
-struct ProtocolList(Vec<String>);
-
 pub struct Negotiator {
-    protocols: ProtocolList,
-    selected_proto: Option<String>,
+    protocols: Vec<String>,
+    pub selected_proto_idx: Option<usize>,
     remote_fd: Option<usize>,
+}
+
+#[derive(Encode, Decode, Debug)]
+struct NegotiationSession {
+    addr: [u8; 4],
+    port: u16,
+    protocols: Vec<String>,
+    result: (i64, i64),
 }
 
 impl Negotiator {
     /// 简单的初始化
     pub fn new() -> Self {
         Self {
-            protocols: ProtocolList(Vec::new()),
-            selected_proto: None,
+            protocols: Vec::new(),
+            selected_proto_idx: None,
             remote_fd: None,
         }
     }
     /// 给自身添加一个协议，表示自身支持该协议
     pub fn add_protocol(&mut self, proto: &str) {
-        self.protocols.0.push(proto.to_string());
+        self.protocols.push(proto.to_string());
     }
-    /// 尝试与远程主机建立连接，返回bool值指示协商是否成功
+    /// 尝试与远程主机建立连接并协商后续协议
+    /// 返回bool值指示协商是否成功
     pub fn dial(&mut self, addr: [u8; 4], port: u16) -> bool {
-        // todo 实现这个系统调用
-        let mut fd: isize;
-        let mut proto_idx: isize;
-        let encoded_protocol_list = self.protocols.encode();
+        let mut _ret: isize;
+        let sess = NegotiationSession {
+            addr,
+            port,
+            protocols: self.protocols.clone(),
+            result: (i64::MIN, i64::MIN),
+        };
+        let encoded_ptr = sess.encode();
+        let encoded_sess_ptr = encoded_ptr.as_ptr();
         unsafe {
             asm!(
                 "ecall",
-                inlateout("a7") MULTISTREAM_SELECT_DIALER => fd, // 暂定42666
-                inlateout("a0") addr.as_ptr() => proto_idx,
-                in("a1") port,
-                in("a2") encoded_protocol_list.as_ptr(),
-                in("a3") encoded_protocol_list.len(),
+                in("a7") MULTISTREAM_SELECT_DIALER, // 暂定42666
+                in("a0") encoded_ptr.len(),
+                in("a1") encoded_sess_ptr,
             )
         }
-        if fd >= 0 {
-            self.selected_proto = Some(self.protocols.0[proto_idx as usize].clone());
-            self.remote_fd = Some(fd as usize);
-            true
-        } else {
-            false
+        let negotiation_sess_after = NegotiationSession::decode(&mut &encoded_ptr[..]).unwrap();
+        println!("{:#?}", negotiation_sess_after);
+        match negotiation_sess_after.result {
+            (fd, proto_idx) if fd >= 0 && proto_idx >= 0 => {
+                self.remote_fd = Some(fd as usize);
+                self.selected_proto_idx = Some(proto_idx as usize);
+                true
+            }
+            _ => false,
         }
     }
-    /// 使用协商好的数据，向远程主机发送数据，返回已发送的字节数
+    /// 使用协商好的协议，向远程主机发送数据，返回已发送的字节数
     pub fn send(&self, buf: &[u8]) -> isize {
         if let Some(remote_fd) = self.remote_fd {
             unsafe {
@@ -66,7 +78,7 @@ impl Negotiator {
         }
     }
 
-    /// 使用协商好的数据，从远程主机接收数据，返回已接收的字节数
+    /// 使用协商好的协议，从远程主机接收数据，返回已接收的字节数
     pub fn recv(&self, buf: &mut [u8]) -> isize {
         if let Some(remote_fd) = self.remote_fd {
             unsafe {
