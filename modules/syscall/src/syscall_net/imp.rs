@@ -1,7 +1,10 @@
 //! 相关系统调用的具体实现
 extern crate alloc;
 use super::socket::*;
-use core::{error, slice::{from_raw_parts, from_raw_parts_mut}};
+use core::{
+    error,
+    slice::{from_raw_parts, from_raw_parts_mut},
+};
 
 use super::common_types::NegotiationSession;
 use crate::{syscall_fs::ctype::pipe::make_pipe, SyscallError, SyscallResult};
@@ -61,6 +64,7 @@ pub async fn syscall_socket(args: [usize; 6]) -> SyscallResult {
 /// Args:
 /// args[0] length of the next arg
 /// args[1] `negotiation_sess` - Vec<u8> parity-scale-codec编码的NegotiationSession
+/// args[2] `proto_idx` - *mut i64
 pub async fn syscall_multistream_select_dialer(args: [usize; 6]) -> SyscallResult {
     let length = args[0];
     let ns_bytes = args[1] as *mut u8;
@@ -78,7 +82,6 @@ pub async fn syscall_multistream_select_dialer(args: [usize; 6]) -> SyscallResul
         async_net::IpAddr::v4(ns.addr[0], ns.addr[1], ns.addr[2], ns.addr[3]),
         ns.port,
     ));
-    error!("Connecting...");
     match socket.connect(addr).await {
         Ok(_) => (),
         Err(AxError::WouldBlock) => return Err(SyscallError::EINPROGRESS),
@@ -99,15 +102,13 @@ pub async fn syscall_multistream_select_dialer(args: [usize; 6]) -> SyscallResul
     };
     fd_table[fd] = Some(Arc::new(socket));
 
-    ns.result = (fd as i64, proto_idx as u64);
-    let encoded_ns = ns.encode();
-    for i in 0..encoded_ns.len() {
-        unsafe {
-            ns_bytes.add(i).write_volatile(encoded_ns[i]);
-        }
+    // 把结果写回proto_idx
+    unsafe {
+        let ptr = args[2] as *mut i64;
+        *ptr = proto_idx as i64;
     }
 
-    Ok(0)
+    Ok(fd as isize)
 }
 
 /// # Arguments

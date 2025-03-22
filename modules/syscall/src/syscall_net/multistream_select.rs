@@ -6,7 +6,6 @@ use parity_scale_codec::{Decode, Encode};
 use super::common_types::Message;
 
 pub async fn dial(sock: &Socket, protos: &Vec<String>) -> isize {
-    info!("HEHEHEHE");
     let mut res = -1isize;
     for (idx, proto) in protos.iter().enumerate() {
         sock.sendto(

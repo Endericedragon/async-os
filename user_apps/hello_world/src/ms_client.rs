@@ -41,26 +41,41 @@ impl Negotiator {
             protocols: self.protocols.clone(),
             result: (i64::MIN, i64::MIN),
         };
-        let encoded_ptr = sess.encode();
-        let encoded_sess_ptr = encoded_ptr.as_ptr();
+        let mut encoded_ptr = sess.encode();
+        let mut fd = -1i64;
+        let mut proto_idx = -1i64;
+        let encoded_sess_ptr = encoded_ptr.as_mut_ptr();
         unsafe {
             asm!(
                 "ecall",
                 in("a7") MULTISTREAM_SELECT_DIALER, // 暂定42666
-                in("a0") encoded_ptr.len(),
+                inlateout("a0") encoded_ptr.len() => fd,
                 in("a1") encoded_sess_ptr,
+                in("a2") &proto_idx as *const i64 as *mut i64,
             )
         }
-        let negotiation_sess_after = NegotiationSession::decode(&mut &encoded_ptr[..]).unwrap();
-        println!("{:#?}", negotiation_sess_after);
-        match negotiation_sess_after.result {
-            (fd, proto_idx) if fd >= 0 && proto_idx >= 0 => {
+        // let new_vec = unsafe {
+        //     Vec::from_raw_parts(encoded_sess_ptr, length, length)
+        // };
+        if fd >= 0 && proto_idx >= 0 {
+            println!("Negotiation successful!");
                 self.remote_fd = Some(fd as usize);
                 self.selected_proto_idx = Some(proto_idx as usize);
                 true
-            }
-            _ => false,
+        } else {
+            false
         }
+        // let negotiation_sess_after = NegotiationSession::decode(&mut &new_vec[..]).unwrap();
+        // println!("{:#?}", negotiation_sess_after);
+        // match negotiation_sess_after.result {
+        //     (fd, proto_idx) if fd >= 0 && proto_idx >= 0 => {
+        //         println!("Negotiation successful!");
+        //         self.remote_fd = Some(fd as usize);
+        //         self.selected_proto_idx = Some(proto_idx as usize);
+        //         true
+        //     }
+        //     _ => false,
+        // }
     }
     /// 使用协商好的协议，向远程主机发送数据，返回已发送的字节数
     pub fn send(&self, buf: &[u8]) -> isize {
