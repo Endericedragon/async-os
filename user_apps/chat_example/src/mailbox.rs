@@ -18,8 +18,7 @@ pub struct Mailbox {
 
 impl Mailbox {
     pub fn new(identity: String) -> Self {
-        let broadcast_socket =
-            UdpSocket::bind(SocketAddr::from(([0, 0, 0, 0], MAGIC_PORT))).unwrap();
+        let broadcast_socket = UdpSocket::bind(SocketAddr::from(([0, 0, 0, 0], 0))).unwrap();
         broadcast_socket.set_broadcast(true).unwrap();
         broadcast_socket.set_nonblocking(true).unwrap();
         Self {
@@ -32,7 +31,7 @@ impl Mailbox {
     }
 
     /// 将存储在 `self.buf` 中的消息广播出去。使用前，必须先调用 `prepare_message` 方法将消息写入 `self.buf`。
-    fn broadcast_buf(&self) {
+    pub fn broadcast_buf(&self) -> usize {
         let Ok(size_sent) = self.broadcast_socket.send_to(
             &self.send_buf,
             SocketAddr::from(([255, 255, 255, 255], MAGIC_PORT)),
@@ -41,10 +40,11 @@ impl Mailbox {
         };
         // 能看到输出
         // println!("Broadcasted message of size {}.", size_sent);
+        size_sent
     }
 
     /// 将消息写入 `self.buf`，准备发送。
-    fn prepare_message(&mut self, message: &[u8]) {
+    pub fn prepare_message(&mut self, message: &[u8]) {
         self.send_buf.clear();
         self.send_buf.extend_from_slice(message);
     }

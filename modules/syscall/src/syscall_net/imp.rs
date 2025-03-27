@@ -574,6 +574,10 @@ pub async fn syscall_set_sock_opt(args: [usize; 6]) -> SyscallResult {
 
             option.set(socket, opt)
         }
+        SocketOptionLevel::Unknown => {
+            warn!("[setsockopt()] option {opt_name} not supported in unknown level");
+            Ok(0)
+        }
     }
 }
 
@@ -653,7 +657,8 @@ pub async fn syscall_get_sock_opt(args: [usize; 6]) -> SyscallResult {
             option.get(socket, opt_value, opt_len).await;
         }
         // TODO: achieve the real implementation of ipv6
-        SocketOptionLevel::IPv6 => {}
+        SocketOptionLevel::IPv6 => (),
+        SocketOptionLevel::Unknown => ()
     }
 
     Ok(0)

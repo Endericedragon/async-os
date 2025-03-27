@@ -148,6 +148,7 @@ impl UdpSocket {
         if remote_addr.port() == 0 || remote_addr.ip().is_unspecified() {
             return ax_err!(InvalidInput, "socket send_to() failed: invalid address");
         }
+        info!("Sending UDP packets {} to {}", alloc::string::String::from_utf8_lossy(buf), remote_addr);
         self.send_impl(buf, from_core_sockaddr(remote_addr)).await
     }
 

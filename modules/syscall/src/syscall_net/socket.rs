@@ -36,7 +36,7 @@ pub enum Domain {
     AF_UNIX = 1,
     AF_INET = 2,
     //AF_INET6 = 10,
-    AF_NETLINK = 16,
+    AF_NETLINK = 17, // todo 假的，其实是16，我想看看 chat-example 到底是哪一步用到了Netlink协议，然后再改
 }
 
 #[derive(TryFromPrimitive, PartialEq, Eq, Copy, Clone, Debug)]
@@ -75,6 +75,7 @@ pub enum SocketOptionLevel {
     Socket = 1,
     Tcp = 6,
     IPv6 = 41,
+    Unknown = 17, // 真的不知道是啥
 }
 
 #[derive(TryFromPrimitive, Debug)]
@@ -94,6 +95,7 @@ pub enum SocketOption {
     SO_REUSEADDR = 2,
     SO_ERROR = 4,
     SO_DONTROUTE = 5,
+    // SO_BROADCAST = 6,
     SO_SNDBUF = 7,
     SO_RCVBUF = 8,
     SO_KEEPALIVE = 9,
