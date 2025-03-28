@@ -1,8 +1,8 @@
 use core::net::SocketAddr;
-use std::hash::{Hash as _, Hasher};
 use libp2p::swarm::{behaviour, dummy, NetworkBehaviour};
 use libp2p::PeerId;
 use std::collections::HashMap;
+use std::hash::{Hash as _, Hasher};
 use std::net::UdpSocket;
 use std::time::{Duration, Instant};
 
@@ -112,47 +112,48 @@ impl NetworkBehaviour for DiscoveryBehaviour {
     {
         // 广播心跳，让其他节点发现我们
         if Instant::now() >= self.next_broadcast {
-            cx.waker().wake_by_ref();
             self.next_broadcast = Instant::now() + HEARTBEAT_INTERVAL;
             let msg_local_peer_id = self.local_peer_id.to_bytes();
             self.broadcast(&msg_local_peer_id);
-        }
+            // cx.waker().wake_by_ref();
 
-        // 通过接收广播来发现节点
-        self.buf.fill(0);
-        match self.sock.recv_from(&mut self.buf) {
-            Ok((length, peer_sockaddr)) => {
-                if let Ok(peer_id) = PeerId::from_bytes(&self.buf[..length]) {
-                    if !self.known_peers.contains_key(&peer_sockaddr)
-                        && peer_id != self.local_peer_id
-                    {
-                        self.known_peers.insert(peer_sockaddr, peer_id);
+            // 通过接收广播来发现节点
+            self.buf.fill(0);
+            match self.sock.recv_from(&mut self.buf) {
+                Ok((length, peer_sockaddr)) => {
+                    if let Ok(peer_id) = PeerId::from_bytes(&self.buf[..length]) {
+                        if !self.known_peers.contains_key(&peer_sockaddr)
+                            && peer_id != self.local_peer_id
+                        {
+                            self.known_peers.insert(peer_sockaddr, peer_id);
+                            return std::task::Poll::Ready(behaviour::ToSwarm::GenerateEvent(
+                                DiscoveryEvent::Discovered(peer_id),
+                            ));
+                        }
+                    } else if let Ok(msg) = String::from_utf8(self.buf[..length].to_vec()) {
+                        let remote_peer_id = self.known_peers.get(&peer_sockaddr).unwrap();
+                        let msg_id = {
+                            let mut hasher = std::collections::hash_map::DefaultHasher::new();
+                            let msg_bytes = msg.as_bytes();
+                            msg_bytes.hash(&mut hasher);
+                            hasher.finish().to_string()
+                        };
                         return std::task::Poll::Ready(behaviour::ToSwarm::GenerateEvent(
-                            DiscoveryEvent::Discovered(peer_id),
+                            DiscoveryEvent::IncomingMessage(*remote_peer_id, msg_id, msg),
                         ));
                     }
-                } else if let Ok(msg) = String::from_utf8(self.buf[..length].to_vec()) {
-                    let remote_peer_id = self.known_peers.get(&peer_sockaddr).unwrap();
-                    let msg_id = {
-                        let mut hasher = std::collections::hash_map::DefaultHasher::new();
-                        let msg_bytes = msg.as_bytes();
-                        msg_bytes.hash(&mut hasher);
-                        hasher.finish().to_string()
-                    };
-                    return std::task::Poll::Ready(behaviour::ToSwarm::GenerateEvent(
-                        DiscoveryEvent::IncomingMessage(*remote_peer_id, msg_id, msg),
-                    ));
+                }
+                Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                    // 继续等待
+                    // cx.waker().wake_by_ref();
+                }
+                Err(e) => {
+                    println!("Error receiving: {e}");
+                    // cx.waker().wake_by_ref();
                 }
             }
-            Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
-                // 继续等待
-                cx.waker().wake_by_ref();
-            }
-            Err(e) => {
-                println!("Error receiving: {e}");
-                cx.waker().wake_by_ref();
-            }
         }
+
         cx.waker().wake_by_ref();
         std::task::Poll::Pending
     }
