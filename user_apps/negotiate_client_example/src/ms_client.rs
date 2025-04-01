@@ -1,5 +1,6 @@
 use core::arch::asm;
-use parity_scale_codec::{Decode, Encode};
+use ms_shared_types::ps_codec::Encode;
+use ms_shared_types::NegotiationContext;
 use std::ffi::c_void;
 
 const MULTISTREAM_SELECT_DIALER: usize = 42666;
@@ -8,14 +9,6 @@ pub struct Negotiator {
     protocols: Vec<String>,
     pub selected_proto_idx: Option<usize>,
     remote_fd: Option<usize>,
-}
-
-#[derive(Encode, Decode, Debug)]
-struct NegotiationSession {
-    addr: [u8; 4],
-    port: u16,
-    protocols: Vec<String>,
-    result: (i64, i64),
 }
 
 impl Negotiator {
@@ -28,22 +21,22 @@ impl Negotiator {
         }
     }
     /// 给自身添加一个协议，表示自身支持该协议
-    pub fn add_protocol(&mut self, proto: &str) {
+    pub fn add_protocol(mut self, proto: &str) -> Self {
         self.protocols.push(proto.to_string());
+        self
     }
     /// 尝试与远程主机建立连接并协商后续协议
     /// 返回bool值指示协商是否成功
     pub fn dial(&mut self, addr: [u8; 4], port: u16) -> bool {
         let mut _ret: isize;
-        let sess = NegotiationSession {
+        let neg_ctxt = NegotiationContext {
             addr,
             port,
             protocols: self.protocols.clone(),
-            result: (i64::MIN, i64::MIN),
         };
-        let mut encoded_ptr = sess.encode();
-        let mut fd = -1i64;
-        let mut proto_idx = -1i64;
+        let mut encoded_ptr = neg_ctxt.encode();
+        let mut fd: i64;
+        let proto_idx = -1i64;
         let encoded_sess_ptr = encoded_ptr.as_mut_ptr();
         unsafe {
             asm!(
@@ -59,23 +52,12 @@ impl Negotiator {
         // };
         if fd >= 0 && proto_idx >= 0 {
             println!("Negotiation successful!");
-                self.remote_fd = Some(fd as usize);
-                self.selected_proto_idx = Some(proto_idx as usize);
-                true
+            self.remote_fd = Some(fd as usize);
+            self.selected_proto_idx = Some(proto_idx as usize);
+            true
         } else {
             false
         }
-        // let negotiation_sess_after = NegotiationSession::decode(&mut &new_vec[..]).unwrap();
-        // println!("{:#?}", negotiation_sess_after);
-        // match negotiation_sess_after.result {
-        //     (fd, proto_idx) if fd >= 0 && proto_idx >= 0 => {
-        //         println!("Negotiation successful!");
-        //         self.remote_fd = Some(fd as usize);
-        //         self.selected_proto_idx = Some(proto_idx as usize);
-        //         true
-        //     }
-        //     _ => false,
-        // }
     }
     /// 使用协商好的协议，向远程主机发送数据，返回已发送的字节数
     pub fn send(&self, buf: &[u8]) -> isize {

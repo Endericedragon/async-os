@@ -154,12 +154,12 @@ impl<'a> SocketSetWrapper<'a> {
     pub async fn poll_interfaces(&self) {
         let _timestamp =
             Instant::from_micros_const((current_time_nanos() / NANOS_PER_MICROS) as i64);
-        #[cfg(feature = "monolithic")]
-        LOOPBACK.lock().await.poll(
-            _timestamp,
-            LOOPBACK_DEV.lock().await.deref_mut(),
-            &mut *self.0.lock().await,
-        );
+        // #[cfg(feature = "monolithic")]
+        // LOOPBACK.lock().await.poll(
+        //     _timestamp,
+        //     LOOPBACK_DEV.lock().await.deref_mut(),
+        //     &mut *self.0.lock().await,
+        // );
 
         ETH0.poll(&self.0).await;
     }

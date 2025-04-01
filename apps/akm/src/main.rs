@@ -5,18 +5,21 @@
 extern crate async_std;
 extern crate async_net;
 
-// use async_net::multistream_select;
-use async_std::net::SocketAddr;
-
 #[async_std::async_main]
 async fn main() -> isize {
-    let udp_socket = async_std::net::UdpSocket::bind("0.0.0.0:0").await.unwrap();
-    loop {
-        udp_socket
-            .send_to(b"hello", SocketAddr::from(([255, 255, 255, 255], 42666)))
-            .await
-            .unwrap();
-        async_std::task::sleep(async_std::time::Duration::from_secs(1)).await;
+    let udp_socket = async_std::net::UdpSocket::bind("0.0.0.0:42660")
+        .await
+        .unwrap();
+    match udp_socket.peer_addr() {
+        Ok(peer_addr) => println!("Bound to {:?}", peer_addr),
+        Err(e) => println!("Error: {:?}", e),
     }
-    0
+
+    loop {
+        if let Err(e) = udp_socket.send_to(b"hello", "255.255.255.255:42666").await {
+            println!("{:?}", e);
+            return -1;
+        }
+        async_std::task::sleep(async_std::time::Duration::from_secs(2)).await;
+    }
 }

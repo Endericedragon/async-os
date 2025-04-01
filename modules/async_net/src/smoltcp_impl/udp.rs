@@ -107,9 +107,11 @@ impl UdpSocket {
     /// [`recv_from`](Self::recv_from).
     pub async fn bind(&self, mut local_addr: SocketAddr) -> AxResult {
         let mut self_local_addr = self.local_addr.write();
+        // error!("Udp::bind get a local_addr: {:?}", local_addr);
 
         if local_addr.port() == 0 {
-            local_addr.set_port(get_ephemeral_port().await?);
+            let new_port = get_ephemeral_port().await?;
+            local_addr.set_port(new_port);
         }
         if self_local_addr.is_some() {
             return ax_err!(InvalidInput, "socket bind() failed: already bound");
@@ -148,7 +150,11 @@ impl UdpSocket {
         if remote_addr.port() == 0 || remote_addr.ip().is_unspecified() {
             return ax_err!(InvalidInput, "socket send_to() failed: invalid address");
         }
-        info!("Sending UDP packets {} to {}", alloc::string::String::from_utf8_lossy(buf), remote_addr);
+        info!(
+            "Sending UDP packets {} to {}",
+            alloc::string::String::from_utf8_lossy(buf),
+            remote_addr
+        );
         self.send_impl(buf, from_core_sockaddr(remote_addr)).await
     }
 
@@ -282,7 +288,7 @@ impl UdpSocket {
         if self.local_addr.read().is_none() {
             return ax_err!(NotConnected, "socket send() failed");
         }
-        // info!("send to addr: {:?}", remote_endpoint);
+        error!("send to addr: {:?}", remote_endpoint);
         self.block_on(async || {
             SOCKET_SET
                 .with_socket_mut::<udp::Socket, _, _>(self.handle, async |socket| {
@@ -339,20 +345,28 @@ impl UdpSocket {
     where
         F: AsyncFnMut() -> AxResult<T>,
     {
+        info!("[async_net::udp::block_on] Enter");
         if self.is_nonblocking() {
             f().await
         } else {
             loop {
                 #[cfg(feature = "monolithic")]
                 if executor::signal::current_have_signals().await {
+                    info!("[async_net::udp::block_on] Exit");
                     return Err(AxError::Interrupted);
                 }
 
                 SOCKET_SET.poll_interfaces().await;
                 match f().await {
-                    Ok(t) => return Ok(t),
+                    Ok(t) => {
+                        info!("[async_net::udp::block_on] Exit");
+                        return Ok(t);
+                    }
                     Err(AxError::WouldBlock) => executor::yield_now().await,
-                    Err(e) => return Err(e),
+                    Err(e) => {
+                        info!("[async_net::udp::block_on] Exit");
+                        return Err(e);
+                    }
                 }
             }
         }

@@ -1,13 +1,12 @@
 use std::{
-    collections::hash_map::DefaultHasher,
     error::Error,
-    hash::{Hash, Hasher},
     time::Duration,
 };
 
 use futures::stream::StreamExt;
 use libp2p::{
-    gossipsub, mdns, noise,
+    // gossipsub, mdns, 
+    noise,
     swarm::{NetworkBehaviour, SwarmEvent},
     tcp, yamux,
 };
@@ -85,7 +84,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Listen on all interfaces and whatever port the OS assigns
     // swarm.listen_on("/ip4/0.0.0.0/udp/0/quic-v1".parse()?)?; // 会触发Netlink
-    swarm.listen_on("/ip4/192.168.124.4/udp/0/quic-v1".parse()?)?; // 不会触发Netlink，而且能用
+    // swarm.listen_on("/ip4/192.168.124.4/udp/0/quic-v1".parse()?)?; // 不会触发Netlink，而且能用
+    // swarm.listen_on("/ip4/127.0.0.1/udp/0/quic-v1".parse()?)?; // 不会触发Netlink，而且能用
                                                                    // swarm.listen_on("/ip4/0.0.0.0/tcp/0".parse()?)?;
 
     println!("Enter messages via STDIN and they will be sent to connected peers using Gossipsub");

@@ -4,9 +4,3 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-libc = "0.2.171"
-# multihash = "0.19.3"
-# multihash = { path = "../../../ak_multihash_user", package = "ak_multihash_user" }
-parity-scale-codec = { version = "3.7", default-features = false, features = [
-    "derive"
-] }

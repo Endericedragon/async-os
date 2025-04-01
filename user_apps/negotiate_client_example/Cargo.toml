@@ -1,0 +1,11 @@
+[package]
+name = "negotiate_client_example"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# ms-shared-types = { git = "https://atomgit.com/qq_39710999/ms-shared-types.git", features = [
+ms-shared-types = { path = "../../../ms-shared-types", features = [
+    "user_space"
+] }
+libc = "0.2"

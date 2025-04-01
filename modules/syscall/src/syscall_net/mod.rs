@@ -9,7 +9,6 @@ use imp::*;
 pub use socket::Socket;
 mod net_syscall_id;
 pub use net_syscall_id::NetSyscallId::{self, *};
-pub(crate) mod common_types;
 pub(crate) mod multistream_select;
 
 /// 进行 syscall 的分发

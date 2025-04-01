@@ -1,12 +1,8 @@
 //! 相关系统调用的具体实现
 extern crate alloc;
 use super::socket::*;
-use core::{
-    error,
-    slice::{from_raw_parts, from_raw_parts_mut},
-};
+use core::slice::{from_raw_parts, from_raw_parts_mut};
 
-use super::common_types::NegotiationSession;
 use crate::{syscall_fs::ctype::pipe::make_pipe, SyscallError, SyscallResult};
 use alloc::sync::Arc;
 use async_collections::Vec;
@@ -15,11 +11,10 @@ use async_net::IpEndpoint;
 use axerrno::AxError;
 use axlog::{debug, error, info, warn};
 
-use executor::current_executor;
-use num_enum::TryFromPrimitive;
-use parity_scale_codec::{Decode, Encode};
-
 use super::multistream_select;
+use executor::current_executor;
+use ms_shared_types::{ps_codec::Decode, NegotiationContext};
+use num_enum::TryFromPrimitive;
 
 pub const SOCKET_TYPE_MASK: usize = 0xFF;
 
@@ -63,7 +58,7 @@ pub async fn syscall_socket(args: [usize; 6]) -> SyscallResult {
 
 /// Args:
 /// args[0] length of the next arg
-/// args[1] `negotiation_sess` - Vec<u8> parity-scale-codec编码的NegotiationSession
+/// args[1] `negotiation_sess` - Vec<u8> parity-scale-codec编码的NegotiationContext
 /// args[2] `proto_idx` - *mut i64
 pub async fn syscall_multistream_select_dialer(args: [usize; 6]) -> SyscallResult {
     let length = args[0];
@@ -72,15 +67,15 @@ pub async fn syscall_multistream_select_dialer(args: [usize; 6]) -> SyscallResul
     for i in 0..length {
         ns_vec_u8.push(unsafe { ns_bytes.add(i).read_volatile() });
     }
-    let mut ns = NegotiationSession::decode(&mut &ns_vec_u8[..]).unwrap();
+    let neg_ctxt = NegotiationContext::decode(&mut &ns_vec_u8[..]).unwrap();
 
-    // 创建Socket
+    // 创建TCP Socket
     let socket = Socket::new(Domain::AF_INET, SocketType::SOCK_STREAM, None).await;
 
     // connect
     let addr = async_net::SocketAddr::IpPortPair(IpEndpoint::new(
-        async_net::IpAddr::v4(ns.addr[0], ns.addr[1], ns.addr[2], ns.addr[3]),
-        ns.port,
+        async_net::IpAddr::v4(neg_ctxt.addr[0], neg_ctxt.addr[1], neg_ctxt.addr[2], neg_ctxt.addr[3]),
+        neg_ctxt.port,
     ));
     match socket.connect(addr).await {
         Ok(_) => (),
@@ -89,10 +84,10 @@ pub async fn syscall_multistream_select_dialer(args: [usize; 6]) -> SyscallResul
         Err(AxError::AlreadyExists) => return Err(SyscallError::EISCONN),
         Err(_) => return Err(SyscallError::ECONNREFUSED),
     }
-    info!("[multistream_select_dialer()] connected");
+    error!("[multistream_select_dialer()] connected");
 
     // 开始协商
-    let proto_idx = multistream_select::dial(&socket, &ns.protocols).await;
+    let proto_idx = multistream_select::dial(&socket, &neg_ctxt.protocols).await;
 
     // 操作完了以后再塞进fd表中
     let curr = current_executor().await;
@@ -658,7 +653,7 @@ pub async fn syscall_get_sock_opt(args: [usize; 6]) -> SyscallResult {
         }
         // TODO: achieve the real implementation of ipv6
         SocketOptionLevel::IPv6 => (),
-        SocketOptionLevel::Unknown => ()
+        SocketOptionLevel::Unknown => (),
     }
 
     Ok(0)

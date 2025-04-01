@@ -48,9 +48,8 @@ multihash = { path = "../../modules/ak_addition/ak_multihash", default-features 
     "alloc"
 ] }
 public_types = { path = "../public_types" }
-parity-scale-codec = { version = "3.7", default-features = false, features = [
-    "derive"
-] }
+# ms-shared-types = { path = "../../../ms-shared-types", git = "https://atomgit.com/qq_39710999/ms-shared-types.git", features = [
+ms-shared-types = { path = "../../../ms-shared-types", features = ["kernel"] }
 async_collections = { path = "../async_collections" }
 
 [target.'cfg(any(target_arch = "riscv32", target_arch = "riscv64"))'.dependencies]

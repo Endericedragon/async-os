@@ -7,7 +7,8 @@ use std::net::UdpSocket;
 use std::time::{Duration, Instant};
 
 const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(2);
-const MAGIC_PORT: [usize; 2] = [42666, 42667];
+const MAGIC_PORT: [usize; 4] = [42666, 42667, 42668, 42669];
+const MAGIC_ADDR: &str = "192.168.124.4";
 
 #[derive(Debug)]
 pub enum DiscoveryEvent {
@@ -30,10 +31,10 @@ impl DiscoveryBehaviour {
         let mut idx = 0usize;
         let mut port = MAGIC_PORT[idx];
         let udp_socket = {
-            let mut udp_socket = UdpSocket::bind(format!("0.0.0.0:{}", MAGIC_PORT[idx]));
+            let mut udp_socket = UdpSocket::bind(format!("{}:{}", MAGIC_ADDR, MAGIC_PORT[idx]));
             while udp_socket.is_err() && idx < MAGIC_PORT.len() {
                 idx += 1;
-                udp_socket = UdpSocket::bind(format!("0.0.0.0:{}", MAGIC_PORT[idx]));
+                udp_socket = UdpSocket::bind(format!("{}:{}", MAGIC_ADDR, MAGIC_PORT[idx]));
                 port = MAGIC_PORT[idx];
             }
             if udp_socket.is_err() {
@@ -41,9 +42,10 @@ impl DiscoveryBehaviour {
             }
             let udp_socket = udp_socket.unwrap();
             udp_socket.set_broadcast(true).unwrap();
-            udp_socket.set_nonblocking(true).unwrap();
+            // udp_socket.set_nonblocking(true).unwrap();
             udp_socket
         };
+        println!("Bound to port {}", port);
         Self {
             sock: udp_socket,
             port,
@@ -59,9 +61,11 @@ impl DiscoveryBehaviour {
             if port == self.port {
                 continue;
             }
-            self.sock
+            let send_length = self
+                .sock
                 .send_to(msg, format!("255.255.255.255:{}", port))
                 .unwrap();
+            println!("Sent {} bytes to port {}", send_length, port);
         }
     }
 }
@@ -75,9 +79,9 @@ impl NetworkBehaviour for DiscoveryBehaviour {
     fn handle_established_inbound_connection(
         &mut self,
         _connection_id: libp2p::swarm::ConnectionId,
-        peer: PeerId,
-        local_addr: &libp2p::Multiaddr,
-        remote_addr: &libp2p::Multiaddr,
+        _peer: PeerId,
+        _local_addr: &libp2p::Multiaddr,
+        _remote_addr: &libp2p::Multiaddr,
     ) -> Result<libp2p::swarm::THandler<Self>, libp2p::swarm::ConnectionDenied> {
         Ok(dummy::ConnectionHandler)
     }
@@ -85,14 +89,14 @@ impl NetworkBehaviour for DiscoveryBehaviour {
     fn handle_established_outbound_connection(
         &mut self,
         _connection_id: libp2p::swarm::ConnectionId,
-        peer: PeerId,
-        addr: &libp2p::Multiaddr,
-        role_override: libp2p::core::Endpoint,
+        _peer: PeerId,
+        _addr: &libp2p::Multiaddr,
+        _role_override: libp2p::core::Endpoint,
     ) -> Result<libp2p::swarm::THandler<Self>, libp2p::swarm::ConnectionDenied> {
         Ok(dummy::ConnectionHandler)
     }
 
-    fn on_swarm_event(&mut self, event: behaviour::FromSwarm) {
+    fn on_swarm_event(&mut self, _event: behaviour::FromSwarm) {
         /* 暂且不管 */
     }
 
