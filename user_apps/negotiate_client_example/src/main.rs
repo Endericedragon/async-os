@@ -1,34 +1,43 @@
 use core::arch::asm;
-use std::io::{stdin, stdout, Write};
 
 mod ms_client;
+mod run_chunked_file_transfer;
+mod run_daytime;
+mod run_echo;
 
 fn main() {
     greeting_through_syscall();
 
+    // let mut negotiator = ms_client::Negotiator::new()
+    //     .add_protocol("/nika/1.0")
+    //     .add_protocol("/akusta/2.0")
+    //     .add_protocol("/echo/1.0");
     let mut negotiator = ms_client::Negotiator::new()
-        .add_protocol("/nika/1.0")
-        .add_protocol("/akusta/2.0")
+        .add_protocol("/tribios/9.8")
+        .add_protocol("/ain/4.4")
+        .add_protocol("/chunked-file-transfer/1.0")
+        .add_protocol("/daytime/1.0")
         .add_protocol("/echo/1.0");
+
     // 通过log看到QEMU提供的网关地址就是10.0.2.2
     if negotiator.dial([10, 0, 2, 2], 42666) {
         // 成功连接到远程主机，proto为"/echo/1.0"，fd为连接的文件描述符
-        println!(
-            "Negotiation successful! {:?}",
-            negotiator.selected_proto_idx
-        );
-        let mut buf = [0u8; 1024];
-        let idx = negotiator.selected_proto_idx.unwrap();
-        if idx == 2 {
-            loop {
-                let mut user_input = String::new();
-                print!(">>> ");
-                stdout().flush().unwrap();
-                stdin().read_line(&mut user_input).unwrap();
-                negotiator.send(user_input.as_bytes());
-                negotiator.recv(&mut buf);
-                println!("Echo from listener: {}", String::from_utf8_lossy(&buf));
+        // println!(
+        //     "Negotiation successful! {:?}",
+        //     negotiator.selected_proto_idx
+        // );
+        let mut buf = [0u8; 2048];
+        match negotiator.acquire_selected_protocol_identifier() {
+            Some("/echo/1.0") => {
+                run_echo::run(&mut negotiator, &mut buf);
             }
+            Some("/daytime/1.0") => {
+                run_daytime::get_remote_time(&mut negotiator, &mut buf);
+            }
+            Some("/chunked-file-transfer/1.0") => {
+                run_chunked_file_transfer::transfer_end_poem(&mut negotiator, &mut buf);
+            }
+            _ => unimplemented!(),
         }
     } else {
         eprintln!("Failed to negotiate with remote server!");

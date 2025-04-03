@@ -20,7 +20,12 @@ pub async fn dial(sock: &Socket, protos: &Vec<String>) -> isize {
     .await
     .unwrap();
     let length = match sock.recv_from(&mut buf).await {
-        Ok((length, _)) => length,
+        Ok((length, _)) => {
+            assert!(length > 0);
+            let msg = Message::decode(&mut &buf[..length]).unwrap();
+            error!("Received handshake message: {:?}", msg);
+            length
+        }
         Err(e) => {
             error!("Failed to receive handshake message: {}", e);
             return -1;
@@ -52,7 +57,8 @@ pub async fn dial(sock: &Socket, protos: &Vec<String>) -> isize {
         .await
         .unwrap();
 
-        sock.recv_from(&mut buf).await.unwrap();
+        let (length, _) = sock.recv_from(&mut buf).await.unwrap();
+        assert!(length > 0);
         match Message::decode(&mut &buf[..]) {
             Ok(Message::NA) => {
                 continue;

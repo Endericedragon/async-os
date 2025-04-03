@@ -4,8 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-# ms-shared-types = { git = "https://atomgit.com/qq_39710999/ms-shared-types.git", features = [
 ms-shared-types = { path = "../../../ms-shared-types", features = [
     "user_space"
 ] }
+chrono = { version = "0.4.40", default-features = false, features = ["alloc"] }
 libc = "0.2"
+parity-scale-codec = { version = "3.7.4", default-features = false, features = [
+    "derive"
+] }
+bytes = "1.10.1"
+crc32fast = "1.4.2"

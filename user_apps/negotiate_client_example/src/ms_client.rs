@@ -6,7 +6,7 @@ use std::ffi::c_void;
 const MULTISTREAM_SELECT_DIALER: usize = 42666;
 
 pub struct Negotiator {
-    protocols: Vec<String>,
+    protocol_identifiers: Vec<String>,
     pub selected_proto_idx: Option<usize>,
     remote_fd: Option<usize>,
 }
@@ -15,15 +15,22 @@ impl Negotiator {
     /// 简单的初始化
     pub fn new() -> Self {
         Self {
-            protocols: Vec::new(),
+            protocol_identifiers: Vec::new(),
             selected_proto_idx: None,
             remote_fd: None,
         }
     }
     /// 给自身添加一个协议，表示自身支持该协议
     pub fn add_protocol(mut self, proto: &str) -> Self {
-        self.protocols.push(proto.to_string());
+        self.protocol_identifiers.push(proto.to_string());
         self
+    }
+    /// 查询已选中的协议的描述符
+    pub fn acquire_selected_protocol_identifier(&self) -> Option<&str> {
+        if let Some(idx) = self.selected_proto_idx {
+            return Some(&self.protocol_identifiers[idx]);
+        }
+        None
     }
     /// 尝试与远程主机建立连接并协商后续协议
     /// 返回bool值指示协商是否成功
@@ -32,7 +39,7 @@ impl Negotiator {
         let neg_ctxt = NegotiationContext {
             addr,
             port,
-            protocols: self.protocols.clone(),
+            protocols: self.protocol_identifiers.clone(),
         };
         let mut encoded_ptr = neg_ctxt.encode();
         let mut fd: i64;
@@ -51,7 +58,7 @@ impl Negotiator {
         //     Vec::from_raw_parts(encoded_sess_ptr, length, length)
         // };
         if fd >= 0 && proto_idx >= 0 {
-            println!("Negotiation successful!");
+            // println!("Negotiation successful!");
             self.remote_fd = Some(fd as usize);
             self.selected_proto_idx = Some(proto_idx as usize);
             true
@@ -74,7 +81,6 @@ impl Negotiator {
             -1
         }
     }
-
     /// 使用协商好的协议，从远程主机接收数据，返回已接收的字节数
     pub fn recv(&self, buf: &mut [u8]) -> isize {
         if let Some(remote_fd) = self.remote_fd {
