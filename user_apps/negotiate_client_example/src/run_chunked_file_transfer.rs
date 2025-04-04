@@ -2,7 +2,7 @@ use crate::ms_client::Negotiator;
 use parity_scale_codec::{Decode, Encode};
 use std::io::Read;
 
-const FRAME_SIZE_LIMIT: usize = 32;
+const FRAME_SIZE_LIMIT: usize = 1024;
 
 #[derive(Encode, Decode)]
 enum ChunkedFileTransferMessage {
@@ -72,6 +72,7 @@ pub fn transfer_end_poem(negotiator: &mut Negotiator, buf: &mut [u8]) {
         let msg = ChunkedFileTransferMessage::decode(&mut &buf[..length]).unwrap();
         match msg {
             ChunkedFileTransferMessage::TransferDone => {
+                println!("Transfered chunk {}.", chunk_id);
                 continue;
             }
             ChunkedFileTransferMessage::TransferError => {
