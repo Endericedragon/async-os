@@ -25,6 +25,14 @@ enum ChunkedFileTransferMessage {
     ChecksumError,
 }
 
+fn get_message_from_negotiator(
+    negotiator: &mut Negotiator,
+    buf: &mut [u8],
+) -> ChunkedFileTransferMessage {
+    let length = negotiator.recv(buf) as usize;
+    ChunkedFileTransferMessage::decode(&mut &buf[..length]).expect("Failed to decode message!")
+}
+
 pub fn transfer_end_poem(negotiator: &mut Negotiator, buf: &mut [u8]) {
     let mut f = match std::fs::File::open("/end_poem.txt") {
         Ok(f) => {
@@ -47,9 +55,10 @@ pub fn transfer_end_poem(negotiator: &mut Negotiator, buf: &mut [u8]) {
         ) > 0
     );
 
-    let length = negotiator.recv(buf) as usize;
-    let msg = ChunkedFileTransferMessage::decode(&mut &buf[..length]).unwrap();
-    assert!(matches!(msg, ChunkedFileTransferMessage::ServerReady));
+    assert!(matches!(
+        get_message_from_negotiator(negotiator, buf),
+        ChunkedFileTransferMessage::ServerReady
+    ));
 
     let mut hasher = crc32fast::Hasher::new();
     let mut chunk_id = 0;
@@ -83,12 +92,12 @@ pub fn transfer_end_poem(negotiator: &mut Negotiator, buf: &mut [u8]) {
         }
     }
     assert!(negotiator.send(&ChunkedFileTransferMessage::Checksum(hasher.finalize()).encode()) > 0);
-    let length = negotiator.recv(buf) as usize;
-    match ChunkedFileTransferMessage::decode(&mut &buf[..length]) {
-        Ok(ChunkedFileTransferMessage::ChecksumOk) => {
+    // let length = negotiator.recv(buf) as usize;
+    match get_message_from_negotiator(negotiator, buf) {
+        ChunkedFileTransferMessage::ChecksumOk => {
             println!("Transfer done!");
         }
-        Ok(ChunkedFileTransferMessage::ChecksumError) => {
+        ChunkedFileTransferMessage::ChecksumError => {
             eprintln!("Checksum error!");
         }
         _ => unreachable!(),
