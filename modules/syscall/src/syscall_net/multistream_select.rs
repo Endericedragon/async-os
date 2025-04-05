@@ -61,14 +61,17 @@ pub async fn dial(sock: &Socket, protos: &Vec<String>) -> isize {
         assert!(length > 0);
         match Message::decode(&mut &buf[..]) {
             Ok(Message::NA) => {
+                error!("We do not support this protocol...");
                 continue;
             }
             Ok(Message::Protocol(_)) => {
                 res = idx as isize;
+                error!("We support this protocol!");
                 break;
             }
             Err(_) => {
-                break;
+                error!("Failed to decode message!");
+                return -1;
             }
         }
     }

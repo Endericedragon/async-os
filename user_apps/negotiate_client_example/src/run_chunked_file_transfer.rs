@@ -33,10 +33,10 @@ fn get_message_from_negotiator(
     ChunkedFileTransferMessage::decode(&mut &buf[..length]).expect("Failed to decode message!")
 }
 
-pub fn transfer_end_poem(negotiator: &mut Negotiator, buf: &mut [u8]) {
-    let mut f = match std::fs::File::open("/end_poem.txt") {
+pub fn transfer_file(filename: &str, negotiator: &mut Negotiator, buf: &mut [u8]) {
+    let mut f = match std::fs::File::open(filename) {
         Ok(f) => {
-            println!("Poem file opened!");
+            println!("File opened!");
             f
         }
         Err(e) => {
@@ -48,7 +48,7 @@ pub fn transfer_end_poem(negotiator: &mut Negotiator, buf: &mut [u8]) {
     assert!(
         negotiator.send(
             &ChunkedFileTransferMessage::Init {
-                filename: String::from("end_poem.txt"),
+                filename: String::from(filename),
                 size: f.metadata().unwrap().len() as i64,
             }
             .encode()
@@ -81,11 +81,11 @@ pub fn transfer_end_poem(negotiator: &mut Negotiator, buf: &mut [u8]) {
         let msg = ChunkedFileTransferMessage::decode(&mut &buf[..length]).unwrap();
         match msg {
             ChunkedFileTransferMessage::TransferDone => {
-                println!("Transfered chunk {}.", chunk_id);
+                print!("Transfered chunk {}.\r", chunk_id);
                 continue;
             }
             ChunkedFileTransferMessage::TransferError => {
-                eprintln!("Transfer error!");
+                eprintln!("\nTransfer error!");
                 return;
             }
             _ => unreachable!(),
@@ -95,10 +95,10 @@ pub fn transfer_end_poem(negotiator: &mut Negotiator, buf: &mut [u8]) {
     // let length = negotiator.recv(buf) as usize;
     match get_message_from_negotiator(negotiator, buf) {
         ChunkedFileTransferMessage::ChecksumOk => {
-            println!("Transfer done!");
+            println!("\nTransfer done!");
         }
         ChunkedFileTransferMessage::ChecksumError => {
-            eprintln!("Checksum error!");
+            eprintln!("\nChecksum error!");
         }
         _ => unreachable!(),
     }

@@ -103,6 +103,7 @@ else
 	echo "Copying $arch $fs $FILE/* to disk"
 	sudo cp -r ./testcases/$FILE/* ./mnt/
 	sudo cp ./testcases/end_poem.txt ./mnt/
+	sudo cp ./testcases/proto_ids.txt ./mnt/
 	sudo umount mnt
 	sudo rm -rf mnt
 	sudo chmod 777 disk.img
