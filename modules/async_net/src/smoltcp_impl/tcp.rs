@@ -731,6 +731,7 @@ impl TcpSocket {
         F: AsyncFnMut() -> AxResult<T>,
     {
         if self.is_nonblocking() {
+            SOCKET_SET.poll_interfaces().await; // new implement
             f().await
         } else {
             loop {
@@ -739,7 +740,7 @@ impl TcpSocket {
                     return Err(AxError::Interrupted);
                 }
 
-                SOCKET_SET.poll_interfaces().await;
+                SOCKET_SET.poll_interfaces().await; // original implement
                 match f().await {
                     Ok(t) => return Ok(t),
                     Err(AxError::WouldBlock) => executor::yield_now().await,

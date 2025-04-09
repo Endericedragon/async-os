@@ -2,13 +2,8 @@ use core::arch::asm;
 use ms_shared_types::ps_codec::Encode;
 use ms_shared_types::NegotiationContext;
 use std::ffi::c_void;
-use std::time::{SystemTime, UNIX_EPOCH};
 
 const MULTISTREAM_SELECT_DIALER: usize = 42666;
-
-fn print_timestamp_and_note(note: &str) {
-    println!("[{}] {}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_micros(), note);
-}
 
 pub struct Negotiator {
     protocol_identifiers: Vec<String>,

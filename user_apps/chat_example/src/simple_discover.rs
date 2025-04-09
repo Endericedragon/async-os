@@ -1,3 +1,6 @@
+/// 简单的节点发现机制，基于TCP配合Known Peers机制实现
+/// 规定：每个P2P网络中总有一个节点充当枢纽Hub的作用
+
 use core::net::SocketAddr;
 use libp2p::swarm::{behaviour, dummy, NetworkBehaviour};
 use libp2p::PeerId;

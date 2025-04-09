@@ -76,5 +76,12 @@ pub async fn dial(sock: &Socket, protos: &Vec<String>) -> isize {
         }
     }
 
+    if res < 0 {
+        error!("No protocol supported!");
+        sock.sendto(Message::NA.encode().as_slice(), None)
+            .await
+            .unwrap();
+    }
+
     res
 }
