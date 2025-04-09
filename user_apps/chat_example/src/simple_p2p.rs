@@ -19,7 +19,7 @@ use libp2p::{
 };
 use std::collections::{HashMap, HashSet};
 use std::hash::{Hash as _, Hasher};
-use std::io::{ErrorKind::WouldBlock, Write as _};
+use std::io::{ErrorKind, Write as _};
 use std::net::{SocketAddr, TcpListener, TcpStream};
 use std::task::Poll;
 use std::time::{Duration, Instant};
@@ -138,6 +138,10 @@ impl SimpleP2PBehaviour {
                 known_peers,
             } => {
                 // 直接自行广播即可
+                if known_peers.len() == 0 {
+                    println!("Insufficient peers!");
+                    return;
+                }
                 for (_, (peer_id, stream)) in known_peers.iter_mut() {
                     if peer_id == &sender {
                         continue;
@@ -226,14 +230,14 @@ impl NetworkBehaviour for SimpleP2PBehaviour {
                     .map(|(_addr, (peer_id, _stream))| KnownPeerItem(PeerIdWrapper::from(peer_id)))
                     .collect();
                 // 检查是否有新的连接，并建立从TCP地址到PeerId和TcpStream的映射关系
-                if let Ok((mut stream, addr)) = hub_listener.accept() {
-                    println!("New connection from {}", addr);
+                while let Ok((mut stream, addr)) = hub_listener.accept() {
                     stream.set_nonblocking(true).unwrap();
+                    println!("New connection from {}", addr);
                     // 此时新节点一定会发送 RequestKnownPeers 消息
                     let p2p_message = loop {
                         match P2PMessage::read_from_tcp_stream(&mut stream, &mut self.buf) {
                             Ok(p2p_message) => break p2p_message,
-                            Err(e) if e.kind() == WouldBlock => {
+                            Err(e) if e.kind() == ErrorKind::WouldBlock => {
                                 continue;
                             }
                             Err(e) => {
@@ -285,7 +289,7 @@ impl NetworkBehaviour for SimpleP2PBehaviour {
                             }
                             _ => unreachable!(),
                         },
-                        Err(e) if e.kind() == WouldBlock => {
+                        Err(e) if e.kind() == ErrorKind::WouldBlock => {
                             continue;
                         }
                         Err(e) => {
@@ -363,12 +367,13 @@ impl NetworkBehaviour for SimpleP2PBehaviour {
                         }
                         _ => {}
                     },
-                    Err(e) if e.kind() == WouldBlock => { /* Totally OK */ }
                     Err(e) => {
-                        eprintln!("[Normal] Error reading from stream: {}", e);
-                        return Poll::Ready(behaviour::ToSwarm::GenerateEvent(
-                            P2PEvent::ErrorAndExit,
-                        ));
+                        if e.kind() != ErrorKind::WouldBlock {
+                            eprintln!("[Normal] Error reading from stream: {}", e);
+                            return Poll::Ready(behaviour::ToSwarm::GenerateEvent(
+                                P2PEvent::ErrorAndExit,
+                            ));
+                        }
                     }
                 }
             }
