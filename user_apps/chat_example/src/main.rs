@@ -79,9 +79,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     eprintln!("Fatal error occured and exit.");
                     break Ok(())
                 }
-                // SwarmEvent::NewListenAddr { address, .. } => {
-                //     println!("Local node is listening on {address}");
-                // }
+                SwarmEvent::Behaviour(MyBehaviourEvent::Spb(simple_p2p::P2PEvent::PeerExpired(expired_peer_id))) => {
+                    println!("Peer {} expired!", expired_peer_id);
+                }
                 _ => {}
             }
         }

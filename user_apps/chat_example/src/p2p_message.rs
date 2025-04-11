@@ -12,14 +12,15 @@ pub enum P2PMessage {
         sender: PeerIdWrapper,
         text_message: String,
     },
-    KnownPeers {
+    HubReturnsKnownPeers {
         sender: PeerIdWrapper,
         known_peers: Vec<KnownPeerItem>,
     },
-    RequestKnownPeers {
+    HubDeclaresExpiredPeer(PeerIdWrapper),
+    NormalRequestsKnownPeers {
         sender: PeerIdWrapper,
     },
-    RequestBroadcast {
+    NormalRequestsBroadcast {
         sender: PeerIdWrapper,
         message: String,
     },

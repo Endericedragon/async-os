@@ -80,6 +80,7 @@ impl core::fmt::Display for MessageId {
 pub enum P2PEvent {
     UpdatedKnownPeers(Vec<libp2p::PeerId>),
     IncomingMessage(libp2p::PeerId, MessageId, String),
+    PeerExpired(PeerId),
     ErrorAndExit,
 }
 
@@ -165,7 +166,7 @@ impl SimpleP2PBehaviour {
                 // 请求 Hub 帮忙广播
                 // lifetime注意：这儿的message一定活得比p2p_message长
                 // todo: Hub自己也要收到自己发送的消息
-                let p2p_message = P2PMessage::RequestBroadcast {
+                let p2p_message = P2PMessage::NormalRequestsBroadcast {
                     sender: PeerIdWrapper::from(self.local_peer_id).into(),
                     message,
                 };
@@ -250,11 +251,11 @@ impl NetworkBehaviour for SimpleP2PBehaviour {
                         };
                     };
                     match p2p_message {
-                        P2PMessage::RequestKnownPeers { sender } => {
+                        P2PMessage::NormalRequestsKnownPeers { sender } => {
                             let sender_peer_id = sender.into_inner();
                             println!("New node {} has connected to the hub", sender_peer_id);
                             // 发送 KnownPeers 消息
-                            let p2p_message = P2PMessage::KnownPeers {
+                            let p2p_message = P2PMessage::HubReturnsKnownPeers {
                                 sender: PeerIdWrapper::from(self.local_peer_id).into(),
                                 known_peers: known_peers_vec.clone(),
                             };
@@ -275,16 +276,16 @@ impl NetworkBehaviour for SimpleP2PBehaviour {
                 for (peer_addr, (_peer_id, stream)) in known_peers.iter_mut() {
                     match P2PMessage::read_from_tcp_stream(stream, &mut self.buf) {
                         Ok(p2p_message) => match p2p_message {
-                            P2PMessage::RequestKnownPeers { sender: _ } => {
+                            P2PMessage::NormalRequestsKnownPeers { sender: _ } => {
                                 // 如法炮制
                                 // 发送 KnownPeers 消息
-                                let p2p_message = P2PMessage::KnownPeers {
+                                let p2p_message = P2PMessage::HubReturnsKnownPeers {
                                     sender: PeerIdWrapper::from(self.local_peer_id).into(),
                                     known_peers: known_peers_vec.clone(),
                                 };
                                 stream.write_all(&p2p_message.serialize()).unwrap();
                             }
-                            P2PMessage::RequestBroadcast { sender, message } => {
+                            P2PMessage::NormalRequestsBroadcast { sender, message } => {
                                 msg_to_broadcast.push((sender.into_inner(), message));
                             }
                             _ => unreachable!(),
@@ -301,9 +302,18 @@ impl NetworkBehaviour for SimpleP2PBehaviour {
                         }
                     }
                 }
-                // 处理 peer_to_remove
-                for peer_addr in peer_to_remove {
-                    known_peers.remove(&peer_addr);
+                // 处理过期节点
+                for expired_peer_addr in peer_to_remove {
+                    let expired_peer_id = known_peers[&expired_peer_addr].0;
+                    let p2p_message = P2PMessage::HubDeclaresExpiredPeer(
+                        PeerIdWrapper::from(expired_peer_id).into(),
+                    );
+                    known_peers.remove(&expired_peer_addr);
+                    self.event_queue
+                        .push(P2PEvent::PeerExpired(expired_peer_id));
+                    for (_peer_addr, (_peer_id, stream)) in known_peers.iter_mut() {
+                        stream.write_all(&p2p_message.serialize()).unwrap();
+                    }
                 }
                 // 处理 msg_to_broadcast
                 if msg_to_broadcast.len() > 0 {
@@ -325,7 +335,7 @@ impl NetworkBehaviour for SimpleP2PBehaviour {
                 // 首先 RequestKnownPeers
                 if Instant::now() >= *next_heartbeat {
                     *next_heartbeat = Instant::now() + HEARTBEAT_INTERVAL;
-                    let request_known_peers_message = P2PMessage::RequestKnownPeers {
+                    let request_known_peers_message = P2PMessage::NormalRequestsKnownPeers {
                         sender: PeerIdWrapper::from(self.local_peer_id).into(),
                     };
                     stream_to_hub
@@ -334,7 +344,7 @@ impl NetworkBehaviour for SimpleP2PBehaviour {
                 }
                 match P2PMessage::read_from_tcp_stream(stream_to_hub, &mut self.buf) {
                     Ok(msg) => match msg {
-                        P2PMessage::KnownPeers {
+                        P2PMessage::HubReturnsKnownPeers {
                             sender: _,
                             known_peers: new_known_peers,
                         } => {
@@ -364,6 +374,15 @@ impl NetworkBehaviour for SimpleP2PBehaviour {
                                     text_message,
                                 ),
                             ))
+                        }
+                        P2PMessage::HubDeclaresExpiredPeer(peer_id_wrapper) => {
+                            let peer_id = peer_id_wrapper.into_inner();
+                            if known_peers.contains(&peer_id) {
+                                known_peers.remove(&peer_id);
+                                return Poll::Ready(behaviour::ToSwarm::GenerateEvent(
+                                    P2PEvent::PeerExpired(peer_id),
+                                ));
+                            }
                         }
                         _ => {}
                     },
