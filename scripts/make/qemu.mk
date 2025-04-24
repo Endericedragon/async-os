@@ -43,8 +43,8 @@ endif
 ifeq ($(NET_DEV), user)
   # qemu_args-$(NET) += -netdev user,id=net0,hostfwd=tcp::5555-:5555,hostfwd=udp::5555-:5555,hostfwd=tcp::7878-:7878 #,hostfwd=udp::42666-:42666,hostfwd=tcp::42666-:42666
   # qemu_args-$(NET) += -netdev user,id=net0,hostfwd=udp::42665-:42665,hostfwd=udp::42666-:42666
-  # qemu_args-$(NET) += -netdev user,id=net0
-  qemu_args-$(NET) += -netdev user,id=net0,hostfwd=tcp::42666-:42666
+  qemu_args-$(NET) += -netdev user,id=net0 # for multistream-select
+  # qemu_args-$(NET) += -netdev user,id=net0,hostfwd=tcp::42666-:42666 # for chat-example
 else ifeq ($(NET_DEV), tap)
   qemu_args-$(NET) += -netdev tap,id=net0,script=scripts/net/qemu-ifup.sh,downscript=no,vhost=$(VHOST),vhostforce=$(VHOST),br=virbr0
   QEMU := sudo $(QEMU)

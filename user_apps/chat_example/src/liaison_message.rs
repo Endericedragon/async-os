@@ -7,7 +7,7 @@ use crate::known_peer_item::KnownPeerItem;
 use crate::peer_id_wrapper::PeerIdWrapper;
 
 #[derive(Serialize, Deserialize, Debug)]
-pub enum P2PMessage {
+pub enum LiaisonMessage {
     Text {
         sender: PeerIdWrapper,
         text_message: String,
@@ -26,7 +26,7 @@ pub enum P2PMessage {
     },
 }
 
-impl P2PMessage {
+impl LiaisonMessage {
     pub fn serialize(&self) -> Vec<u8> {
         bincode::serialize(self).unwrap()
     }

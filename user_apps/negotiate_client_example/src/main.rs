@@ -41,7 +41,7 @@ fn try_cftp() {
         .add_protocol("/nika/1.0")
         .add_protocol("/akusta/1.0")
         .add_protocol("/chunked-file-transfer/1.0");
-    // .add_protocol("/echo/1.0");
+        // .add_protocol("/echo/1.0");
     if negotiator.dial([10, 0, 2, 2], 42666) {
         // 成功连接到远程主机，proto为"/echo/1.0"，fd为连接的文件描述符
         // println!(

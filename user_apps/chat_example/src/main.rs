@@ -10,17 +10,17 @@ use peer_id_wrapper::PeerIdWrapper;
 use tokio::{io, io::AsyncBufReadExt, select};
 use tracing_subscriber::EnvFilter;
 
-mod simple_p2p;
-use simple_p2p::SimpleP2PBehaviour;
+mod simple_liaison;
+use simple_liaison::SimpleLiaisonBehaviour;
 
 mod known_peer_item;
-mod p2p_message;
+mod liaison_message;
 mod peer_id_wrapper;
 
 // We create a custom network behaviour that combines Gossipsub and Mdns.
 #[derive(NetworkBehaviour)]
-struct MyBehaviour {
-    spb: SimpleP2PBehaviour,
+struct CustomBehaviour {
+    spb: SimpleLiaisonBehaviour,
 }
 
 #[tokio::main]
@@ -40,8 +40,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .with_behaviour(|key| {
             let local_peer_id = key.public().to_peer_id();
             println!("Local peer id = {:?}", local_peer_id);
-            let spb = simple_p2p::SimpleP2PBehaviour::new(local_peer_id);
-            Ok(MyBehaviour { spb })
+            let spb = simple_liaison::SimpleLiaisonBehaviour::new(local_peer_id);
+            Ok(CustomBehaviour { spb })
         })?
         .with_swarm_config(|c| c.with_idle_connection_timeout(Duration::from_secs(60)))
         .build();
@@ -62,12 +62,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 );
             }
             event = swarm.select_next_some() => match event {
-                SwarmEvent::Behaviour(MyBehaviourEvent::Spb(simple_p2p::P2PEvent::UpdatedKnownPeers(peer_ids))) => {
+                SwarmEvent::Behaviour(CustomBehaviourEvent::Spb(simple_liaison::LiaisonEvent::UpdatedKnownPeers(peer_ids))) => {
                     for each in peer_ids {
                         println!("SimpleP2P updated a new peer: {}", each);
                     }
                 }
-                SwarmEvent::Behaviour(MyBehaviourEvent::Spb(simple_p2p::P2PEvent::IncomingMessage(remote_peer, new_msg_id, new_msg))) => {
+                SwarmEvent::Behaviour(CustomBehaviourEvent::Spb(simple_liaison::LiaisonEvent::IncomingMessage(remote_peer, new_msg_id, new_msg))) => {
                     println!(
                         "Got message: '{}' with {} from peer: {}",
                         new_msg,
@@ -75,11 +75,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         remote_peer,
                     );
                 }
-                SwarmEvent::Behaviour(MyBehaviourEvent::Spb(simple_p2p::P2PEvent::ErrorAndExit)) => {
+                SwarmEvent::Behaviour(CustomBehaviourEvent::Spb(simple_liaison::LiaisonEvent::ErrorAndExit)) => {
                     eprintln!("Fatal error occured and exit.");
                     break Ok(())
                 }
-                SwarmEvent::Behaviour(MyBehaviourEvent::Spb(simple_p2p::P2PEvent::PeerExpired(expired_peer_id))) => {
+                SwarmEvent::Behaviour(CustomBehaviourEvent::Spb(simple_liaison::LiaisonEvent::PeerExpired(expired_peer_id))) => {
                     println!("Peer {} expired!", expired_peer_id);
                 }
                 _ => {}
@@ -87,15 +87,3 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
     }
 }
-
-// mod mailbox;
-
-// fn main() {
-//     let mut my_mailbox = mailbox::Mailbox::new("AsyncOS".to_string());
-//     loop {
-//         println!("Sending...");
-//         my_mailbox.prepare_message(b"Hello, world!");
-//         my_mailbox.broadcast_buf();
-//         std::thread::sleep(std::time::Duration::from_secs(2));
-//     }
-// }

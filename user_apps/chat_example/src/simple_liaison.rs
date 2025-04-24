@@ -1,4 +1,4 @@
-//! 简单的节点发现机制，基于TCP配合Known Peers机制实现。
+//! 简单的节点发现和通信机制，基于TCP配合Known Peers机制实现。
 //! 规定：每个P2P网络中总有一个节点充当枢纽Hub的作用。该Hub总是工作在42666端口上。
 //!
 //! 当新节点启动时，应当这样做：
@@ -25,7 +25,7 @@ use std::task::Poll;
 use std::time::{Duration, Instant};
 
 use crate::{
-    known_peer_item::KnownPeerItem, p2p_message::P2PMessage, peer_id_wrapper::PeerIdWrapper,
+    known_peer_item::KnownPeerItem, liaison_message::LiaisonMessage, peer_id_wrapper::PeerIdWrapper,
 };
 
 const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(2);
@@ -77,7 +77,7 @@ impl core::fmt::Display for MessageId {
 
 /// P2P事件，上层应用会收到这些事件，然后采取一些措施
 #[derive(Debug)]
-pub enum P2PEvent {
+pub enum LiaisonEvent {
     UpdatedKnownPeers(Vec<libp2p::PeerId>),
     IncomingMessage(libp2p::PeerId, MessageId, String),
     PeerExpired(PeerId),
@@ -85,17 +85,17 @@ pub enum P2PEvent {
 }
 
 #[derive(Debug)]
-pub struct SimpleP2PBehaviour {
+pub struct SimpleLiaisonBehaviour {
     role: PeerRole,
     buf: [u8; BUFFER_SIZE],
     local_peer_id: PeerId,
     /// 待发送的事件队列。
     /// 如果单次发送一个事件，则直接用 return Poll::Ready(...) 的形式完成。
     /// 只有在需要一次性发送多个事件时，才会进入该队列，并在poll函数的开头逐个发送。
-    event_queue: Vec<P2PEvent>,
+    event_queue: Vec<LiaisonEvent>,
 }
 
-impl SimpleP2PBehaviour {
+impl SimpleLiaisonBehaviour {
     pub fn new(local_peer_id: PeerId) -> Self {
         // 根据角色不同分配TcpListener或者TcpStream
         let role = match TcpListener::bind(format!("{}:{}", HUB_ADDR, HUB_PORT)) {
@@ -149,7 +149,7 @@ impl SimpleP2PBehaviour {
                     }
                     stream
                         .write_all(
-                            &P2PMessage::Text {
+                            &LiaisonMessage::Text {
                                 sender: PeerIdWrapper::from(self.local_peer_id).into(),
                                 text_message: message.clone(),
                             }
@@ -164,23 +164,25 @@ impl SimpleP2PBehaviour {
                 next_heartbeat: _,
             } => {
                 // 请求 Hub 帮忙广播
-                // lifetime注意：这儿的message一定活得比p2p_message长
+                // lifetime注意：这儿的message一定活得比liaison_message长
                 // todo: Hub自己也要收到自己发送的消息
-                let p2p_message = P2PMessage::NormalRequestsBroadcast {
+                let liaison_message = LiaisonMessage::NormalRequestsBroadcast {
                     sender: PeerIdWrapper::from(self.local_peer_id).into(),
                     message,
                 };
-                stream_to_hub.write_all(&p2p_message.serialize()).unwrap();
+                stream_to_hub
+                    .write_all(&liaison_message.serialize())
+                    .unwrap();
             }
         }
     }
 }
 
 // 学着点，兄弟：https://github.com/libp2p/rust-libp2p/blob/master/protocols/mdns/src/behaviour.rs
-impl NetworkBehaviour for SimpleP2PBehaviour {
+impl NetworkBehaviour for SimpleLiaisonBehaviour {
     type ConnectionHandler = dummy::ConnectionHandler;
 
-    type ToSwarm = P2PEvent;
+    type ToSwarm = LiaisonEvent;
     // 连上了就不管了
     fn handle_established_inbound_connection(
         &mut self,
@@ -235,9 +237,9 @@ impl NetworkBehaviour for SimpleP2PBehaviour {
                     stream.set_nonblocking(true).unwrap();
                     println!("New connection from {}", addr);
                     // 此时新节点一定会发送 RequestKnownPeers 消息
-                    let p2p_message = loop {
-                        match P2PMessage::read_from_tcp_stream(&mut stream, &mut self.buf) {
-                            Ok(p2p_message) => break p2p_message,
+                    let liaison_message = loop {
+                        match LiaisonMessage::read_from_tcp_stream(&mut stream, &mut self.buf) {
+                            Ok(liaison_message) => break liaison_message,
                             Err(e) if e.kind() == ErrorKind::WouldBlock => {
                                 continue;
                             }
@@ -245,21 +247,21 @@ impl NetworkBehaviour for SimpleP2PBehaviour {
                                 // 因为此时 Hub 还没有把新节点加入 known_peers ，所以直接退出就好了
                                 eprintln!("[Hub] Error reading from stream: {}", e);
                                 return Poll::Ready(behaviour::ToSwarm::GenerateEvent(
-                                    P2PEvent::ErrorAndExit,
+                                    LiaisonEvent::ErrorAndExit,
                                 ));
                             }
                         };
                     };
-                    match p2p_message {
-                        P2PMessage::NormalRequestsKnownPeers { sender } => {
+                    match liaison_message {
+                        LiaisonMessage::NormalRequestsKnownPeers { sender } => {
                             let sender_peer_id = sender.into_inner();
                             println!("New node {} has connected to the hub", sender_peer_id);
                             // 发送 KnownPeers 消息
-                            let p2p_message = P2PMessage::HubReturnsKnownPeers {
+                            let liaison_message = LiaisonMessage::HubReturnsKnownPeers {
                                 sender: PeerIdWrapper::from(self.local_peer_id).into(),
                                 known_peers: known_peers_vec.clone(),
                             };
-                            stream.write_all(&p2p_message.serialize()).unwrap();
+                            stream.write_all(&liaison_message.serialize()).unwrap();
                             known_peers.insert(addr, (sender_peer_id, stream));
                         }
                         _ => unreachable!(),
@@ -274,18 +276,18 @@ impl NetworkBehaviour for SimpleP2PBehaviour {
                 let mut msg_to_broadcast = Vec::<(PeerId, String)>::new();
                 let mut peer_to_remove = Vec::<SocketAddr>::new();
                 for (peer_addr, (_peer_id, stream)) in known_peers.iter_mut() {
-                    match P2PMessage::read_from_tcp_stream(stream, &mut self.buf) {
-                        Ok(p2p_message) => match p2p_message {
-                            P2PMessage::NormalRequestsKnownPeers { sender: _ } => {
+                    match LiaisonMessage::read_from_tcp_stream(stream, &mut self.buf) {
+                        Ok(liaison_message) => match liaison_message {
+                            LiaisonMessage::NormalRequestsKnownPeers { sender: _ } => {
                                 // 如法炮制
                                 // 发送 KnownPeers 消息
-                                let p2p_message = P2PMessage::HubReturnsKnownPeers {
+                                let liaison_message = LiaisonMessage::HubReturnsKnownPeers {
                                     sender: PeerIdWrapper::from(self.local_peer_id).into(),
                                     known_peers: known_peers_vec.clone(),
                                 };
-                                stream.write_all(&p2p_message.serialize()).unwrap();
+                                stream.write_all(&liaison_message.serialize()).unwrap();
                             }
-                            P2PMessage::NormalRequestsBroadcast { sender, message } => {
+                            LiaisonMessage::NormalRequestsBroadcast { sender, message } => {
                                 msg_to_broadcast.push((sender.into_inner(), message));
                             }
                             _ => unreachable!(),
@@ -296,30 +298,27 @@ impl NetworkBehaviour for SimpleP2PBehaviour {
                         Err(e) => {
                             println!("[Hub] Error reading from stream: {}", e);
                             peer_to_remove.push(*peer_addr);
-                            // return Poll::Ready(behaviour::ToSwarm::GenerateEvent(
-                            //     P2PEvent::ErrorAndExit,
-                            // ));
                         }
                     }
                 }
                 // 处理过期节点
                 for expired_peer_addr in peer_to_remove {
                     let expired_peer_id = known_peers[&expired_peer_addr].0;
-                    let p2p_message = P2PMessage::HubDeclaresExpiredPeer(
+                    let liaison_message = LiaisonMessage::HubDeclaresExpiredPeer(
                         PeerIdWrapper::from(expired_peer_id).into(),
                     );
                     known_peers.remove(&expired_peer_addr);
                     self.event_queue
-                        .push(P2PEvent::PeerExpired(expired_peer_id));
+                        .push(LiaisonEvent::PeerExpired(expired_peer_id));
                     for (_peer_addr, (_peer_id, stream)) in known_peers.iter_mut() {
-                        stream.write_all(&p2p_message.serialize()).unwrap();
+                        stream.write_all(&liaison_message.serialize()).unwrap();
                     }
                 }
                 // 处理 msg_to_broadcast
                 if msg_to_broadcast.len() > 0 {
                     for (sender, message) in msg_to_broadcast {
                         self.broadcast_string(sender, message.clone());
-                        self.event_queue.push(P2PEvent::IncomingMessage(
+                        self.event_queue.push(LiaisonEvent::IncomingMessage(
                             sender,
                             MessageId::from(message.as_str()),
                             message,
@@ -335,16 +334,16 @@ impl NetworkBehaviour for SimpleP2PBehaviour {
                 // 首先 RequestKnownPeers
                 if Instant::now() >= *next_heartbeat {
                     *next_heartbeat = Instant::now() + HEARTBEAT_INTERVAL;
-                    let request_known_peers_message = P2PMessage::NormalRequestsKnownPeers {
+                    let request_known_peers_message = LiaisonMessage::NormalRequestsKnownPeers {
                         sender: PeerIdWrapper::from(self.local_peer_id).into(),
                     };
                     stream_to_hub
                         .write_all(&request_known_peers_message.serialize())
                         .unwrap();
                 }
-                match P2PMessage::read_from_tcp_stream(stream_to_hub, &mut self.buf) {
+                match LiaisonMessage::read_from_tcp_stream(stream_to_hub, &mut self.buf) {
                     Ok(msg) => match msg {
-                        P2PMessage::HubReturnsKnownPeers {
+                        LiaisonMessage::HubReturnsKnownPeers {
                             sender: _,
                             known_peers: new_known_peers,
                         } => {
@@ -360,27 +359,27 @@ impl NetworkBehaviour for SimpleP2PBehaviour {
                                 new_peer_ids.push(new_peer_id);
                             }
                             return Poll::Ready(behaviour::ToSwarm::GenerateEvent(
-                                P2PEvent::UpdatedKnownPeers(new_peer_ids),
+                                LiaisonEvent::UpdatedKnownPeers(new_peer_ids),
                             ));
                         }
-                        P2PMessage::Text {
+                        LiaisonMessage::Text {
                             sender,
                             text_message,
                         } => {
                             return Poll::Ready(behaviour::ToSwarm::GenerateEvent(
-                                P2PEvent::IncomingMessage(
+                                LiaisonEvent::IncomingMessage(
                                     sender.into_inner(),
                                     MessageId::from(text_message.as_str()),
                                     text_message,
                                 ),
                             ))
                         }
-                        P2PMessage::HubDeclaresExpiredPeer(peer_id_wrapper) => {
+                        LiaisonMessage::HubDeclaresExpiredPeer(peer_id_wrapper) => {
                             let peer_id = peer_id_wrapper.into_inner();
                             if known_peers.contains(&peer_id) {
                                 known_peers.remove(&peer_id);
                                 return Poll::Ready(behaviour::ToSwarm::GenerateEvent(
-                                    P2PEvent::PeerExpired(peer_id),
+                                    LiaisonEvent::PeerExpired(peer_id),
                                 ));
                             }
                         }
@@ -390,7 +389,7 @@ impl NetworkBehaviour for SimpleP2PBehaviour {
                         if e.kind() != ErrorKind::WouldBlock {
                             eprintln!("[Normal] Error reading from stream: {}", e);
                             return Poll::Ready(behaviour::ToSwarm::GenerateEvent(
-                                P2PEvent::ErrorAndExit,
+                                LiaisonEvent::ErrorAndExit,
                             ));
                         }
                     }
