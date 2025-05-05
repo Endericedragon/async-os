@@ -1,4 +1,7 @@
-use std::{error::Error, time::Duration};
+use std::{
+    error::Error,
+    time::{Duration, Instant},
+};
 
 use futures::stream::StreamExt;
 use libp2p::{
@@ -55,11 +58,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
     loop {
         select! {
             Ok(Some(line)) = stdin.next_line() => {
+                eprintln!("[Sending...] {:?}", Instant::now());
                 let line = line.trim();
                 swarm.behaviour_mut().spb.broadcast_string(
                     local_peer_id_wrapper.as_inner(),
                     String::from(line)
                 );
+                eprintln!("[Sent] {:?}!", Instant::now());
             }
             event = swarm.select_next_some() => match event {
                 SwarmEvent::Behaviour(CustomBehaviourEvent::Spb(simple_liaison::LiaisonEvent::UpdatedKnownPeers(peer_ids))) => {
@@ -67,13 +72,46 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         println!("SimpleP2P updated a new peer: {}", each);
                     }
                 }
-                SwarmEvent::Behaviour(CustomBehaviourEvent::Spb(simple_liaison::LiaisonEvent::IncomingMessage(remote_peer, new_msg_id, new_msg))) => {
-                    println!(
-                        "Got message: '{}' with {} from peer: {}",
-                        new_msg,
-                        new_msg_id,
-                        remote_peer,
-                    );
+                SwarmEvent::Behaviour(CustomBehaviourEvent::Spb(simple_liaison::LiaisonEvent::IncomingMessage(remote_peer_id, new_msg_id, new_msg))) => {
+                    // println!(
+                    //     "Got message: '{}' with {} from peer: {}",
+                    //     new_msg,
+                    //     new_msg_id,
+                    //     remote_peer,
+                    // );
+                    match new_msg.as_str() {
+                        "/stress_test" => {
+                            eprintln!("[Stress test starting...] {:?}", Instant::now());
+                            for _ in 0..4096 {
+                                swarm.behaviour_mut().spb.broadcast_string(
+                                    local_peer_id_wrapper.as_inner(),
+                                    format!("[S] Stress[{:?}]", Instant::now())
+                                );
+                            }
+                            eprintln!("[Stress test done!] {:?}", Instant::now());
+                        }
+                        "/resp" => {
+                            eprintln!("[Responding...] {:?}", Instant::now());
+                            swarm.behaviour_mut().spb.broadcast_string(
+                                local_peer_id_wrapper.as_inner(),
+                                format!("[R] {:?}", Instant::now())
+                            );
+                            eprintln!("[Responded!] {:?}", Instant::now());
+                        }
+                        x if x.starts_with("[R]") => {
+                            eprintln!("[Got response] {:?}", Instant::now());
+                        }
+                        x if x.starts_with("[S]") => {
+                            eprintln!("[Got stress message] {:?}", Instant::now());
+                        }
+                        _ => {
+                            // 只有普通消息才会打印出来
+                            println!(
+                                "Got message: '{}' with id: {} from peer: {} at {:?}",
+                                new_msg, new_msg_id, remote_peer_id, Instant::now(),
+                            );
+                        }
+                    }
                 }
                 SwarmEvent::Behaviour(CustomBehaviourEvent::Spb(simple_liaison::LiaisonEvent::ErrorAndExit)) => {
                     eprintln!("Fatal error occured and exit.");

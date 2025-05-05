@@ -264,6 +264,7 @@ impl NetworkBehaviour for SimpleLiaisonBehaviour {
                             stream.write_all(&liaison_message.serialize()).unwrap();
                             known_peers.insert(addr, (sender_peer_id, stream));
                         }
+                        LiaisonMessage::Dummy => {}
                         _ => unreachable!(),
                     }
                 }
@@ -290,6 +291,7 @@ impl NetworkBehaviour for SimpleLiaisonBehaviour {
                             LiaisonMessage::NormalRequestsBroadcast { sender, message } => {
                                 msg_to_broadcast.push((sender.into_inner(), message));
                             }
+                            LiaisonMessage::Dummy => {}
                             _ => unreachable!(),
                         },
                         Err(e) if e.kind() == ErrorKind::WouldBlock => {

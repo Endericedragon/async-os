@@ -24,6 +24,7 @@ pub enum LiaisonMessage {
         sender: PeerIdWrapper,
         message: String,
     },
+    Dummy,
 }
 
 impl LiaisonMessage {
@@ -41,7 +42,12 @@ impl LiaisonMessage {
     ) -> Result<Self, std::io::Error> {
         match stream.read(buf) {
             Ok(0) => return Err(ErrorKind::UnexpectedEof.into()),
-            Ok(n) => return Ok(Self::deserialize(&buf[0..n]).unwrap()),
+            Ok(n) => {
+                return Ok(match Self::deserialize(&buf[0..n]) {
+                    Ok(x) => x,
+                    Err(_) => Self::Dummy,
+                })
+            }
             Err(e) => return Err(e),
         }
     }
